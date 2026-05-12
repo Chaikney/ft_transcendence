@@ -3,10 +3,7 @@
 ARG ALP_VERSION=3.23.4
 
 # NOTE n is working on ruby 4.0.3 but basic Alpine images only have 3.4.9-r0
-# This SHA256 links to an image on dockerhub that would not resolve using tags
-# BUT it times out, may not work at all.
-# FROM docker.io/library/ruby@sha256:7252100ab2dd2e8d77dfb8fada7eb6cb3dbb7e96a59b3f122813165e627cd804 AS baseimage
-#FROM ruby:${RUBY_VERSION}-alpine${ALP_VERSION} AS baseimage
+# This first stage gets and compiles ruby 4.0.3 on Alpine linux
 FROM alpine:${ALP_VERSION} AS baseimage
 
 ARG RUBY_VERSION=4.0.3
@@ -57,7 +54,7 @@ WORKDIR /
 RUN rm -rf /ruby-${RUBY_VERSION} /ruby.tar.gz /var/cache/apk/*
 
 
-# NOTE Add second stage
+# NOTE This stage copies the compiled ruby and relevant pieces to a fresh Alpine
 # final runtime stage
 FROM alpine:${ALP_VERSION} AS runtime
 
@@ -67,7 +64,7 @@ ENV PATH=$PATH:/usr/local/bin:/usr/local/bundle/bin
 
 RUN mkdir --parents $RB_FILES
 
-# Copy only runtime files from builder
+# Copy only runtime files from builder. Commented lines are not (currently) present
 COPY --from=baseimage /usr/local/bin/ruby /usr/local/bin/ruby
 COPY --from=baseimage /usr/local/bin/erb /usr/local/bin/erb
 COPY --from=baseimage /usr/local/bin/irb /usr/local/bin/irb
@@ -78,7 +75,7 @@ COPY --from=baseimage /usr/local/lib/ruby /usr/local/lib/ruby
 # COPY --from=baseimage /usr/local/lib/libruby.* /usr/local/lib/
 COPY --from=baseimage /usr/local/share/ri /usr/local/share/ri
 
-# Copy gems if present
+# NOTE Copy gems if present, i.e. uncomment as needed
 # COPY --from=baseimage /usr/local/bundle /usr/local/bundle
 
 # Bring necessary system libs (detect common dirs on Alpine)
@@ -87,7 +84,6 @@ COPY --from=baseimage /usr/lib /usr/lib
 COPY --from=baseimage /etc/ssl/certs /etc/ssl/certs
 
 WORKDIR $RB_FILES
-
 
 # TODO Copy app source files into the image
 # COPY Gemfile Gemfile.lock ./
@@ -101,8 +97,8 @@ LABEL name=ruby_img
 LABEL projectpart=Ruby
 LABEL description="Container to run a ruby application (i.e. the sudoku game)"
 # NOTE this is also the default port for rails as well as PHP apps
-# NOTE This might not be any use at all, have added tagging to the Makefile instead.
 EXPOSE 3000/tcp
+# NOTE This might not be any use at all, have added tagging to the Makefile instead.
 LABEL org.opencontainers.image.tag="ruby" \
 org.opencontainers.image.vendor="${author}" \
 org.opencontainers.image.repo="memememe" \
@@ -111,7 +107,4 @@ LABEL org.opencontainers.image.source="https://cache.ruby-lang.org/pub/ruby/4.0/
 ENV IMAGE_TAG="My awesome ruby box"
 # TODO Add correct name here
 # CMD ["./sudoku.rb"]
-# CMD["irb"]
-#CMD["./ruby -e \"puts 'Hello, World!'\""]
-# CMD ["bash", "-lc", "exec ruby your_app.rb"]
-CMD ["ruby -v"]
+CMD ["ruby","-v"]
