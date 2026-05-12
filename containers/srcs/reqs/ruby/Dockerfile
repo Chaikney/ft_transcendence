@@ -35,19 +35,21 @@ RUN tar -xzf ruby.tar.gz
 # - add build-essential equivalent
 RUN ["apk", "add", "build-base", "autoconf", "linux-headers", "bzip2-dev", "libffi-dev", "zlib-dev", "openssl-dev", "readline-dev", \
 "gdbm-dev", "ncurses-dev",  "gperf", "libxml2-dev", "libxslt-dev"]
-# - configure make make install?
+RUN ["apk", "add", "yaml-dev"]
+# configure make make install?
 RUN ./ruby-${RUBY_VERSION}/autogen.sh
 RUN mkdir ruby-${RUBY_VERSION}/build
 WORKDIR ruby-${RUBY_VERSION}/build
 RUN  ../configure --prefix=${RB_FILES}
 # RUN cd ruby-${RUBY_VERSION}
 RUN make
-# FIXME needs a target directory I think...
+# FIXED? needs a target directory I think...
 # https://docs.ruby-lang.org/en/master/contributing/building_ruby_md.html
+RUN make test
 RUN make install
+# TODO ruby has to be on PATH, why does make install not do that?
 # TODO Confirm what extra packages are needed for our app
 # ...probably a database driver? "pg"?
-# RUN ["apk", "add", "ruby", "ruby-bundler"]
 # RUN bundle config --global frozen 1
 
 # TODO Copy app source files into the image
@@ -69,7 +71,10 @@ org.opencontainers.image.vendor="${author}" \
 org.opencontainers.image.repo="memememe" \
 org.opencontainers.image.description="Ruby ${RUBY_VERSION} built from source"
 LABEL org.opencontainers.image.source="https://cache.ruby-lang.org/pub/ruby/4.0/ruby-\${VERSION}.tar.gz"
-ENV IMAGE_TAG="My awaesome ruby box"
+ENV IMAGE_TAG="My awesome ruby box"
 # TODO Add correct name here
 # CMD ["./sudoku.rb"]
-CMD["irb"]
+# CMD["irb"]
+#CMD["./ruby -e \"puts 'Hello, World!'\""]
+# CMD ["bash", "-lc", "exec ruby your_app.rb"]
+CMD ["ruby -v"]
