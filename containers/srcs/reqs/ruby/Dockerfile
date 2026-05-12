@@ -35,22 +35,59 @@ RUN tar -xzf ruby.tar.gz
 # - add build-essential equivalent
 RUN ["apk", "add", "build-base", "autoconf", "linux-headers", "bzip2-dev", "libffi-dev", "zlib-dev", "openssl-dev", "readline-dev", \
 "gdbm-dev", "ncurses-dev",  "gperf", "libxml2-dev", "libxslt-dev"]
-RUN ["apk", "add", "yaml-dev"]
+RUN ["apk", "add", "yaml-dev", "ca-certificates"]
 # configure make make install?
+# https://docs.ruby-lang.org/en/master/contributing/building_ruby_md.html
 RUN ./ruby-${RUBY_VERSION}/autogen.sh
 RUN mkdir ruby-${RUBY_VERSION}/build
 WORKDIR ruby-${RUBY_VERSION}/build
-RUN  ../configure --prefix=${RB_FILES}
-# RUN cd ruby-${RUBY_VERSION}
-RUN make
-# FIXED? needs a target directory I think...
-# https://docs.ruby-lang.org/en/master/contributing/building_ruby_md.html
+RUN ../configure --prefix=/usr/local
+RUN make -j"$(nproc)"
 RUN make test
 RUN make install
 # TODO ruby has to be on PATH, why does make install not do that?
 # TODO Confirm what extra packages are needed for our app
 # ...probably a database driver? "pg"?
 # RUN bundle config --global frozen 1
+# Install bundler if you need gems at build time (optional)
+# RUN gem install bundler --no-document
+
+# Clean builder to keep artifacts small (remove source tarball & build dir)
+WORKDIR /
+RUN rm -rf /ruby-${RUBY_VERSION} /ruby.tar.gz /var/cache/apk/*
+
+
+# NOTE Add second stage
+# final runtime stage
+FROM alpine:${ALP_VERSION} AS runtime
+
+ARG RB_FILES=/usr/src/app
+ENV GEM_HOME=/usr/local/bundle
+ENV PATH=$PATH:/usr/local/bin:/usr/local/bundle/bin
+
+RUN mkdir --parents $RB_FILES
+
+# Copy only runtime files from builder
+COPY --from=baseimage /usr/local/bin/ruby /usr/local/bin/ruby
+COPY --from=baseimage /usr/local/bin/erb /usr/local/bin/erb
+COPY --from=baseimage /usr/local/bin/irb /usr/local/bin/irb
+COPY --from=baseimage /usr/local/bin/gem /usr/local/bin/gem
+COPY --from=baseimage /usr/local/bin/bundle /usr/local/bin/bundle
+COPY --from=baseimage /usr/local/lib/ruby /usr/local/lib/ruby
+# COPY --from=baseimage /usr/local/lib/libruby.so* /usr/local/lib/
+# COPY --from=baseimage /usr/local/lib/libruby.* /usr/local/lib/
+COPY --from=baseimage /usr/local/share/ri /usr/local/share/ri
+
+# Copy gems if present
+# COPY --from=baseimage /usr/local/bundle /usr/local/bundle
+
+# Bring necessary system libs (detect common dirs on Alpine)
+COPY --from=baseimage /lib /lib
+COPY --from=baseimage /usr/lib /usr/lib
+COPY --from=baseimage /etc/ssl/certs /etc/ssl/certs
+
+WORKDIR $RB_FILES
+
 
 # TODO Copy app source files into the image
 # COPY Gemfile Gemfile.lock ./
