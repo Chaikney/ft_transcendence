@@ -9,29 +9,31 @@ LABEL description="A postgres server to hold app data like the users, game resul
 EXPOSE 5432/tcp
 
 # NOTE Configuration according to: https://wiki.alpinelinux.org/wiki/Postgresql
-ARG DB_FILES=/usr/local/pgsql/data
+ENV DB_FILES=/usr/local/pgsql/data
 
 # NOTE Have selected PG17 to match Debian stable, in case we need to switch base.
-RUN ["apk", "add", "postgresql17"]
+RUN ["apk", "add", "postgresql17-contrib", "postgresql17"]
 
-# The datadir located at /var/lib/mysql must be owned by the mysql user and group.
-# The location of the datadir can be changed by editing the mariadb service file in /etc/init.d.
-# The new location will also need to be set by adding datadir=<YOUR_DATADIR> in the [mysqld] section in a mariadb configuration file.
+# The datadir must be owned by the postgres user and group.
 RUN mkdir --parents $DB_FILES
-# TODO Change this to whatever the PG username is, if needed.
-# RUN chown -R mysql:mysql $DB_FILES
+RUN chown -R postgres:postgres $DB_FILES
 
-# TODO Adapt initialissation for PostgreSQL
-# Normal initialization of mariadb can be done as follows:
-#     Initialize MySQL Data Directory. mariadb-install-db --user=mysql --datadir=/var/lib/mysql
-#RUN ["mariadb-install-db" , "--user=mysql", "--datadir=/var/lib/mysql"]
-# RUN mariadb-install-db --user=mysql --datadir=$DB_FILES --skip-test-db
+# Setup the DB cluster (must be run as postgres not root)
+# https://www.postgresql.org/docs/17/creating-cluster.html
+USER postgres:postgres
+RUN initdb -D $DB_FILES
+# TODO Adapt initialisation for PostgreSQL
+# - Configure to allow external connections
+# -- (change /etc/postgresql17/postgresql.conf)
+# -- (change /etc/postgresql17/pg_hba.conf)
 
-# TODO Add any the setup script to the image
+# TODO Set up database(s)
+# - User name and password (shared with ruby)
+# - schema or initialisation
 
 # TODO IF this returns 3, the DB is poorly
 # https://www.postgresql.org/docs/current/app-pg-ctl.html
 # HEALTHCHECK pgctl status -D $DB_FILES
 
-# TODO Who knows if this works
-ENTRYPOINT ["postgresql -D $DB_FILES"]
+# https://www.postgresql.org/docs/17/server-start.html
+CMD ["sh", "-c", "exec postgres -D $DB_FILES"]
