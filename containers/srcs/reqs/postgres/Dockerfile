@@ -17,6 +17,9 @@ RUN ["apk", "add", "postgresql17-contrib", "postgresql17"]
 # The datadir must be owned by the postgres user and group.
 RUN mkdir --parents $DB_FILES
 RUN chown -R postgres:postgres $DB_FILES
+# Add location for the UNIX socket/lockfile and ensure we can write to it
+RUN mkdir /var/run/postgresql
+RUN chown -R postgres:postgres /var/run/postgresql
 
 # Setup the DB cluster (must be run as postgres not root)
 # https://www.postgresql.org/docs/17/creating-cluster.html
