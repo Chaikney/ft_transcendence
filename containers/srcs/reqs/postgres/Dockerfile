@@ -27,8 +27,10 @@ USER postgres:postgres
 RUN initdb -D $DB_FILES
 # TODO Adapt initialisation for PostgreSQL
 # - Configure to allow external connections
-# -- (change /etc/postgresql17/postgresql.conf)
-# -- (change /etc/postgresql17/pg_hba.conf)
+# -- (change $DB_FILES/postgresql.conf)
+COPY tools/postgresql.conf $DB_FILES/postgresql.conf
+# -- (change $DB_FILES/pg_hba.conf)
+COPY tools/pg_hba.conf $DB_FILES/pg_hba.conf
 
 # TODO Set up database(s)
 # - User name and password (shared with ruby)
