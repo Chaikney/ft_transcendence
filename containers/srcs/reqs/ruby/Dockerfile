@@ -105,6 +105,7 @@ org.opencontainers.image.repo="memememe" \
 org.opencontainers.image.description="Ruby ${RUBY_VERSION} built from source"
 LABEL org.opencontainers.image.source="https://cache.ruby-lang.org/pub/ruby/4.0/ruby-\${VERSION}.tar.gz"
 ENV IMAGE_TAG="My awesome ruby box"
-# TODO Add correct name here
+# FIXME With this command the container does not stay up but immediately exits
 # CMD ["./sudoku.rb"]
-CMD ["ruby","-v"]
+#CMD ["ruby","-v"]
+CMD ["irb"]
