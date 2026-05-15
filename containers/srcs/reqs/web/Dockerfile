@@ -15,15 +15,14 @@ EXPOSE 443/tcp
 RUN ["apk", "add", "nginx"]
 
 # TODO Configuration to pass through to Ruby for web to PHP
-# COPY tools/securer2.conf /etc/nginx/http.d/default.conf
+COPY tools/NGINX_example.conf /etc/nginx/http.d/default.conf
 # TODO SSL-specific config like key locations
 # COPY tools/self-signed.conf /etc/nginx/snippets/
 
-# TODO Copy the *key* and *certificate*
 # NOTE These are excluded from the repo! Must be populated elsewise
 # NOTE these end up baked into the image but they kind of have to be, without LetsEncrypt
-# COPY ./secret/transcendence.crt /etc/ssl/certs/transcendence.crt
-# COPY ./secret/transcendence.key /etc/ssl/private/transcendence.key
+COPY --chown=nginx secret/trans.crt /etc/ssl/certs/transcendence.crt
+COPY --chown=nginx secret/trans.key /etc/ssl/private/transcendence.key
 
 # AI-generated health check, changed to have no external dependencies
 # NOTE Podman / OCI format ignores HEALTHCHECK therefore build container with --format=docker
