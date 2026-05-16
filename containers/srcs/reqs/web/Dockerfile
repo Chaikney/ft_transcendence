@@ -14,7 +14,7 @@ EXPOSE 443/tcp
 # installs nginx (latest by default)
 RUN ["apk", "add", "nginx"]
 
-# TODO Configuration to pass through to Ruby for web to PHP
+# TODO Configuration - split into manageable pieces
 COPY tools/NGINX_example.conf /etc/nginx/http.d/default.conf
 # TODO SSL-specific config like key locations
 # COPY tools/self-signed.conf /etc/nginx/snippets/
@@ -23,7 +23,8 @@ COPY tools/NGINX_example.conf /etc/nginx/http.d/default.conf
 # NOTE these end up baked into the image but they kind of have to be, without LetsEncrypt
 COPY --chown=nginx secret/trans.crt /etc/ssl/certs/transcendence.crt
 COPY --chown=nginx secret/trans.key /etc/ssl/private/transcendence.key
-
+# HACK until the real frontend exists
+COPY --chown=nginx tools/index.html /var/www
 # AI-generated health check, changed to have no external dependencies
 # NOTE Podman / OCI format ignores HEALTHCHECK therefore build container with --format=docker
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD nginx -t || exit 1
