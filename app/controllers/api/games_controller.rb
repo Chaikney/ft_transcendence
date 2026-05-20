@@ -1,5 +1,9 @@
 module Api
   class GamesController < ::ApplicationController
+    
+    before_action :authorize_request
+    
+    
     def index
       games = Game.all 
       render json: games

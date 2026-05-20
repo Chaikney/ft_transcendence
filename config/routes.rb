@@ -3,5 +3,9 @@ Rails.application.routes.draw do
     get 'status', to: 'status#index'
     
     resources :games, only: [:index, :show, :create, :update]
+    post 'register', to: 'auth#register'
+    post 'login', to: 'auth#login'
+
+    get 'leaderboard', to: 'stats#leaderboard'
   end
 end
