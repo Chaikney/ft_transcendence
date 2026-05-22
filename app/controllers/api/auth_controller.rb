@@ -31,7 +31,7 @@ module Api
         totp = ROTP::TOTP.new(user.otp_secret)
         
         # Comprobamos si el código de 6 dígitos que envió el usuario es válido
-        if totp.verify(params[:totp_code])
+        if params[:totp_code].present? && totp.verify(params[:totp_code])
           token = JWT.encode({ user_id: user.id }, Rails.application.secret_key_base)
           render json: { user: user, token: token }, status: :ok
         else
