@@ -2,7 +2,12 @@ Rails.application.routes.draw do
   namespace :api do
     get 'status', to: 'status#index'
     
-    resources :games, only: [:index, :show, :create, :update]
+    resources :games, only: [:create] do
+      member do
+        patch :finish, to: 'games#update'
+      end
+    end
+    
     post 'register', to: 'auth#register'
     post 'login', to: 'auth#login'
     
