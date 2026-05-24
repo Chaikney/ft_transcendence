@@ -1,34 +1,30 @@
 module Api
-  class StatsController < ::ApplicationController
-    # Este endpoint será público para que cualquiera pueda ver el Salón de la Fama
+  class StatsController < ApplicationController
     
     def leaderboard
-      # Recorremos todos los usuarios para calcular sus números
-      users_with_stats = User.all.map do |user|
-        total_games = user.games.count
+      # Pedimos a la base de datos el TOP 10 ordenado por ELO directamente (muchísimo más rápido)
+      top_players = User.order(elo: :desc).limit(10).map do |user|
         
-        # Suponemos que cuando un jugador gana, el status de su partida pasa a 'completado'
-        won_games = user.games.where(status: 'completado').count
+        total_games = user.wins + user.losses
         
-        # Calculamos el porcentaje de victorias (Win Rate)
+        # Mantenemos el Win Rate, pero usando las columnas nuevas
         win_rate = if total_games > 0
-                     ((won_games.to_f / total_games) * 100).round(1)
+                     ((user.wins.to_f / total_games) * 100).round(1)
                    else
                      0
                    end
-        
+
         {
           username: user.username,
+          elo: user.elo, # ¡El poder real de Sendokai!
+          wins: user.wins,
+          losses: user.losses,
           total_games: total_games,
-          won_games: won_games,
-          win_rate: win_rate
+          win_rate: "#{win_rate}%"
         }
       end
 
-      # Ordenamos la lista de campeones: el que tenga más partidas ganadas va primero
-      ranking = users_with_stats.sort_by { |player| -player[:won_games] }
-
-      render json: ranking
+      render json: { leaderboard: top_players }, status: :ok
     end
   end
 end
