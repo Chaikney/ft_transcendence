@@ -1,6 +1,0 @@
-/containers/secret/*
-/containers/srcs/reqs/web/secret/
-*.csr
-*.key
-*.pem
-*.crt
