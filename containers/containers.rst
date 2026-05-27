@@ -30,7 +30,37 @@ Everything related to deployment of the solution via docker (or alternate soluti
     	|
     	*--secrets/
 
+"Works on my machine"
+---------------------
 
+These containers are developed and tested using the following **host** platform and software.
+
+- Debian 13 (stable as of project)
+  In general, the requirements are met by whatever that is installed from `apt` with no further repositories added. This should ensure that the versions used are both widely available and stable.
+- podman 5.4.2
+- podman-docker 5.4.2
+- podman-compose 1.3.0
+- GNU make 4.4.1
+
+That said, none of the host features used seem very exotic to me and I would be surprised if earlier versions of these programs fail to work. Let me know if they do!
+
+Container base
+--------------
+
+For its small size, the container images are all based upon `Alpine Linux`. The core images from DockerHub are used as the base, and then built upon.
+
+This approach is preferred for efficiency, educational, and safety reasons.
+- Efficiency
+  Starting from a small base and adding only the necessary parts makes for a significantly smaller and faster experience than using prepackaged images would.
+- Educational
+  Preformed images run the risk of being an inscrutable, opaque blob that the team can neither debug nor explain. By building the image up gradually, the files are more likely to be explicable during evaluation.
+- Safety
+  If there is nothing in the image that should not be there, then the surface area with potential for abuse is much smaller.
+
+::
+   FIXME This is not yet true!!
+
+The version of Alpine used as the base is defined in the `.env` file and sourced by the `compose` file. This overrides the default values in the individual `Dockerfile` build instructions.
 
 How to use this
 ---------------
