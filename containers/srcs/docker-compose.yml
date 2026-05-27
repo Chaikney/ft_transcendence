@@ -52,6 +52,8 @@ services:
         RB_DBNAME: /run/secrets/RB_DBNAME
         RB_DBUSER: /run/secrets/RB_DBUSER
         RB_DBPASS: /run/secrets/RB_DBPASS
+        RUBY_VERSION: ${RUBY_VERSION}
+        RUBY_DOWNLOAD_SHA256: ${RUBY_DOWNLOAD_SHA256}
     secrets:
       - RB_DBPASS
       - RB_DBNAME
