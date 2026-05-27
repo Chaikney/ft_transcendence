@@ -2,11 +2,13 @@
 
 ARG ALP_VERSION=3.23.4
 
-# NOTE n is working on ruby 4.0.3 but basic Alpine images only have 3.4.9-r0
-# This first stage gets and compiles ruby 4.0.3 on Alpine linux
+# NOTE n is working on ruby 4.0.3 but the base Alpine images only have 3.4.9-r0
+# This first stage gets and compiles ruby 4.0.3 (now 4.0.5) on Alpine linux
 FROM alpine:${ALP_VERSION} AS baseimage
 
-ARG RUBY_VERSION=4.0.3
+ARG RUBY_VERSION=4.0.5
+# NOTE Every time that RUBY_VERSION changes, this must be updated
+ARG RUBY_DOWNLOAD_SHA256=7d6149079a63f8ae1d326c9fa65c6019ba2dc3155eae7b39159817911c88958e
 
 # NOTE The difference between ARG and ENV is...?
 ARG RB_FILES=/usr/src/app
@@ -15,10 +17,8 @@ ARG RB_DBHOST=db:5432
 RUN mkdir --parents $RB_FILES
 # WORKDIR $RB_FILES
 
-# NOTE I lifted these steps from the page of the undownloadable image :|
 RUN echo $RUBY_VERSION
 ENV RUBY_DOWNLOAD_URL=https://cache.ruby-lang.org/pub/ruby/4.0/ruby-${RUBY_VERSION}.tar.gz
-ENV RUBY_DOWNLOAD_SHA256=77964acc370d5c8375b9502e5ba6c13c03ef91ab9eb9f521c84fb42b9c9a6b0f
 ENV GEM_HOME=/usr/local/bundle
 
 # Download Ruby version
