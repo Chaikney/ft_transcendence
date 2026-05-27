@@ -3,6 +3,8 @@ name: ft_transcendence
 services:
   web:
     build: ./reqs/web
+    args:
+      ALP_VERSION: ${ALP_VERSION}
     restart: unless-stopped
     depends_on:
       - ruby
@@ -24,6 +26,7 @@ services:
     build:
       context: ./reqs/postgres
       args:
+        ALP_VERSION: ${ALP_VERSION}
         DB_FILES: ${DB_FILES}
         RB_DBNAME: /run/secrets/RB_DBNAME
         RB_DBUSER: /run/secrets/RB_DBUSER
@@ -47,6 +50,7 @@ services:
     build:
       context: ./reqs/ruby
       args:
+        ALP_VERSION: ${ALP_VERSION}
         RB_FILES: ${RB_FILES}
         RB_DBHOST: ${RB_DBHOST}
         RB_DBNAME: /run/secrets/RB_DBNAME
