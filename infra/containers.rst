@@ -50,6 +50,7 @@ Container base
 For its small size, the container images are all based upon `Alpine Linux`. The core images from DockerHub are used as the base, and then built upon.
 
 This approach is preferred for efficiency, educational, and safety reasons.
+
 - Efficiency
   Starting from a small base and adding only the necessary parts makes for a significantly smaller and faster experience than using prepackaged images would.
 - Educational
@@ -57,10 +58,16 @@ This approach is preferred for efficiency, educational, and safety reasons.
 - Safety
   If there is nothing in the image that should not be there, then the surface area with potential for abuse is much smaller.
 
-::
-   FIXME This is not yet true!!
-
 The version of Alpine used as the base is defined in the `.env` file and sourced by the `compose` file. This overrides the default values in the individual `Dockerfile` build instructions.
+
+As of 2026-05-27 the current Alpine version is 3.23.4 and this means that the active versions of key packages will be as follows:
+
+- NGINX: 1.30.2-r0
+- PostgreSQL: 17.10-r0
+  Stable v17 is chosen because it the version packaged for Debian 13, allowing us to switch bases if we really needed to.
+- Ruby: 4.0.5
+  Note that this differs from the above as it is *not* the default Alpine package. The API is developed in Ruby 4, which is not, at time of writing, packaged for Alpine. The ruby container downloads and installs this from source using variables in the `.env` if present.
+
 
 How to use this
 ---------------
