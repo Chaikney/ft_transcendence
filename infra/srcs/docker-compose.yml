@@ -2,9 +2,10 @@ name: ft_transcendence
 
 services:
   web:
-    build: ./reqs/web
-    args:
-      ALP_VERSION: ${ALP_VERSION}
+    build:
+      context: ./reqs/web
+      args:
+        ALP_VERSION: ${ALP_VERSION}
     restart: unless-stopped
     depends_on:
       - ruby

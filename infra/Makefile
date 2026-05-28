@@ -37,8 +37,8 @@ builds: web-build db-build ruby-build
 
 # NOTE Podman / OCI format ignores HEALTHCHECK therefore build container with --format=docker
 # TODO when the source is available, make this depend on web_src
-# web-build: server_cert
-web-build: server_cert web_src
+web-build: server_cert
+#web-build: server_cert web_src
 	@echo "Building NGINX container..."
 	$(BASECMD) build --format docker -f $(CONTHOME)/web/Dockerfile --tag $(REPO)/web:0.1
 
