@@ -19,16 +19,17 @@ $(NAME): start
 
 # Launch the cluster / pod of 3 containers
 # NOTE podman compose and podman-compose behave differently! BOOOO!
+# NOTE !! if you get a "cant get socket" error, *LAUNCH THE podman.socket SERVICE!
 start: secrets
 	@echo "Building and launching the 3 containers"
 	@echo "NOTE This command does not work realiably yet!"
-	$(BASECMD)-compose -f "$(abspath $(BASEDIR)/docker-compose.yml)" up
+	$(BASECMD) compose -f "$(abspath $(BASEDIR)/docker-compose.yml)" up
 
 stop:
 # stop all the running containers
 	@echo "Stopping our containers"
 	@echo "NOTE This is untested"
-	$(BASECMD)-compose -f "$(abspath $(BASEDIR)/docker-compose.yml)" down
+	$(BASECMD) compose -f "$(abspath $(BASEDIR)/docker-compose.yml)" down
 
 # NOTE These builds run separately from the "compose"-triggered make targets, so mostly for testing.
 # ...containers are "interesting" like that
@@ -40,7 +41,7 @@ builds: web-build db-build ruby-build
 web-build: server_cert
 #web-build: server_cert web_src
 	@echo "Building NGINX container..."
-	$(BASECMD) build --format docker -f $(CONTHOME)/web/Dockerfile --tag $(REPO)/web:0.1
+	$(BASECMD) build -f $(CONTHOME)/web/Dockerfile --tag $(REPO)/web:0.1
 
 db-build: secrets
 	@echo "Building database container..."

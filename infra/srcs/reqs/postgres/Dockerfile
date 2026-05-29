@@ -36,9 +36,7 @@ COPY --chown=postgres:postgres tools/pg_hba.conf $DB_FILES/pg_hba.conf
 # - User name and password (shared with ruby)
 # - schema or initialisation
 
-# TODO IF this returns 3, the DB is poorly
-# https://www.postgresql.org/docs/current/app-pg-ctl.html
-# HEALTHCHECK pgctl status -D $DB_FILES
+HEALTHCHECK CMD pg_isready -q || exit 1
 
 # https://www.postgresql.org/docs/17/server-start.html
 CMD ["sh", "-c", "exec postgres -D $DB_FILES"]

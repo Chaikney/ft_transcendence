@@ -105,7 +105,8 @@ org.opencontainers.image.repo="memememe" \
 org.opencontainers.image.description="Ruby ${RUBY_VERSION} built from source"
 LABEL org.opencontainers.image.source="https://cache.ruby-lang.org/pub/ruby/4.0/ruby-\${VERSION}.tar.gz"
 ENV IMAGE_TAG="My awesome ruby box"
-# FIXME With this command the container does not stay up but immediately exits
-# CMD ["./sudoku.rb"]
-#CMD ["ruby","-v"]
+# NOTE Example that relies on the preseence/configuration of rails healthcontroller
+# IT is inactive for now
+# HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl -f http://localhost:3000/up || exit 1
+
 CMD ["irb"]

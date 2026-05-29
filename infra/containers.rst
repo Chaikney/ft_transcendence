@@ -44,6 +44,8 @@ These containers are developed and tested using the following **host** platform 
 
 That said, none of the host features used seem very exotic to me and I would be surprised if earlier versions of these programs fail to work. Let me know if they do!
 
+Note that when using podman the Makefile may fail if you have not activated  the systemd service socket: `sudo systemctl start podman.socket`. This behaves like the Docker daemon  *but* consumes no resources until the socket is pinged and the service activated.
+
 Container base
 --------------
 
