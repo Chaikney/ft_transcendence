@@ -17,18 +17,18 @@ Everything related to deployment of the solution via docker (or alternate soluti
    *--srcs/
        |
        docker-compose.yml
-	   |
-      	*--reqs/
-    	|   |
-	    |   *--ruby
-    	|  |
-	    |   *--postgresql
-    	|   |
-    	|   *--web
-	    |   |
-    	|   *--...más?
-    	|
-    	*--secrets/
+       |
+        *--reqs/
+        |   |
+        |   *--ruby
+        |  |
+        |   *--postgresql
+        |   |
+        |   *--web
+        |   |
+        |   *--...más?
+        |
+        *--secrets/
 
 "Works on my machine"
 ---------------------

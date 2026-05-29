@@ -47,9 +47,10 @@ db-build: secrets
 	@echo "Building database container..."
 	$(BASECMD) build -f $(CONTHOME)/postgres/Dockerfile --tag $(REPO)/db:0.1
 
+# FIXME if we have the ruby version, it should be actually correct and not hardcoded...
 ruby-build: secrets
 	@echo "Building ruby container..."
-	$(BASECMD) build -f $(CONTHOME)/ruby/Dockerfile --tag $(REPO)/ruby:4.0.3
+	$(BASECMD) build -f $(CONTHOME)/ruby/Dockerfile --tag $(REPO)/ruby:4.0.5
 
 # Launch the cluster with rebuilt containers (will use cache if present)
 rebuild:
