@@ -17,7 +17,7 @@ interface MatchState {
   setChessGame: (game: ChessGameState) => void;
   setSudokuGame: (game: SudokuGameState) => void;
   setError: (message: string) => void;
-  restMatch: () => void;
+  resetMatch: () => void;
 }
 
 const initialState = {
@@ -32,7 +32,7 @@ export const useMatchStore = create<MatchState>((set) => ({
   ...initialState,
 
   startLoading: (gameType) =>
-    set({ chessGame: gameType, gameType: 'in_progress', error: null }),
+    set({ status: 'loading', gameType, error: null }),
 
   setChessGame: (game) =>
     set({ chessGame: game, status: 'in_progress', error: null }),
