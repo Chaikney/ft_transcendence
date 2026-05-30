@@ -1,24 +1,24 @@
-# README
+# ♟️ Transcendence Real-Time Backend (WebSockets & Game Core)
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Este módulo gestiona la lógica de juego en tiempo real y las conexiones WebSocket utilizando **ActionCable** y una **Arquitectura Hexagonal**. El sistema aísla por completo el flujo de red, la orquestación de servicios y el motor interno del juego.
 
-Things you may want to cover:
+## 🏗️ Arquitectura del Sistema
 
-* Ruby version
+El flujo de datos sigue un diseño unidireccional desacoplado:
+1. **Frontend** envía una acción de movimiento en formato JSON por el WebSocket.
+2. **GameChannel** intercepta la conexión, autentica mediante JWT y delega el payload.
+3. **GameService** orquesta la acción buscando la partida e invocando al motor.
+4. **ChessEngine** procesas los datos (actualmente simulados/mockeados) y devuelve el nuevo estado.
+5. **GameService** emite un broadcast con el estado actualizado a todos los clientes suscritos.
 
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+```text
+app/
+├── channels/
+│   ├── application_cable/
+│   │   ├── channel.rb
+│   │   └── connection.rb      <-- Autenticación JWT por URL
+│   └── game_channel.rb        <-- Intercepta play_move y gestiona salas
+├── services/
+│   └── game_service.rb        <-- Orquesta y dispara el broadcast por ActionCable
+└── core/
+    └── chess_engine.rb        <-- Cerebro del juego (Punto de integración C++)
