@@ -5,7 +5,7 @@ export interface SudokuGameState {
 	status: 'active' | 'won' | 'lost';
 }
 
-export interface SudokuMovePlayload {
+export interface SudokuMovePayload {
 	game_id: string;
 	row: number;
 	col: number;

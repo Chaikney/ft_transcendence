@@ -1,5 +1,5 @@
 export interface ChessGameState {
-	gameId: string;
+	game_id: string;
 	fen: string;				//standar representation board
 	turn: 'white' | 'black';
 	status: 'active' | 'checkmate' | 'draw';
@@ -12,7 +12,7 @@ export interface ChessMove {
 	piece: string;
 }
 
-export interface ChessMovePlayload {
+export interface ChessMovePayload {
 	game_id: string;
 	from: string;
 	to: string;
