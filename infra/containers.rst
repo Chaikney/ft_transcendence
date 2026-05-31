@@ -10,7 +10,7 @@ Folder structure
 Everything related to deployment of the solution via docker (or alternate solution) lives in this "containers" folder.
 
 ::
-   containers/
+   infra/
    |
    Makefile
    |
@@ -44,7 +44,10 @@ These containers are developed and tested using the following **host** platform 
 
 That said, none of the host features used seem very exotic to me and I would be surprised if earlier versions of these programs fail to work. Let me know if they do!
 
-Note that when using podman the Makefile may fail if you have not activated  the systemd service socket: `sudo systemctl start podman.socket`. This behaves like the Docker daemon  *but* consumes no resources until the socket is pinged and the service activated.
+.. WARNING::
+   Note that when using podman the make targets for *start*, *stop*, etc. may fail if you have not activated  the systemd service socket for the user: `systemctl --user start podman.socket`.
+
+The user socket behaves like the Docker daemon  *but* consumes no resources until the socket is pinged and the service activated, while also not requiring root privileges for the daemon on the host machine.
 
 Container base
 --------------
