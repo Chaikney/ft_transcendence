@@ -96,7 +96,7 @@ server_cert: secret/trans.crt
 
 web_src:
 	@echo "Copying react source to build context"
-	cp -r  --update ../frontend/src $(CONTHOME)/web/tools
+	cp -r  --update ../frontend/ $(CONTHOME)/web/tools
 
 chess_src:
 	@echo "Copying chess source to build context"
