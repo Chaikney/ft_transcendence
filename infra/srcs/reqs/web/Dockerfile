@@ -1,15 +1,32 @@
 # syntax=docker/dockerfile:1
 
 ARG ALP_VERSION=3.23.4
-FROM alpine:${ALP_VERSION} AS baseimage
+FROM alpine:${ALP_VERSION} AS buildimage
 
+ARG SRCDIR=tools/frontend
+ARG DESTDIR=/app
+# get the NPM pieces
+RUN ["apk", "add", "npm", "typescript"]
+# NOTE Make sure we have a user?
+RUN mkdir $DESTDIR
+# RUN chown -R npm:npm $DESTDIR
+WORKDIR $DESTDIR
+# TODO Copy websource, check the location / WORKDIR etc
+COPY $SRCDIR/package.json $SRCDIR/package-lock.json $DESTDIR
+COPY $SRCDIR $DESTDIR
+# TODO run npm build or whatever, that should put things in DESTDIR/build
+RUN npm run build
 LABEL author=chaikney
-LABEL projectpart=webserver
-LABEL description="An NGINX server to display pages on SSL / 443 *only*"
+LABEL projectpart=nodebuilder
+LABEL description="Build frontend with NPM"
 
+FROM alpine:${ALP_VERSION} AS weblayer
 # this can be overridden by docker run,
 # but serves as useful documentation.
 EXPOSE 443/tcp
+LABEL author=chaikney
+LABEL projectpart=webserver
+LABEL description="An NGINX server to display pages on SSL / 443 *only*"
 
 # installs nginx (latest by default)
 RUN ["apk", "add", "nginx"]
@@ -26,8 +43,8 @@ COPY --chown=nginx secret/trans.key /etc/ssl/private/transcendence.key
 # HACK until the real frontend exists
 # COPY --chown=nginx tools/index.html /var/www
 # TODO This should fail if source does not exist.
-# TODO Check that these locations are correct, and define in .env if possible
-COPY --chown=nginx tools/src /var/www/app
+# TODO This should be the build directory now I think.
+COPY --from=buildimage --chown=nginx $DESTDIR/build /var/www/app
 # AI-generated health check, changed to have no external dependencies
 # NOTE Podman / OCI format ignores HEALTHCHECK therefore build container with --format=docker
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD nginx -t || exit 1
