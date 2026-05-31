@@ -1,0 +1,26 @@
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432" # Expone el puerto por si quieres conectarte con DBeaver o pgAdmin
+
+  api:
+    build: .
+    # Este comando es vital: borra el PID fantasma de Rails y luego arranca el servidor
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    volumes:
+      - .:/app  # <--- LA MAGIA: Sincroniza tu carpeta local con el contenedor
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
