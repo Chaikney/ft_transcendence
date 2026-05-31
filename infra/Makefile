@@ -37,9 +37,7 @@ builds: web-build db-build ruby-build
 	@echo "All containers now built"
 
 # NOTE Podman / OCI format ignores HEALTHCHECK therefore build container with --format=docker
-# TODO when the source is available, make this depend on web_src
-web-build: server_cert
-#web-build: server_cert web_src
+web-build: server_cert web_src
 	@echo "Building NGINX container..."
 	$(BASECMD) build -f $(CONTHOME)/web/Dockerfile --tag $(REPO)/web:0.1
 
@@ -88,7 +86,7 @@ server_cert: secret/trans.crt
 
 web_src:
 	@echo "Copying react source to build context"
-	cp -r  --update ../Frontend/src $(CONTHOME)/web/tools
+	cp -r  --update ../frontend/src $(CONTHOME)/web/tools
 
 # Convenience / convention rules; not properly worked out or needed yet
 # TODO test this
