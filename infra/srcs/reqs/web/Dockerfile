@@ -14,7 +14,13 @@ WORKDIR $DESTDIR
 # TODO Copy websource, check the location / WORKDIR etc
 COPY $SRCDIR/package.json $SRCDIR/package-lock.json $DESTDIR
 COPY $SRCDIR $DESTDIR
-# TODO run npm build or whatever, that should put things in DESTDIR/build
+# run npm build or whatever, that should put things in DESTDIR/build
+# Use npm ci if you need a deterministic, repeatable build.
+# For example during continuous integration, automated jobs, etc.
+# and when installing dependencies for the first time, instead of npm install.
+# NOTE install and ci doesn't make a difference at this point (it doesn't build)
+RUN npm install
+#RUN npm ci
 RUN npm run build
 LABEL author=chaikney
 LABEL projectpart=nodebuilder
