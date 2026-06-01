@@ -55,8 +55,12 @@ rebuild:
 	$(BASECMD)-compose -f "$(abspath $(BASEDIR)/docker-compose.yml)" up --build
 
 # Finding or generating secrets that are not in the repo
-secrets: secret/rb_dbpass server_cert
+secrets: secret_dir secret/rb_dbpass server_cert
 	@echo "Ensuring presence of necessary secret values"
+
+secret_dir:
+	@echo "Creating secrets dir if it doesn't already exist"
+	mkdir secret
 
 # Generates a random password for database access
 secret/rb_dbpass:
@@ -81,6 +85,7 @@ secret/trans.crt: secret/testprivate.key
 # TODO This "relinks"/ never says it has nothing to do, even if the keys are in place
 server_cert: secret/trans.crt
 	@echo "Copying web certs to build context"
+	mkdir $(CONTHOME)/web/secret
 	cp secret/testprivate.key $(CONTHOME)/web/secret/trans.key
 	cp secret/trans.crt $(CONTHOME)/web/secret/trans.crt
 
