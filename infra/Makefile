@@ -86,8 +86,8 @@ secret/trans.crt: secret/testprivate.key
 server_cert: secret/trans.crt
 	@echo "Copying web certs to build context"
 	mkdir --parents $(CONTHOME)/web/secret
-	cp secret/testprivate.key $(CONTHOME)/web/secret/trans.key
-	cp secret/trans.crt $(CONTHOME)/web/secret/trans.crt
+	cp --update secret/testprivate.key $(CONTHOME)/web/secret/trans.key
+	cp --update secret/trans.crt $(CONTHOME)/web/secret/trans.crt
 
 web_src:
 	@echo "Copying react source to build context"
