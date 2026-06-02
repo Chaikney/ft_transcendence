@@ -96,6 +96,7 @@ web_src:
 # TODO Copying *all* ruby source like this is a ballache. Want a neat folder!
 ruby_src:
 	@echo "Copying ruby source to build context"
+	mkdir -p $(CONTHOME)/ruby/tools
 	cp -r  --update ../app $(CONTHOME)/ruby/tools/app
 	cp -r  --update ../config $(CONTHOME)/ruby/tools/config
 	cp -r  --update ../db $(CONTHOME)/ruby/tools/db
