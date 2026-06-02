@@ -41,6 +41,10 @@ web-build: server_cert web_src
 	@echo "Building NGINX container..."
 	$(BASECMD) build -f $(CONTHOME)/web/Dockerfile --tag $(REPO)/web:0.1
 
+chess-build:
+	@echo "Building chess container..."
+	$(BASECMD) build -f $(CONTHOME)/chess/Dockerfile --tag $(REPO)/sf:0.1
+
 db-build: secrets
 	@echo "Building database container..."
 	$(BASECMD) build -f $(CONTHOME)/postgres/Dockerfile --tag $(REPO)/db:0.1
