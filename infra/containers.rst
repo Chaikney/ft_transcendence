@@ -42,7 +42,16 @@ These containers are developed and tested using the following **host** platform 
 - podman-compose 1.3.0
 - GNU make 4.4.1
 
-That said, none of the host features used seem very exotic to me and I would be surprised if earlier versions of these programs fail to work. Let me know if they do!
+.. NOTE::
+   The 42U computers have older versions of these; probably need to ensure compatibility with those.
+   - podman 3.4.4 (ERROR: podman compose -f flag not recognised)
+   - podman-compose: not present, install it with `pipx install podman compose`
+   - podman-docker: not present
+   - GNU Make 4.3
+
+The main problem caused by the earlier version of `podman` on the lab machines is the absence of the built-in `podman compose` interpreter. This implies you have to either install `podman-compose` as noted, and *also* change the rules in the `Makefile` slightly to add the hyphen.
+
+A better solution is probably ignoring the lab machines and instead run the pieces from a VM.
 
 .. WARNING::
    Note that when using podman the make targets for *start*, *stop*, etc. may fail if you have not activated  the systemd service socket for the user: `systemctl --user start podman.socket`.
