@@ -21,6 +21,8 @@ COPY $SRCDIR $DESTDIR
 # NOTE install and ci doesn't make a difference at this point (it doesn't build)
 RUN npm install
 #RUN npm ci
+# HACK for debugging
+RUN tsc --version
 RUN npm run build
 LABEL author=chaikney
 LABEL projectpart=nodebuilder
