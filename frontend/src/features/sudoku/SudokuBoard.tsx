@@ -47,24 +47,33 @@ export const SudokuBoard = ({
   gameState,
   originalGrid,
   onMove,
-  disbled = false;
+  disabled = false,
 }: SudokuBoardProps) => {
+  if (!gameState || !originalGrid || !gameState.grid) {
+    return <div>Loading game...</div>
+  }
   const { selectedCell, selectCell, inputValue, clearSelection } =
     useSudokuBoard(gameState.game_id, originalGrid, onMove);
 
-  const isLocked = (row: number, col: number) => originalGrid[row][col] !== 0;
+  const isLocked = (row: number, col: number) => {
+    return originalGrid?.[row]?.[col] !== 0;
+  };
 
   const isSameBox = (row: number, col: number) => {
     if (!selectedCell) return false;
-    const Math.floor(row / 3) === Math.floor(sr / 3) &&
-          Math.floor(col / 3) === Math.floor(sr / 3);
+
+    // desecstructuring after seen alive
+    const [sr, sc] = selectCell;
+
+    return Math.floor(row / 3) === Math.floor(sr / 3) &&
+           Math.floor(col / 3) === Math.floor(sc / 3);
   };
 
   // keyboard input handler
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (disabled || gameState.status !== 'active') return;
-      const num = parseInt(e.Key);
+      const num = parseInt(e.key);
       if (num >= 1 && num <= 9) inputValue(num);
       if (e.key === 'Backspace' || e.key == '0') inputValue(0);
       if (e.key === 'Escape') clearSelection();
