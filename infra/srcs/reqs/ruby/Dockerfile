@@ -28,7 +28,7 @@ RUN wget -O ruby.tar.gz "$RUBY_DOWNLOAD_URL"
 RUN printf '%s *%s\n' "$RUBY_DOWNLOAD_SHA256" "ruby.tar.gz" | sha256sum -c -s
 # RUN tar t -f ruby.tar.gz
 RUN tar -xzf ruby.tar.gz
-# TODO Installl the ruby from source (and freeze image there?)
+# TODO Install the ruby from source (and freeze image there?)
 # - add build-essential equivalent
 RUN ["apk", "add", "build-base", "autoconf", "linux-headers", "bzip2-dev", "libffi-dev", "zlib-dev", "openssl-dev", "readline-dev", \
 "gdbm-dev", "ncurses-dev",  "gperf", "libxml2-dev", "libxslt-dev"]
@@ -44,10 +44,14 @@ RUN make test
 RUN make install
 # TODO ruby has to be on PATH, why does make install not do that?
 # TODO Confirm what extra packages are needed for our app
-# ...probably a database driver? "pg"?
-# RUN bundle config --global frozen 1
 # Install bundler if you need gems at build time (optional)
 # RUN gem install bundler --no-document
+# ...probably a database driver? "pg"?
+# TODO Check these locations are correct...
+RUN bundle config --global frozen 1
+COPY tools/Gemfile tools/Gemfile.lock ./
+COPY tools/app/* $RB_FILES
+RUN bundle install
 
 # Clean builder to keep artifacts small (remove source tarball & build dir)
 WORKDIR /

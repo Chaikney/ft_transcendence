@@ -46,7 +46,7 @@ db-build: secrets
 	$(BASECMD) build -f $(CONTHOME)/postgres/Dockerfile --tag $(REPO)/db:0.1
 
 # FIXME if we have the ruby version, it should be actually correct and not hardcoded...
-ruby-build: secrets
+ruby-build: secrets ruby_src
 	@echo "Building ruby container..."
 	$(BASECMD) build -f $(CONTHOME)/ruby/Dockerfile --tag $(REPO)/ruby:4.0.5
 
@@ -92,6 +92,18 @@ server_cert: secret/trans.crt
 web_src:
 	@echo "Copying react source to build context"
 	cp -r  --update ../frontend/src $(CONTHOME)/web/tools
+
+# TODO Copying *all* ruby source like this is a ballache. Want a neat folder!
+ruby_src:
+	@echo "Copying ruby source to build context"
+	cp -r  --update ../app $(CONTHOME)/ruby/tools/app
+	cp -r  --update ../config $(CONTHOME)/ruby/tools/config
+	cp -r  --update ../db $(CONTHOME)/ruby/tools/db
+	cp -r  --update ../bin $(CONTHOME)/ruby/tools/bin
+	cp -r  --update ../test $(CONTHOME)/ruby/tools/test
+	cp -r  --update ../vendor $(CONTHOME)/ruby/tools/vendor
+	cp -r  --update ../Gemfile $(CONTHOME)/ruby/tools
+	cp -r  --update ../Gemfile.lock $(CONTHOME)/ruby/tools
 
 # Convenience / convention rules; not properly worked out or needed yet
 # TODO test this
