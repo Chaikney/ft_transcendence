@@ -85,6 +85,20 @@ services:
     expose:
       - "3000"
 
+  # Bring up the chess container as well, though we don't knw what it needs.
+  # NOTE! Until we have the interface or server-thing of it coded, it immediately exits!
+  chess:
+    build:
+      context: ./reqs/chess
+      args:
+        ALP_VERSION: ${ALP_VERSION}
+    restart: on-failure
+#    depends_on:
+    env_file: ".env"
+#     volumes:
+    networks:
+      - app_int
+
 # TODO Do we need a location for the ruby files? Other pieces?
 volumes:
   DB_vol:
