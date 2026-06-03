@@ -9,5 +9,5 @@ export const getChessGame = (game_id: string): Promise<ApiResponse<ChessGameStat
 export const postChessMove = (payload: ChessMovePayload): Promise<ApiResponse<ChessGameState>> =>
   post<ChessGameState, ChessMovePayload>('/chess/move', payload);
 
-export const postChessAiMove = (game_id: string): Promise<ApiResponse<ChessGameState>> =>
+export const postChessAIMove = (game_id: string): Promise<ApiResponse<ChessGameState>> =>
   post<ChessGameState, { game_id: string }>('/chess/ai_move', { game_id });

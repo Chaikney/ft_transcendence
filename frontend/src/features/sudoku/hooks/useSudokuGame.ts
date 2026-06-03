@@ -3,7 +3,6 @@ import { useMatchStore } from "@/store";
 import { getSudokuGame, postSudokuMove } from "@/services/sudoku.service";
 import { useGameChannel } from "@/hooks";
 import type { SudokuMovePayload } from "../types";
-import { ConnectionStatus } from "@/components/ConnectionStatus";
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
 
@@ -44,5 +43,5 @@ export const useSudokuGame = (gameId: string) => {
       setError('Move failed.');
     }
   };
-  return { sudokuGame, sendMove, ConnectionStatus };
+  return { sudokuGame, sendMove, connectionStatus };
 };

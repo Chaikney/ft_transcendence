@@ -1,9 +1,8 @@
 import { useEffect } from "react";
 import { useMatchStore } from "@/store";
-import { getChessGame, postChessMove, postChesAIMove } from "@services/chess.service";
+import { getChessGame, postChessMove, postChessAIMove } from "../service";
 import { useGameChannel } from "@/hooks";
 import type { ChessMovePayload } from '../types';
-import { ConnectionStatus } from "@/components/ConnectionStatus";
 
 // TODO: Dev flag - flip to false when the backend is ready
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
@@ -20,10 +19,11 @@ export const useChessGame = (gameId: string) => {
     const load = async () => {
       startLoading('chess');
       try {
-        if (USE_MOCK)
+        if (USE_MOCK) {
           // <- MOCK
           const { mockChessGame } = await import('@/mocks');
           setChessGame(mockChessGame);
+        }
         else {
           // REAL
           const res = await getChessGame(gameId);
@@ -55,19 +55,19 @@ export const useChessGame = (gameId: string) => {
   };
 
   // Request AI move
-  const requestAiMove = async () => {
+  const requestAIMove = async () => {
     if (!chessGame) return;
     try {
       if (USE_MOCK) {
         const { mockChessGameAfterMove } = await import('@/mocks');
         setChessGame(mockChessGameAfterMove);
       } else {
-        await postChesAIMove(gameId);
+        await postChessAIMove(gameId);
         // Again - websocket broadcast the result
       }
     } catch (err) {
       setError('AI move failed.');
     }
   };
-  return { chessGame, sendMove, requestAiMove, ConnectionStatus };
+  return { chessGame, sendMove, requestAIMove, connectionStatus };
 };
