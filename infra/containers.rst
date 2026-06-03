@@ -26,9 +26,49 @@ Everything related to deployment of the solution via docker (or alternate soluti
         |   |
         |   *--web
         |   |
+        |   *--chess
+        |   |
         |   *--...más?
         |
         *--secrets/
+
+How to use this
+---------------
+
+..
+  This is to explain how a person (user? developer?) can pick up the project and run with it (launch, etc)
+
+Developers you will get best results using `podman <https://podman.io/>`_, although I have tried to maintain the compatibility that the podman CLI claims to offer. If you use the Makefile (I hope) you won't notice any difference.
+
+The Makefile has a set of targets that should be self-explanatory. They will allow you to build the containers and launch the app as well as managing storage and secrets. Some of the key ones are:
+
+ - help
+   Lists existing targets and their state of readiness.
+ - builds
+   Build  *all* the necessary containers.
+ - secrets
+   Generate necessary secrets (e.g. database passwords) that are needed to run but should not be kept in the repository.
+ - start / stop
+   Set the cluster of services running, or shut them down.
+
+Note that if you change the $(BASECMD) variable in the Makefile from podman to docker, it *should*  still work the same. File a bug if not!
+
+Description of containers
+-------------------------
+
+..
+  TODO: Add details about each container
+
+* web
+* ruby server
+* chess server
+* database server
+
+Description of interfaces
+-------------------------
+
+..
+  TODO: Add details about interface between containers - comms, protocols, et.
 
 "Works on my machine"
 ---------------------
@@ -58,8 +98,11 @@ A better solution is probably ignoring the lab machines and instead run the piec
 
 The user socket behaves like the Docker daemon  *but* consumes no resources until the socket is pinged and the service activated, while also not requiring root privileges for the daemon on the host machine.
 
+Notes on technologies used
+--------------------------
+
 Container base
---------------
+..............
 
 For its small size, the container images are all based upon `Alpine Linux`. The core images from DockerHub are used as the base, and then built upon.
 
@@ -82,32 +125,13 @@ As of 2026-05-27 the current Alpine version is 3.23.4 and this means that the ac
 - Ruby: 4.0.5
   Note that this differs from the above as it is *not* the default Alpine package. The API is developed in Ruby 4, which is not, at time of writing, packaged for Alpine. The ruby container downloads and installs this from source using variables in the `.env` if present.
 
-
-How to use this
----------------
-
-Developers you will get best results using `podman <https://podman.io/>`_, although I have tried to maintain the compatibility that the podman CLI claims to offer. If you use the Makefile (I hope) you won't notice any difference.
-
-The Makefile has a set of targets that should be self-explanatory. They will allow you to build the containers and launch the app as well as managing storage and secrets. Some of the key ones are:
-
- - help
-   Lists existing targets and their state of readiness.
- - builds
-   Build  *all* the necessary containers.
- - secrets
-   Generate necessary secrets (e.g. database passwords) that are needed to run but should not be kept in the repository.
- - start / stop
-   Set the cluster of services running, or shut them down.
-
-Note that if you change the $(BASECMD) variable in the Makefile from podman to docker, it *should*  still work the same. File a bug if not!
-
 Why podman?
------------
+...........
 
 Docker runs a persistent daemon and runs with root privileges. These are two things I prefer to avoid, being both paranoid and resource-constrained.
 
-Resources and AI Disclosure
----------------------------
+AI Disclosure
+.............
 
 As ever, no LLMs have been used to write the documentation here. No grammar checker either, only good old ispell.
 
