@@ -38,3 +38,5 @@
 *.pem
 *.crt
 /infra/secret/*
+/chessthing/obj/*.o
+/chessthing/chess
