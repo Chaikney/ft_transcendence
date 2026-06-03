@@ -41,7 +41,7 @@ web-build: server_cert web_src
 	@echo "Building NGINX container..."
 	$(BASECMD) build -f $(CONTHOME)/web/Dockerfile --tag $(REPO)/web:0.1
 
-chess-build:
+chess-build: chess_src
 	@echo "Building chess container..."
 	$(BASECMD) build -f $(CONTHOME)/chess/Dockerfile --tag $(REPO)/sf:0.1
 
@@ -96,6 +96,11 @@ server_cert: secret/trans.crt
 web_src:
 	@echo "Copying react source to build context"
 	cp -r  --update ../frontend/src $(CONTHOME)/web/tools
+
+chess_src:
+	@echo "Copying chess source to build context"
+	mkdir --parents $(CONTHOME)/chess/tools/src
+	cp -r  --update ../chessthing/ $(CONTHOME)/chess/tools/src
 
 # TODO Copying *all* ruby source like this is a ballache. Want a neat folder!
 ruby_src:
