@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1780510376987" clover="3.2.0">
+  <project timestamp="1780510376987" name="All files">
+    <metrics statements="45" coveredstatements="45" conditionals="10" coveredconditionals="9" methods="14" coveredmethods="14" elements="69" coveredelements="68" complexity="0" loc="45" ncloc="45" packages="4" files="7" classes="7"/>
+    <package name="features.chess.hooks">
+      <metrics statements="17" coveredstatements="17" conditionals="4" coveredconditionals="4" methods="3" coveredmethods="3"/>
+      <file name="useChessBoard.ts" path="/home/manu/Desktop/ft_transcendence/frontend/src/features/chess/hooks/useChessBoard.ts">
+        <metrics statements="17" coveredstatements="17" conditionals="4" coveredconditionals="4" methods="3" coveredmethods="3"/>
+        <line num="11" count="1" type="stmt"/>
+        <line num="14" count="11" type="stmt"/>
+        <line num="15" count="11" type="stmt"/>
+        <line num="17" count="11" type="stmt"/>
+        <line num="18" count="6" type="cond" truecount="2" falsecount="0"/>
+        <line num="19" count="4" type="stmt"/>
+        <line num="20" count="4" type="stmt"/>
+        <line num="22" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="23" count="1" type="stmt"/>
+        <line num="24" count="1" type="stmt"/>
+        <line num="27" count="1" type="stmt"/>
+        <line num="28" count="1" type="stmt"/>
+        <line num="29" count="1" type="stmt"/>
+        <line num="32" count="11" type="stmt"/>
+        <line num="33" count="1" type="stmt"/>
+        <line num="34" count="1" type="stmt"/>
+        <line num="36" count="11" type="stmt"/>
+      </file>
+    </package>
+    <package name="features.sudoku.hooks">
+      <metrics statements="15" coveredstatements="15" conditionals="6" coveredconditionals="5" methods="5" coveredmethods="5"/>
+      <file name="useSudokuBoard.ts" path="/home/manu/Desktop/ft_transcendence/frontend/src/features/sudoku/hooks/useSudokuBoard.ts">
+        <metrics statements="15" coveredstatements="15" conditionals="6" coveredconditionals="5" methods="5" coveredmethods="5"/>
+        <line num="11" count="1" type="stmt"/>
+        <line num="16" count="10" type="stmt"/>
+        <line num="18" count="10" type="stmt"/>
+        <line num="19" count="5" type="stmt"/>
+        <line num="23" count="10" type="stmt"/>
+        <line num="24" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="25" count="3" type="stmt"/>
+        <line num="28" count="10" type="stmt"/>
+        <line num="29" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="30" count="1" type="stmt"/>
+        <line num="31" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="34" count="1" type="stmt"/>
+        <line num="35" count="1" type="stmt"/>
+        <line num="37" count="10" type="stmt"/>
+        <line num="39" count="10" type="stmt"/>
+      </file>
+    </package>
+    <package name="mocks">
+      <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="auth.mock.ts" path="/home/manu/Desktop/ft_transcendence/frontend/src/mocks/auth.mock.ts">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="3" count="2" type="stmt"/>
+      </file>
+      <file name="chess.mock.ts" path="/home/manu/Desktop/ft_transcendence/frontend/src/mocks/chess.mock.ts">
+        <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="3" count="2" type="stmt"/>
+        <line num="11" count="2" type="stmt"/>
+        <line num="23" count="2" type="stmt"/>
+      </file>
+      <file name="index.ts" path="/home/manu/Desktop/ft_transcendence/frontend/src/mocks/index.ts">
+        <metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      </file>
+      <file name="sudoku.mock.ts" path="/home/manu/Desktop/ft_transcendence/frontend/src/mocks/sudoku.mock.ts">
+        <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="3" count="2" type="stmt"/>
+        <line num="20" count="2" type="stmt"/>
+      </file>
+    </package>
+    <package name="store">
+      <metrics statements="7" coveredstatements="7" conditionals="0" coveredconditionals="0" methods="6" coveredmethods="6"/>
+      <file name="matchStore.ts" path="/home/manu/Desktop/ft_transcendence/frontend/src/store/matchStore.ts">
+        <metrics statements="7" coveredstatements="7" conditionals="0" coveredconditionals="0" methods="6" coveredmethods="6"/>
+        <line num="23" count="1" type="stmt"/>
+        <line num="31" count="1" type="stmt"/>
+        <line num="35" count="2" type="stmt"/>
+        <line num="38" count="2" type="stmt"/>
+        <line num="41" count="1" type="stmt"/>
+        <line num="44" count="1" type="stmt"/>
+        <line num="47" count="8" type="stmt"/>
+      </file>
+    </package>
+  </project>
+</coverage>
