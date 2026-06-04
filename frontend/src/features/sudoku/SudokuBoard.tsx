@@ -44,12 +44,10 @@ export const SudokuBoard = ({
   const { selectedCell, selectCell, inputValue, clearSelection } =
     useSudokuBoard(gameState.game_id, originalGrid, onMove);
 
-  // 1. Función para saber si la celda está bloqueada (original)
   const isLocked = (row: number, col: number) => {
     return originalGrid[row]?.[col] !== 0;
   };
 
-  // 2. Función para resaltar celdas relacionadas
   const isRelatedCell = useCallback((row: number, col: number) => {
     if (!selectedCell) return false;
     const [sr, sc] = selectedCell;
@@ -60,7 +58,6 @@ export const SudokuBoard = ({
     return isSameRow || isSameCol || isSameBox;
   }, [selectedCell]);
 
-  // 3. Manejador de teclado (definido a nivel de componente, NO dentro de otra función)
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (disabled || gameState.status !== 'active') return;
     
@@ -70,7 +67,6 @@ export const SudokuBoard = ({
     if (e.key === 'Escape') clearSelection();
   }, [disabled, gameState.status, inputValue, clearSelection]);
   
-  // 4. Efecto para escuchar el teclado
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -86,15 +82,27 @@ export const SudokuBoard = ({
         {gameState.grid.map((row, rowIdx) =>
           row.map((value, colIdx) => {
             const isSelected = selectedCell?.[0] === rowIdx && selectedCell?.[1] === colIdx;
+            const isLockedCell = isLocked(rowIdx, colIdx);
             
+            // Lógica de deshabilitado:
+            // El atributo HTML 'disabled' solo debería aplicarse si el tablero está pausado,
+            // la celda está bloqueada originalmente, o el juego no está activo.
+            const isHtmlDisabled = disabled || isLockedCell || gameState.status !== 'active';
+          
             return (
               <button
                 key={`${rowIdx}-${colIdx}`}
-                disabled={disabled || isLocked(rowIdx, colIdx) || gameState.status !== 'active'}
-                onClick={() => selectCell(rowIdx, colIdx)}
+                // Esto controla si el botón es clicable en el DOM (lo que los tests buscan)
+                disabled={isHtmlDisabled}
+                // Esto controla la lógica de negocio
+                onClick={() => {
+                  if (!isHtmlDisabled) {
+                    selectCell(rowIdx, colIdx);
+                  }
+                }}
                 className={getCellClasses(
                   isSelected,
-                  isLocked(rowIdx, colIdx),
+                  isLockedCell,
                   isRelatedCell(rowIdx, colIdx),
                   value as CellValue
                 )}
@@ -107,7 +115,7 @@ export const SudokuBoard = ({
       </div>
 
       {!disabled && gameState.status === 'active' && (
-        <div className="grid grid-cols-9 gap-1" style={{ width: 'min(80vw, 450px)' }}>
+        <div data-testid="number-pad" className="grid grid-cols-9 gap-1" style={{ width: 'min(80vw, 450px)' }}>
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
             <button key={n} onClick={() => inputValue(n)} className="aspect-square rounded bg-gray-100 hover:bg-blue-100 text-gray-700 font-bold">
               {n}
