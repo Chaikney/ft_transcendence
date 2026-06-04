@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useMatchStore } from "@/store";
-import { getSudokuGame, postSudokuMove } from "@/services/sudoku.service";
+import { getSudokuGame, postSudokuMove } from "@/features/sudoku/service";
 import { useGameChannel } from "@/hooks";
 import type { SudokuMovePayload } from "../types";
 
