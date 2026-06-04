@@ -102,18 +102,10 @@ chess_src:
 	mkdir --parents $(CONTHOME)/chess/tools/src
 	cp -r  --update ../chessthing/ $(CONTHOME)/chess/tools/src
 
-# TODO Copying *all* ruby source like this is a ballache. Want a neat folder!
 ruby_src:
 	@echo "Copying ruby source to build context"
-	mkdir -p $(CONTHOME)/ruby/tools
-	cp -r  --update ../app $(CONTHOME)/ruby/tools/app
-	cp -r  --update ../config $(CONTHOME)/ruby/tools/config
-	cp -r  --update ../db $(CONTHOME)/ruby/tools/db
-	cp -r  --update ../bin $(CONTHOME)/ruby/tools/bin
-	cp -r  --update ../test $(CONTHOME)/ruby/tools/test
-	cp -r  --update ../vendor $(CONTHOME)/ruby/tools/vendor
-	cp -r  --update ../Gemfile $(CONTHOME)/ruby/tools
-	cp -r  --update ../Gemfile.lock $(CONTHOME)/ruby/tools
+	mkdir -p $(CONTHOME)/ruby/tools/src
+	cp -r --update ../backend/* $(CONTHOME)/ruby/tools/src
 
 # Convenience / convention rules; not properly worked out or needed yet
 # TODO test this

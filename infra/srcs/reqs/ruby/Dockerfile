@@ -51,8 +51,8 @@ RUN make install
 # TODO Check these locations are correct...
 # TODO what does *this* line do?
 RUN bundle config --global frozen 1
-COPY tools/Gemfile tools/Gemfile.lock ./
-COPY tools/app/* $RB_FILES
+COPY tools/src/Gemfile tools/src/Gemfile.lock ./
+COPY tools/src/app/* $RB_FILES
 # NOTE We *must* have this else can't run it on our Alpine container
 RUN bundle lock --add-platform x86_64-linux-musl
 # TODO Run as a different user? bundler complains if run as root...
