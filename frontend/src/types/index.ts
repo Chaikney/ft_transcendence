@@ -1,3 +1,5 @@
+export type ConnectionStatusType = 'connecting' | 'connected' | 'disconnected' | 'reconnecting';
+
 export interface User {
 	id: number;
 	username: string;

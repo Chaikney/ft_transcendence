@@ -1,6 +1,6 @@
-type Status = 'connecting' | 'connected' | 'disconnected' | 'reconnecting';
+import type { ConnectionStatusType } from '../features/chess/types';
 
-const STATUS_CONFIG: Record<Status, { label: string; color: string; pulse: boolean }> = {
+const STATUS_CONFIG: Record<ConnectionStatusType, { label: string; color: string; pulse: boolean }> = {
   connecting:    { label: 'Connecting...',  color: 'bg-yellow-400', pulse: true  },
   connected:     { label: 'Connected',      color: 'bg-green-400',  pulse: false },
   disconnected:  { label: 'Disconnected',   color: 'bg-red-500',    pulse: false },
@@ -8,11 +8,13 @@ const STATUS_CONFIG: Record<Status, { label: string; color: string; pulse: boole
 };
 
 interface ConnectionStatusProps {
-  status: Status;
+  status: ConnectionStatusType;
 }
 
 export const ConnectionStatus = ({ status }: ConnectionStatusProps) => {
-  const { label, color, pulse } = STATUS_CONFIG[status];
+  const config = STATUS_CONFIG[status] || STATUS_CONFIG['disconnected'];
+  
+  const { label, color, pulse } = config;
 
   return (
     <div className="flex items-center gap-2 text-xs font-mono text-gray-400">
