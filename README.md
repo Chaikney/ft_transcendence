@@ -72,3 +72,18 @@ El archivo `app/core/chess_engine.rb` está preparado con datos simulados (*mock
 * Implementación de `GameService` siguiendo arquitectura hexagonal para orquestar los datos entre el canal y el core.
 * Creación de `ChessEngine` con datos simulados (mock) y parseo a JSON para desbloquear el desarrollo del Frontend.
 * Corrección del autoloader de Zeitwerk reubicando los archivos de channels a la jerarquía correcta.
+
+---
+
+## 🚨 Troubleshooting y Notas para el Equipo (IMPORTANTE)
+
+Al haber aislado el backend en su propia carpeta para mejorar el build de Docker, es posible que os encontréis con un par de errores la primera vez que levantéis el proyecto. Aquí tenéis la solución directa:
+
+### 1. Error: `Database not found`
+Al cambiar la ruta del `docker-compose.yml`, Docker genera un volumen nuevo y vacío para PostgreSQL. Vuestra base de datos anterior no se ha borrado, pero Docker ya no la enlaza.
+**Solución:** Con los contenedores encendidos, hay que recrear la base de datos y correr las migraciones:
+`docker compose exec api bundle exec rails db:create db:migrate db:seed`
+
+### 2. Error: `env: ‘ruby.exe’: No such file or directory`
+Si utilizáis Windows con WSL, los ejecutables de la carpeta `bin/` (como `bin/rails`) pueden haberse generado con saltos de línea de Windows, lo que hace que el contenedor de Linux no los entienda.
+**Solución:** NUNCA ejecutéis `bin/rails` directamente dentro del contenedor. Usad siempre `bundle exec rails` por delante para forzar el uso del Ruby nativo de Linux (ejemplo: `bundle exec rails console`).
