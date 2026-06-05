@@ -6,7 +6,8 @@ FROM alpine:${ALP_VERSION} AS buildimage
 ARG SRCDIR=tools/frontend
 ARG DESTDIR=/app
 # get the NPM pieces
-RUN ["apk", "add", "npm", "typescript"]
+# NOTE versions corresponding to Alpine 3.23 are the LTS version of nodejs
+RUN ["apk", "add", "npm", "typescript", "nodejs"]
 # NOTE Make sure we have a user?
 RUN mkdir $DESTDIR
 # RUN chown -R npm:npm $DESTDIR
@@ -23,6 +24,7 @@ RUN npm install
 #RUN npm ci
 # HACK for debugging
 RUN tsc --version
+RUN npx vitest run --coverage
 RUN npm run build
 LABEL author=chaikney
 LABEL projectpart=nodebuilder

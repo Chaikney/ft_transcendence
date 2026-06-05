@@ -12,7 +12,7 @@ If you have already configured this computer, **you don't need to install anythi
 
 ```bash
    nvm use --lts
-````
+```
 
 3. **Verify dependencies:** If you performed a `git pull` and there are changes, run:
     
