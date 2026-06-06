@@ -1,79 +1,59 @@
-import { useEffect, useRef } from 'react';
-import { SudokuBoard } from './features/sudoku';
+import { useState } from 'react';
+import { Navbar } from './components/Navbar';
+import { ChessGamePage } from './features/chess/ChessGamePage';
+import { SudokuGamePage } from './features/sudoku/SudokuGamePage';
 import { useMatchStore } from './store';
-import { mockSudokuGame } from './mocks';
+
+const styles = {
+  shell:
+    'min-h-screen bg-bg-base flex flex-col',
+  content:
+    'flex-1 pt-14',
+  gridBg:
+    'absolute inset-0 ' +
+    '[background-image:linear-gradient(var(--border)_1px,transparent_1px),linear-gradient(90deg,var(--border)_1px,transparent_1px)] ' +
+    '[background-size:48px_48px] opacity-[0.35] pointer-events-none',
+  vignette:
+    'absolute inset-0 ' +
+    'bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,transparent_40%,var(--bg-base)_100%)] ' +
+    'pointer-events-none',
+  pageWrapper:
+    'relative flex-1 flex flex-col',
+} as const;
+
+const GAME_IDS = {
+  chess:  'chess-001',
+  sudoku: 'sudoku-001',
+} as const;
 
 export default function App() {
-  const sudokuGame = useMatchStore((s) => s.sudokuGame);
-  const setSudokuGame = useMatchStore((s) => s.setSudokuGame);
-  
-  // Usamos un 'ref' para guardar el cable del enchufe y poder usarlo al hacer un movimiento
-  const wsRef = useRef<WebSocket | null>(null);
+  const [activeGame, setActiveGame] = useState<'chess' | 'sudoku'>('chess');
+  const resetMatch = useMatchStore((s) => s.resetMatch);
 
-  useEffect(() => {
-    // 1. Cargamos el tablero simulado primero para que la pantalla no explote
-    setSudokuGame(mockSudokuGame);
-
-    // 2. Buscamos el token de seguridad
-    const token = "token_maestro_temporal";
-    if (!token) {
-      console.warn("🔴 No hay token. Haz login en la web para que Rails te deje entrar.");
-      return;
-    }
-
-    // 3. ¡Llamamos a tu servidor!
-    const socket = new WebSocket(`ws://localhost:3000/cable?token=${token}`);
-    wsRef.current = socket;
-
-    socket.onopen = () => {
-      console.log('🟢 ¡Conectado al backend de Rails!');
-      
-      // Entramos a la sala 7
-      const suscripcion = {
-        command: "subscribe",
-        identifier: JSON.stringify({ channel: "GameChannel", game_id: "7" })
-      };
-      socket.send(JSON.stringify(suscripcion));
-    };
-
-    socket.onmessage = (event) => {
-      const response = JSON.parse(event.data);
-      if (response.type === "ping") return; // Ignoramos el ruido de fondo
-      
-      console.log('⚡ ActionCable responde:', response);
-      
-      // Aquí, en el futuro, si tu backend manda el nuevo tablero, harías algo como:
-      // if (response.message && response.message.gameState) {
-      //   setSudokuGame(response.message.gameState);
-      // }
-    };
-
-    return () => {
-      socket.close();
-    };
-  }, [setSudokuGame]);
-
-  if (!sudokuGame) {
-    return <div>Loading...</div>;
-  }
+  const handleSelectGame = (game: 'chess' | 'sudoku') => {
+    resetMatch();
+    setActiveGame(game);
+  };
 
   return (
-    <SudokuBoard
-      gameState={sudokuGame}
-      originalGrid={mockSudokuGame.grid}
-      onMove={(payload) => {
-        console.log('Jugador mueve:', payload);
-        
-        // 4. Cuando el jugador mueve una ficha, se lo enviamos a Rails
-        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-          const jugada = {
-            command: "message",
-            identifier: JSON.stringify({ channel: "GameChannel", game_id: "7" }),
-            data: JSON.stringify({ action: "play_move", ...payload })
-          };
-          wsRef.current.send(JSON.stringify(jugada));
-        }
-      }}
-    />
+    <div className={styles.shell}>
+      <Navbar
+        activeGame={activeGame}
+        onSelectGame={handleSelectGame}
+      />
+
+      <main className={styles.content}>
+        <div className={styles.pageWrapper}>
+          <div className={styles.gridBg} aria-hidden />
+          <div className={styles.vignette} aria-hidden />
+
+          {activeGame === 'chess' ? (
+            <ChessGamePage gameId={GAME_IDS.chess} />
+          ) : (
+            <SudokuGamePage gameId={GAME_IDS.sudoku} />
+          )}
+        </div>
+      </main>
+    </div>
   );
 }
