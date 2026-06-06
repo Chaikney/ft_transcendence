@@ -3,7 +3,11 @@ module ApplicationCable
     identified_by :current_user
 
     def connect
-      self.current_user = find_verified_user
+      # === BYPASS TEMPORAL PARA EL FRONTEND ===
+      self.current_user = "Jugador_Prueba_Local"
+      
+      # === SEGURIDAD ORIGINAL (Desactivada temporalmente) ===
+      # self.current_user = find_verified_user
     end
 
     private

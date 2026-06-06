@@ -19,15 +19,90 @@ const parseFen = (fen: string): (string | null)[][] => {
 };
 
 // Squares notation from row/col index 
-const toSquare = (row: number, col: number): string => {
-  const file = String.fromCharCode(97 + col); // a-h
-  const rank = String(8 - row);
-  return `${file}${rank}`;
-};
+const toSquare = (row: number, col: number): string => 
+  `${String.fromCharCode(97 + col)}${8 - row}`;
 
 const PIECE_UNICODE: Record<string, string> = {
   K: '♔', Q: '♕', R: '♖', B: '♗', N: '♘', P: '♙', // white ♔	 en hexadecimal = U+2654
   k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟', // black ♛	 en javascript =	\u265B
+};
+
+// ── Styles (never mix with logic above) ───────────────────────────────────
+const styles = {
+  wrapper:   'flex flex-col items-center gap-3 animate-board-reveal',
+
+  // Status bar
+  statusBar: 'flex items-center gap-2 h-7',
+  turnDot:   'w-2.5 h-2.5 rounded-full border border-black/20',
+  turnLabel: 'text-xs font-mono tracking-widest uppercase text-text-secondary',
+  gameOver:  'text-xs font-mono tracking-widest uppercase text-status-error',
+
+  // Board wrapper — shadow + border frame
+  boardFrame:
+    'relative rounded-lg overflow-hidden shadow-board ' +
+    'border border-chess-border',
+
+  // Rank labels column (left side)
+  rankLabels:
+    'absolute left-0 top-0 flex flex-col pointer-events-none z-10',
+  rankLabel:
+    'flex items-center justify-center text-[10px] font-mono text-chess-coord ' +
+    'select-none',
+
+  // File labels row (bottom)
+  fileLabels: 'flex',
+  fileLabel:
+    'flex-1 text-center text-[10px] font-mono text-chess-coord select-none ' +
+    'pt-1',
+
+  // Board grid
+  boardGrid: 'grid grid-cols-8',
+
+  // Individual square
+  squareBase:
+    'relative flex items-center justify-center select-none ' +
+    'transition-colors duration-fast',
+
+  // Piece span
+  pieceWhite:
+    'text-chess-piece-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] ' +
+    'transition-transform duration-fast',
+  pieceBlack:
+    'text-chess-piece-black drop-shadow-[0_1px_2px_rgba(255,255,255,0.4)] ' +
+    'transition-transform duration-fast',
+
+  // Last move indicator dot
+  lastMoveDot:
+    'absolute bottom-0.5 right-0.5 w-1.5 h-1.5 rounded-full ' +
+    'bg-chess-coord opacity-60',
+} as const;
+
+// ── Square class builder (separated from render) ───────────────────────────
+const getSquareClasses = (
+  isLight:    boolean,
+  isSelected: boolean,
+  isLastMove: boolean,
+  disabled:   boolean,
+): string => {
+  const bg = isSelected
+    ? 'bg-chess-selected'
+    : isLastMove
+    ? 'bg-chess-lastmove'
+    : isLight
+    ? 'bg-chess-light'
+    : 'bg-chess-dark';
+
+  const interaction = disabled
+    ? 'cursor-not-allowed'
+    : 'cursor-pointer hover:brightness-110 active:brightness-90';
+
+  const ring = isSelected
+    ? 'ring-2 ring-inset ring-accent/60'
+    : '';
+
+  return [styles.squareBase, bg, interaction, ring]
+    .filter(Boolean)
+    .join(' ');
 };
 
 interface ChessBoardProps {
@@ -40,67 +115,110 @@ export const ChessBoard = ({ gameState, onMove, disabled = false }: ChessBoardPr
   const { selectedSquare, selectSquare } = useChessBoard(onMove);
   const board = useMemo(() => parseFen(gameState.fen), [gameState.fen]);
 
+  const boardSize = 'min(80vw, 480px)';
+  const squareSize = `calc(${boardSize} / 8)`;
+  const isActive = gameState.status === 'active';
+
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className={styles.wrapper}>
 
-      {/* Status bar */}
-      <div className="text-sm font-mono text-gray-400 mb-1">
-        {gameState.status === 'active'
-          ? `${gameState.turn === 'white' ? '⬜' : '⬛'} ${gameState.turn}'s turn` // Cuadrado Blanco Grande	U+2B1C	\u2B1C
-          : `Game over — ${gameState.status}`}
-      </div>
-
-      {/* Board */}
-      <div
-        className="grid grid-cols-8 border-2 border-gray-600"
-        style={{ width: 'min(80vw, 480px)', height: 'min(80vw, 480px)' }}
-      >
-        {board.map((row, rowIdx) =>
-          row.map((piece, colIdx) => {
-            const square = toSquare(rowIdx, colIdx);
-            const isLight = (rowIdx + colIdx) % 2 === 0;
-            const isSelected = selectedSquare === square;
-            const isLastMove =
-              gameState.last_move?.from === square ||
-              gameState.last_move?.to === square;
-
-            return (
-              <button
-                key={square}
-                disabled={disabled || gameState.status !== 'active'}
-                onClick={() => selectSquare(square)}
-                className={[
-                  'flex items-center justify-center text-2xl select-none',
-                  'transition-colors duration-100',
-                  isLight ? 'bg-amber-100' : 'bg-amber-800',
-                  isSelected && 'ring-4 ring-inset ring-yellow-400',
-                  isLastMove && !isSelected && 'bg-yellow-300 opacity-80',
-                  disabled ? 'cursor-not-allowed' : 'cursor-pointer hover:opacity-75',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-              >
-                {piece && (
-                  <span
-                    className={
-                      piece === piece.toUpperCase()
-                        ? 'text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]'
-                        : 'text-gray-900 drop-shadow-[0_1px_1px_rgba(255,255,255,0.3)]'
-                    }
-                  >
-                    {PIECE_UNICODE[piece] ?? piece}
-                  </span>
-                )}
-              </button>
-            );
-          })
+      {/* ── Status bar ── */}
+      <div className={styles.statusBar}>
+        {isActive ? (
+          <>
+            <span
+              className={styles.turnDot}
+              style={{
+                background: gameState.turn === 'white' ? '#f0d9b5' : '#1a1a2e',
+              }}
+            />
+            <span className={styles.turnLabel}>
+              {gameState.turn}&apos;s turn
+            </span>
+          </>
+        ) : (
+          <span className={styles.gameOver}>
+            Game over — {gameState.status}
+          </span>
         )}
       </div>
 
-      {/* File labels */}
-      <div className="flex" style={{ width: 'min(80vw, 480px)' }}>
-        {['a','b','c','d','e','f','g','h'].map((f) => (
-          <span key={f} className="flex-1 text-center text-xs text-gray-500 font-mono">
+      {/* ── Board frame ── */}
+      <div
+        className={styles.boardFrame}
+        style={{ width: boardSize, height: boardSize }}
+      >
+        {/* Rank labels (1-8) */}
+        <div
+          className={styles.rankLabels}
+          style={{ width: squareSize, height: boardSize }}
+        >
+          {[8, 7, 6, 5, 4, 3, 2, 1].map((rank) => (
+            <span
+              key={rank}
+              className={styles.rankLabel}
+              style={{ height: squareSize }}
+            >
+              {rank}
+            </span>
+          ))}
+        </div>
+
+        {/* Grid */}
+        <div
+          data-testid="chess-board"
+          className={styles.boardGrid}
+          style={{ width: boardSize, height: boardSize }}
+        >
+          {board.map((row, rowIdx) =>
+            row.map((piece, colIdx) => {
+              const square     = toSquare(rowIdx, colIdx);
+              const isLight    = (rowIdx + colIdx) % 2 === 0;
+              const isSelected = selectedSquare === square;
+              const isLastMove =
+                gameState.last_move?.from === square ||
+                gameState.last_move?.to === square;
+
+              return (
+                <button
+                  key={square}
+                  disabled={disabled || !isActive}
+                  onClick={() => selectSquare(square)}
+                  className={getSquareClasses(
+                    isLight, isSelected, isLastMove, disabled || !isActive
+                  )}
+                  style={{ width: squareSize, height: squareSize }}
+                  aria-label={`${square}${piece ? ` ${piece}` : ''}`}
+                >
+                  {/* Piece */}
+                  {piece && (
+                    <span
+                      className={
+                        piece === piece.toUpperCase()
+                          ? styles.pieceWhite
+                          : styles.pieceBlack
+                      }
+                      style={{ fontSize: `calc(${squareSize} * 0.64)` }}
+                    >
+                      {PIECE_UNICODE[piece] ?? piece}
+                    </span>
+                  )}
+
+                  {/* Last-move dot */}
+                  {isLastMove && !isSelected && !piece && (
+                    <span className={styles.lastMoveDot} />
+                  )}
+                </button>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      {/* ── File labels (a–h) ── */}
+      <div className={styles.fileLabels} style={{ width: boardSize }}>
+        {['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'].map((f) => (
+          <span key={f} className={styles.fileLabel}>
             {f}
           </span>
         ))}
