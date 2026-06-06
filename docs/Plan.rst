@@ -7,22 +7,78 @@ Team: members and commitment
 
 Members
 .......
-# TODO: copy from readme.rst
 
-Level of activity
-..................
+ - Chris Haikney / chaikney
+ - Nikola / nkrasimi
+ - Garikoitz / gcassi-d
+ - Manu
+ - Borja
+
+Agreement
+.......
+
+Aiming for completion "before the summer."
+
+
+Roles
+.....
+
+Each member has a general area of responsibility, agreed in conversation in May 2026. Those roles are sketched in documents also included in this folder, refer to those for details.
+- chaikney DevOps
+- nkrasimi -- backend dev
+- Manu -- frontend dev
+- Garikoitz - chess engine
+- Borja - AI chess partner (tbc)
+
+Expected level of activity
+...........................
+
+Each has different schedule and availability to overcome the challenges here requires **regular and clear communication** with colleagues. There is a group on Slack (to coordinate development) and on WhatsApp (for more urgent requests).
+
+The evaluation requires us to demonstrate the contribution of each team member. The simplest way of doing this is for us *all*  to commit code to the same repository.  This also shows to potential employers our ability to use git.
+
+The shared repo: https://github.com/Chaikney/ft_transcendence
+
+All team members are to be invited to commit but this requires they provide an account and accept the invitation.
 
 Thing to be built
 -----------------
 
-# TODO: copy from readme.rst
-
-Roles
------
-# TODO: copy from readme.rst
+A platform that allows games to be played. The specific games considered are *sudoku* and *chess*.
 
 Project against subject criteria
---------------------------------
+................................
+
+Major criteria (2 points)
+_________________________
+
+* AI opponent for games (major)
+* One Game (major)
+  Implement a complete web-based game where users can play against each other.
+* Second game (sudoku with timers) (major)
+  add another game with user history and matchmaking.
+  Track user history and statistics for this game.
+  Implement a matchmaking system.
+  Maintain performance and responsiveness
+  This unlocks multiplayer (use timers)
+* remote players (major)
+* 3d graphics (major)
+  Implement advanced 3D graphics using a library like Three.js or Babylon.js
+Implicit in this are:
+* use of a frontend & backend framework -- but do we really have both of these??
+
+Minor criteria (1 point)
+_________________________
+* Spectator (minor)
+  Allow users to watch ongoing games.
+  Real-time updates for spectators.
+  Optional: spectator chat.
+* Gamification (minor)
+  gamification system to reward users for their actions.
+  Implement at least 3 of the following: achievements, badges, leaderboards, XP/level system, daily challenges, rewards
+  System must be persistent (stored in database)
+  Visual feedback for users (notifications, progress bars, etc.)
+  Clear rules and progression mechanic
 
 (i.e.) the points for each piece we expect.
 
@@ -47,3 +103,19 @@ There are some factors that could lead to delay against anticipated time.
   The evaluation will start badly if the evaluator has to start with complicated workarounds to bring up the system on the cluster computers. To mitigate that, a VM should be available with the software and configuration required to act as a sufficient host (e.g. podman). This should be accompanied by clear instructions for use and a demonstration that there are no tricks hidden (e.g. that the cache is clear).
 - Lack of cross-team understanding
   All team members must be able to explain and show their part in the project. They don't need to explain the details of others' roles but the *must* know what those roles are and how they interface with the other parts of the project. They must also be able to explain their role in depth and answer questions about it. If the evaluator requires changes they must be able to demonstrate how those would be made. Design trade-offs should be known and explicable.
+---------------
+Chess Project
+---------------
+
+What we have
+------------
+
+What we need
+------------
+
+* Work plan
+* Division of roles
+* Agreement on structure / architecture
+  - How do the frontend, backend, engine fit together? Assume (for now) we need a container for each
+* Comms / planning tools beyond WhatsApp group?
+* Interface between chess engine and other parts / frontend
