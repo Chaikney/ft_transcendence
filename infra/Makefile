@@ -102,6 +102,8 @@ chess_src:
 	mkdir --parents $(CONTHOME)/chess/tools/src
 	cp -r  --update ../chessthing/ $(CONTHOME)/chess/tools/src
 
+# NOTE we need the app, config and bin directories, maybe not the others.
+# This copies all into context for the Dockerfile to handle
 ruby_src:
 	@echo "Copying ruby source to build context"
 	mkdir -p $(CONTHOME)/ruby/tools/src
