@@ -11,6 +11,7 @@ ARG RUBY_VERSION=4.0.5
 ARG RUBY_DOWNLOAD_SHA256=7d6149079a63f8ae1d326c9fa65c6019ba2dc3155eae7b39159817911c88958e
 
 # NOTE The difference between ARG and ENV is...?
+# FIXME This is not getting used.
 ARG RB_FILES=/usr/src/app
 ARG RB_DBHOST=db:5432
 
@@ -52,7 +53,10 @@ RUN make install
 # TODO what does *this* line do?
 RUN bundle config --global frozen 1
 COPY tools/src/Gemfile tools/src/Gemfile.lock ./
-COPY tools/src/app/* $RB_FILES
+# NOTE as well as the app folder we need (at least) config and db
+COPY tools/src/app $RB_FILES
+COPY tools/src/config $RB_FILES
+COPY tools/src/db $RB_FILES
 # NOTE We *must* have this else can't run it on our Alpine container
 RUN bundle lock --add-platform x86_64-linux-musl
 # TODO Run as a different user? bundler complains if run as root...
@@ -61,6 +65,13 @@ RUN bundle install
 # Clean builder to keep artifacts small (remove source tarball & build dir)
 WORKDIR /
 RUN rm -rf /ruby-${RUBY_VERSION} /ruby.tar.gz /var/cache/apk/*
+
+LABEL org.opencontainers.image.tag="rubybase" \
+org.opencontainers.image.vendor="${author}" \
+org.opencontainers.image.repo="memememe" \
+org.opencontainers.image.description="Ruby ${RUBY_VERSION} built from source"
+
+
 
 
 # NOTE This stage copies the compiled ruby and relevant pieces to a fresh Alpine
@@ -85,7 +96,7 @@ COPY --from=baseimage /usr/local/lib/ruby /usr/local/lib/ruby
 COPY --from=baseimage /usr/local/share/ri /usr/local/share/ri
 
 # NOTE Copy gems if present, i.e. uncomment as needed
-# COPY --from=baseimage /usr/local/bundle /usr/local/bundle
+COPY --from=baseimage /usr/local/bundle /usr/local/bundle
 
 # Bring necessary system libs (detect common dirs on Alpine)
 COPY --from=baseimage /lib /lib
@@ -118,4 +129,6 @@ ENV IMAGE_TAG="My awesome ruby box"
 # IT is inactive for now
 # HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl -f http://localhost:3000/up || exit 1
 
-CMD ["irb"]
+# CMD ["irb"]
+# FIXME CMD should be rails but launching the app correctly
+CMD ["rails", "server"]
