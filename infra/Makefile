@@ -20,11 +20,12 @@ $(NAME): start
 # Launch the cluster / pod of 3 containers
 # NOTE podman compose and podman-compose behave differently! BOOOO!
 # NOTE !! if you get a "cant get socket" error, *LAUNCH THE podman.socket SERVICE!
-start: secrets
+start: secrets copy_src
 	@echo "Building and launching the 3 containers"
 	@echo "NOTE This command does not work realiably yet!"
 	$(BASECMD) compose -f "$(abspath $(BASEDIR)/docker-compose.yml)" up
 
+copy_src: chess_src web_src ruby_src
 stop:
 # stop all the running containers
 	@echo "Stopping our containers"
