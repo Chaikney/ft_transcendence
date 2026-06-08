@@ -12,7 +12,7 @@ COPY Gemfile Gemfile.lock ./
 RUN bundle install
 
 # El script para evitar el error del server.pid
-COPY entrypoint.sh /usr/bin/
+COPY bin/docker-entrypoint /usr/bin/entrypoint.sh
 RUN chmod +x /usr/bin/entrypoint.sh
 
 ENTRYPOINT ["entrypoint.sh"]

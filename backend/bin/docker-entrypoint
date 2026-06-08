@@ -1,8 +1,11 @@
-#!/bin/bash -e
+#!/bin/bash
+set -e
 
-# If running the rails server then create or migrate existing database
+# Si el comando es para arrancar el servidor rails
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
+  # Prepara la base de datos (crea o migra)
   ./bin/rails db:prepare
 fi
 
+# Ejecuta el comando pasado a docker compose (normalmente rails server)
 exec "${@}"

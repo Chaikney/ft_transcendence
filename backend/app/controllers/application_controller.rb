@@ -1,21 +1,27 @@
 class ApplicationController < ActionController::API
-  
-  def authorize_request
-    # 1. Miramos si en la petición el frontend nos ha enviado el token en la cabecera 'Authorization'
-    header = request.headers['Authorization']
-    header = header.split(' ').last if header
-    
-    begin
-      # 2. Desencriptamos el token usando la misma llave secreta con la que lo creamos
-      decoded = JWT.decode(header, Rails.application.secret_key_base)[0]
-      
-      # 3. Buscamos al usuario en la base de datos usando el ID que venía escondido en el token
-      @current_user = User.find(decoded['user_id'])
-      
-    rescue ActiveRecord::RecordNotFound, JWT::DecodeError
-      # Si el token es falso, ha caducado o está mal escrito, le damos un portazo
-      render json: { errors: 'Acceso denegado. Token inválido o no proporcionado.' }, status: :unauthorized
-    end
+  # Esto permite que otros controladores usen @current_user fácilmente
+  attr_reader :current_user
+
+  # Ruta de prueba para verificar la conexión con el frontend
+  def test
+    render json: { message: "¡Backend conectado con éxito!" }
   end
 
+  protected
+
+  def authorize_request
+    header = request.headers['Authorization']
+    token = header.to_s.split(' ').last
+
+    begin
+      # Desencriptamos el token (usando la llave secreta base de Rails)
+      decoded = JWT.decode(token, Rails.application.secret_key_base, true, { algorithm: 'HS256' })[0]
+      
+      # Buscamos al usuario en la base de datos
+      @current_user = User.find(decoded['user_id'])
+      
+    rescue JWT::DecodeError, ActiveRecord::RecordNotFound, JWT::ExpiredSignature
+      render json: { errors: 'Acceso denegado. Token inválido o expirado.' }, status: :unauthorized
+    end
+  end
 end

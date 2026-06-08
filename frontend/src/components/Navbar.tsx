@@ -1,5 +1,5 @@
 import { ConnectionStatus } from './ConnectionStatus';
-import type { ConnectionStatusType } from '@/features/chess/types';
+import type { ConnectionStatusType } from '@/types';
 import { useAuthStore } from '@/store';
 
 const styles = {

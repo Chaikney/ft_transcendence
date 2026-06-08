@@ -2,6 +2,8 @@ Rails.application.routes.draw do
 
   mount ActionCable.server => '/cable'
 
+  get '/api/test', to: 'application#test'
+
   namespace :api do
     get 'status', to: 'status#index'
     
@@ -24,5 +26,7 @@ Rails.application.routes.draw do
     post '/friends/request', to: 'friendships#create'
     patch '/friends/accept', to: 'friendships#accept'
     delete '/friends/reject', to: 'friendships#reject'
+
+    
   end
 end
