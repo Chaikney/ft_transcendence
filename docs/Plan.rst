@@ -56,7 +56,6 @@ The scoring and similar monitoring against the target points needed is detailed 
 Major criteria (2 points)
 _________________________
 
-
 * AI opponent for games
 * One Game
     Implement a complete web-based game where users can play against each other.
@@ -87,6 +86,7 @@ _________________________
     Visual feedback for users (notifications, progress bars, etc.)
     Clear rules and progression mechanic
 
+
 Milestones
 ----------
 i.e. the times that each of these should take, *with dates*
@@ -108,3 +108,19 @@ There are some factors that could lead to delay against anticipated time.
     The evaluation will start badly if the evaluator has to start with complicated workarounds to bring up the system on the cluster computers. To mitigate that, a VM should be available with the software and configuration required to act as a sufficient host (e.g. podman). This should be accompanied by clear instructions for use and a demonstration that there are no tricks hidden (e.g. that the cache is clear).
 - Lack of cross-team understanding
     All team members must be able to explain and show their part in the project. They don't need to explain the details of others' roles but the *must* know what those roles are and how they interface with the other parts of the project. They must also be able to explain their role in depth and answer questions about it. If the evaluator requires changes they must be able to demonstrate how those would be made. Design trade-offs should be known and explicable.
+
+Current challenges requiring extra time
+---------------------------------------
+
+- Borja has been away for work  up to this point (2026-06-08) and the integration work has not been able to begin.
+- chaikney is a numpty who booked the wrong number of days in his (final) freeze period. Has black hole date of 2026-06-15 despite only having used 73 days of freeze.
+- Manu works in Navarra during the early part of the week and can be present in the tower Thursday-Saturdays.
+- garikoitz had exams until last Thursday (2026-06-04) but is now fully available.
+- nkrasimi has general availability from Wednesdays to the weekend.
+
+The intention of all in the team is to complete the project before the start of summer. The most likely target dates are the completed project by the 23rd June, leaving the week that follows for evaluations.
+
+Note on AI use
+--------------
+
+Documented written  by chaikney without the use of AI, but the version in Spanish was machine translated because he had his B2.2 exam just last week and quite fancied a break.
