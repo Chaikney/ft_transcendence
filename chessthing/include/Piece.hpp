@@ -25,7 +25,7 @@
 
 #define START_POSITION "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
 #define FEN 0
-#define ALG 1
+#define PGN 1
 #define NO -1
 
 enum type {
@@ -141,6 +141,7 @@ class Piece {
 		const std::vector<move>& getLegalMoves() const;
 
 		void emptyMoves();
+		void fullCopy(const Piece& other);
 		
 		bool isLegal(coords coord);
 		bool isMoveLegal(move m);

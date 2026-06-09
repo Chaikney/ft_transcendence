@@ -107,7 +107,7 @@ void SANParser::parse(std::string& san) {
 		this->capture = true;
 	}
 	
-	if (copy.size() < 3)
+	if (copy.size() < 2)
 		throw (SANError(san, "bad coordinate"));
 	this->rank = rankToInt(copy[copy.size()-1]);
     this->file = fileToInt(copy[copy.size()-2]);
@@ -116,7 +116,7 @@ void SANParser::parse(std::string& san) {
 	if (this->file < 0 || this->file > 7)
     	throw SANError(san, "Bad file destination");
 
-	std::string prefix = san.substr(i, san.size()-i-2);
+	std::string prefix = copy.substr(i, copy.size() - i - 2);
 
     prefix.erase(std::remove(prefix.begin(), prefix.end(), 'x'), prefix.end());
 	
@@ -138,8 +138,8 @@ void SANParser::parse(std::string& san) {
     }
 	if ((this->neededRank != NO) && (this->neededRank < 0 || this->neededRank > 7))
     	throw SANError(san, "Bad rank disambiguity");
-	if (file < 0 || file > 7)
-    	throw SANError(san, "Bad file destination");
+	if ((this->neededFile != NO) && (this->neededFile < 0 || this->neededFile > 7))
+    	throw SANError(san, "Bad file disambiguity");
 }
 
 SANParser::SANError::SANError(std::string& san, const std::string& msg): san(san), msg(msg){}
@@ -182,7 +182,7 @@ fmove SANParser::getMove(std::string& san, Board& board) const {
 		
 		if (this->neededFile != NO)
 			m.from.file = this->neededFile;
-		else
+		else 
 			m.from.file = m.to.file;
 		if (m.t == CAPTURE && m.to.rank == (board.getTurn() == WHITE? 5: 2) && board.board[m.to.rank - board.getTurn()][m.to.file].getPiece() == -board.getTurn() * PAWN && board.board[m.to.rank][m.to.file].getPiece() == 0)
 			m.t = ENPASSANT;
@@ -190,8 +190,8 @@ fmove SANParser::getMove(std::string& san, Board& board) const {
 		if (this->promotion)
 			m.t = (moveType)((4 * (m.t == CAPTURE)) + this->promotedPiece);
 		
-		if (m.to.rank == (board.getTurn() == WHITE? 3: 4) && m.t == MOVE && board.board[m.to.rank - board.getTurn()][m.to.file].getPiece() == 0 && board.board[m.to.rank - 2 * board.getTurn()][m.to.file].getPiece() == 0)
-			m.from.rank = m.to.rank - 2;
+		if (m.to.rank == (board.getTurn() == WHITE? 3: 4) && m.t == MOVE && board.board[m.to.rank - board.getTurn()][m.to.file].getPiece() == 0 && board.board[m.to.rank - 2 * board.getTurn()][m.to.file].getPiece() == PAWN * board.getTurn())
+			m.from.rank = m.to.rank - 2 * board.getTurn();
 	} 
 
 	else {

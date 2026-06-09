@@ -269,7 +269,7 @@ std::ostream& operator<<(std::ostream& os, const Board& chess) {
 }
 
 std::ostream& operator<<(std::ostream& os, const coords& coord) {
-	os << coord.file  << coord.rank;
+	os << (char)(coord.file + 'a') << (char)(coord.rank + '1');
 	return (os);
 }
 
@@ -305,4 +305,35 @@ int Board::charToInt(int c) const{
 	}
 }
 
-void Board::fromAlg(const std::string& alg) {(void)alg;}
+void Board::fromPgn(const std::string& pgn) {
+	std::vector<std::string> turns;
+    std::istringstream iss(pgn);
+    std::string token;
+    while (iss >> token) {
+        turns.push_back(token);
+    }
+
+	this->fromFen(START_POSITION);
+	this->updateLegalMoves();
+
+	for (auto turn: turns) {
+		if (turn.find('.') != std::string::npos) {
+			turn = turn.substr(turn.find('.') + 1);
+			if (turn.empty())
+				continue;
+		}
+		if (turn == "0-1") {
+			this->status = BLACK;
+			return;
+		}
+		if (turn == "1-0") {
+			this->status = WHITE;
+			return;
+		}
+		if (turn == "1/2-1/2") {
+			this->status = DRAW;
+			return;
+		}
+		this->makeMove(turn);
+	}
+}

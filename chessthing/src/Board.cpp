@@ -6,7 +6,7 @@
 /*   By: gcassi-d <gcassi-d@42urduliz.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/19 16:06:23 by gcassi-d          #+#    #+#             */
-/*   Updated: 2026/05/23 18:53:10 by gcassi-d         ###   ########.fr       */
+/*   Updated: 2026/06/08 11:15:21 by gcassi-d         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,8 @@ Board::Board(const Board& other): letters("_pqrbnkp") {
 
 Board::Board(const std::string& s, int type): letters("_pqrbnkp") {
 	switch (type) {
-		case ALG: {
-			this->fromAlg(s);
+		case PGN: {
+			this->fromPgn(s);
 			break;
 		}
 		case FEN: {
@@ -56,11 +56,11 @@ Board& Board::operator=(const Board& other) {
 	this->cur = other.cur;
 	this->drawTracker = other.drawTracker;
 	this->status = other.status;
+	this->turn = other.turn;
 
 	for (int i = 0; i < 8; i++){
-		for (int j = 0; j < 8; j++) {
-			this->board[i][j] = other.board[i][j];
-		}
+		for (int j = 0; j < 8; j++)
+			this->board[i][j].fullCopy(other.board[i][j]);
 	}
 
 	return (*this);
@@ -145,9 +145,7 @@ void Board::makePassable(const coords c) {
 }
 
 void Board::place(coords from, coords to) {
-	this->board[to.rank][to.file] = this->board[from.rank][from.file];
-	this->board[to.rank][to.file].setRank(to.rank);
-	this->board[to.rank][to.file].setFile(to.file);
+	this->board[to.rank][to.file].setPiece(this->board[from.rank][from.file].getPiece());
 	this->board[from.rank][from.file].setPiece(0);
 }
 
@@ -249,6 +247,8 @@ bool Board::isAtacked(int col, coords c) {
 }
 
 int Board::makeMove(coords from, move to) {
+	if (this->status)
+		throw (MoveError("attempted to make a move on a finished game"));
 	if (!onBoard(from.rank, from.file))
 		throw (MoveError("Square outside of the board"));
 
@@ -289,9 +289,11 @@ int Board::makeMove(coords from, move to) {
 	}
 
 	this->moveRule += 1;
+	if ((to.t != MOVE && to.t != CASTLE) || p.getType() == PAWN)
+		this->moveRule = 0;
 	if (this->turn == BLACK)
 		this->fullMoves += 1;
-	if (this->moveRule == 99) {
+	if (this->moveRule == 100) {
 		this->status = DRAW;
 		return (DRAW);
 	}
@@ -343,7 +345,7 @@ bool Board::specialMove(coords from, move to) {
 	else {
 		this->place(from, to.to);
 		rook = getCoords(from.rank, to.to.file == 6? 7: 0);
-		this->place(getCoords(from.rank, (from.rank + to.to.rank) / 2), rook);
+		this->place(rook, getCoords(rook.rank, rook.file == 7? 5: 2));
 		this->enPassant = getCoords(NO, NO);
 		if (this->turn == WHITE) {
 			this->wkc = false;
@@ -354,4 +356,21 @@ bool Board::specialMove(coords from, move to) {
 		}
 	}
 	return true;
+}
+
+int Board::makeMove(std::string san) {
+	SANParser p(san);
+	fmove m = p.getMove(san, *this);
+	move mm = {m.to, m.t};
+	return (this->makeMove(m.from, mm));
+}
+
+std::ostream& operator<<(std::ostream& os, const move& m) {
+	os << "to " << m.to << "; type: " << m.t;
+	return (os);
+}
+
+std::ostream& operator<<(std::ostream& os, const fmove& m) {
+	os << "from: " << m.from << "; to: " << m.to << "; type: " << m.t;
+	return os;
 }

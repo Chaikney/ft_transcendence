@@ -76,6 +76,14 @@ Piece& Piece::operator=(const Piece& other) {
 	return (*this);
 }
 
+void Piece::fullCopy(const Piece& other) {
+	this->col = other.col;
+	this->type = other.type;
+	this->legalMoves = other.legalMoves;
+	this->rank = other.rank;
+	this->file = other.file;
+}
+
 const std::vector<move>& Piece::getLegalMoves() const {
 	return (this->legalMoves);
 }

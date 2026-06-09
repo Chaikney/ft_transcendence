@@ -30,7 +30,7 @@ class Board {
 		coords	enPassant;
 
 		void fromFen(const std::string& fen);
-		void fromAlg(const std::string& alg);
+		void fromPgn(const std::string& pgn);
 		pos makePos() const;
 		void castlingfRightsHandler(const std::string& rights);
 		void makePassable(const coords);
@@ -72,6 +72,7 @@ class Board {
 		void setEnPassant(coords c);
 		bool onBoard(int rank, int file);
 		int makeMove(coords from, move to);
+		int makeMove(std::string san);
 
 		const char letters[9];
 
@@ -107,6 +108,8 @@ coords getCoords(int rank, int file);
 std::ostream& operator<<(std::ostream& os, const Board& chess);
 std::ostream& operator<<(std::ostream& os, const coords& coord);
 std::ostream& operator<<(std::ostream& os, const Piece& piece);
+std::ostream& operator<<(std::ostream& os, const move& m);
+std::ostream& operator<<(std::ostream& os, const fmove& m);
 
 bool operator==(const coords& a, const coords& b);
 bool operator==(const move& a, const move& b);
