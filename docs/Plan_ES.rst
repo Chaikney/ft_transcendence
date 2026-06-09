@@ -11,7 +11,7 @@ Miembros
 - Chris Haikney / chaikney
 - Nikola / nkrasimi
 - Garikoitz / gcassi-d
-- Manu / TODO: añadir nombre de usuario aquí
+- Manu / mdiaz-or
 - Borja / bde-mada
 
 Acuerdo
@@ -26,7 +26,7 @@ Cada miembro tiene un área general de responsabilidad, acordada en una conversa
 
 - chaikney -- DevOps
 - nkrasimi -- desarrollo backend
-- Manu -- desarrollo frontend
+- mdiaz-or -- desarrollo frontend
 - Garikoitz -- motor de ajedrez
 - Borja -- compañero de ajedrez con IA
 
@@ -115,7 +115,7 @@ Retos actuales que requieren más tiempo
 
 - Borja ha estado fuera por motivos de trabajo hasta la fecha (08/06/2026) y aún no se ha podido iniciar el trabajo de integración.
 - chaikney es un despistado que reservó un número incorrecto de días en su periodo de congelación (final). Tiene una fecha de agujero negro el 15 de junio de 2026 a pesar de haber utilizado solo 73 días de congelación.
-- Manu trabaja en Navarra durante la primera parte de la semana y puede estar presente en la torre de jueves a sábado.
+- mdiaz-or trabaja en Navarra durante la primera parte de la semana y puede estar presente en la torre de jueves a sábado.
 - garikoitz tuvo exámenes hasta el jueves pasado (04-06-2026), pero ahora está totalmente disponible.
 - nkrasimi tiene disponibilidad general desde los miércoles hasta el fin de semana.
 

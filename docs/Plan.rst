@@ -11,7 +11,7 @@ Members
 - Chris Haikney / chaikney
 - Nikola / nkrasimi
 - Garikoitz / gcassi-d
-- Manu / TODO: add login name here
+- Manu / mdiaz-or
 - Borja / bde-mada
 
 Agreement
@@ -26,7 +26,7 @@ Each member has a general area of responsibility, agreed in conversation in May 
 
 - chaikney -- DevOps
 - nkrasimi -- backend dev
-- Manu -- frontend dev
+- mdiaz-or -- frontend dev
 - Garikoitz -- chess engine
 - Borja -- AI chess partner
 
@@ -115,7 +115,7 @@ Current challenges requiring extra time
 
 - Borja has been away for work  up to this point (2026-06-08) and the integration work has not been able to begin.
 - chaikney is a numpty who booked the wrong number of days in his (final) freeze period. Has black hole date of 2026-06-15 despite only having used 73 days of freeze.
-- Manu works in Navarra during the early part of the week and can be present in the tower Thursday-Saturdays.
+- mdiaz-or works in Navarra during the early part of the week and can be present in the tower Thursday-Saturdays.
 - garikoitz had exams until last Thursday (2026-06-04) but is now fully available.
 - nkrasimi has general availability from Wednesdays to the weekend.
 
