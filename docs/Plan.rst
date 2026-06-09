@@ -89,7 +89,8 @@ _________________________
 
 Milestones
 ----------
-i.e. the times that each of these should take, *with dates*
+
+Refer to the spreadsheet: https://my.owndrive.com/s/NHsFqSAC7ZNRG7E
 
 Project Risks
 -------------

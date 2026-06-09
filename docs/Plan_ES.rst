@@ -89,7 +89,8 @@ Criterios secundarios (1 punto)
 
 Hitos
 -----
-Es decir, el tiempo que debería llevar cada uno de estos, *con fechas*
+
+Ver el spreadsheet: https://my.owndrive.com/s/NHsFqSAC7ZNRG7E
 
 Riesgos del proyecto
 ---------------------
