@@ -1,82 +1,93 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700&display=swap');
 
 :root {
-    /* ── Typography (Consola) ── */
+    /* ── Typography ── */
     --font-display: 'JetBrains Mono', monospace;
     --font-mono: 'JetBrains Mono', monospace;
 
-    /* ── Base Surfaces (Cyber-Terminal Deep Blue) ── */
-    --bg-base: #05070a;
-    --bg-surface: #0c1017;
-    --bg-elevated: #161d2b;
-    --bg-overlay: #1a2333;
+    /* ── Base Surfaces ── */
+    --bg-base: #020408;
+    --bg-surface: #060d14;
+    --bg-elevated: #0a1628;
+    --bg-overlay: #0d1f35;
 
-    /* ── Borders (Electric Blue) ── */
-    --border: #38bdf8;
-    --border-subtle: #1e293b;
-    --border-strong: #38bdf8;
+    /* ── Borders ── */
+    --border: #0d2d4a;
+    --border-subtle: #071825;
+    --border-strong: #1a5f8a;
 
-    /* ── Text (Sky Blue) ── */
-    --text-primary: #e0f2fe;
-    --text-secondary: #7dd3fc;
-    --text-muted: #384f7d;
-    --text-inverse: #05070a;
+    /* ── Text ── */
+    --text-primary: #c8e8ff;
+    --text-secondary: #4a9eca;
+    --text-muted: #1e4d6b;
+    --text-inverse: #020408;
 
-    /* ── Accent (Electric Sky Blue) ── */
-    --accent: #38bdf8;
-    --accent-dim: #0284c7;
-    --accent-hover: #7dd3fc;
-    --accent-bg: rgba(56, 189, 248, 0.10);
-    --accent-border: rgba(56, 189, 248, 0.30);
-    --accent-glow: rgba(56, 189, 248, 0.20);
+    /* ── Accent — electric cyan/blue ── */
+    --accent: #00d4ff;
+    --accent-dim: #0088aa;
+    --accent-hover: #33ddff;
+    --accent-bg: rgba(0, 212, 255, 0.06);
+    --accent-border: rgba(0, 212, 255, 0.25);
+    --accent-glow: rgba(0, 212, 255, 0.15);
+
+    /* ── Secondary accent — electric indigo ── */
+    --accent2: #4d7cff;
+    --accent2-bg: rgba(77, 124, 255, 0.08);
+    --accent2-border: rgba(77, 124, 255, 0.25);
 
     /* ── Status ── */
-    --status-success: #34d399;
-    --status-warning: #fbbf24;
-    --status-error: #f87171;
-    --status-info: #38bdf8;
+    --status-success: #00ff88;
+    --status-success-bg: rgba(0, 255, 136, 0.08);
+    --status-warning: #ffaa00;
+    --status-warning-bg: rgba(255, 170, 0, 0.08);
+    --status-error: #ff3366;
+    --status-error-bg: rgba(255, 51, 102, 0.08);
+    --status-info: #00d4ff;
+    --status-info-bg: rgba(0, 212, 255, 0.08);
 
-    /* ── Chess Board (Adapting to Blue Theme) ── */
-    --chess-light: #1e293b;
-    --chess-dark: #0f172a;
-    --chess-selected: rgba(56, 189, 248, 0.4);
-    --chess-lastmove: rgba(56, 189, 248, 0.2);
-    --chess-hover: rgba(56, 189, 248, 0.1);
-    --chess-border: #38bdf8;
-    --chess-piece-white: #e0f2fe;
-    --chess-piece-black: #05070a;
-    --chess-coord: #38bdf8;
+    /* ── Chess Board ── */
+    --chess-light: #0d2a3d;
+    --chess-dark: #061420;
+    --chess-selected: rgba(0, 212, 255, 0.35);
+    --chess-lastmove: rgba(0, 212, 255, 0.15);
+    --chess-border: #0d2d4a;
+    --chess-coord: #1e4d6b;
 
     /* ── Sudoku ── */
-    --sudoku-cell-bg: #0c1017;
-    --sudoku-selected-bg: rgba(56, 189, 248, 0.15);
-    --sudoku-selected-ring: #38bdf8;
-    --sudoku-related-bg: rgba(56, 189, 248, 0.08);
-    --sudoku-locked-text: #e0f2fe;
-    --sudoku-input-text: #38bdf8;
-    --sudoku-error-text: #f87171;
-    --sudoku-border: #1e293b;
-    --sudoku-border-box: #38bdf8;
+    --sudoku-cell-bg: #060d14;
+    --sudoku-cell-hover: #0a1628;
+    --sudoku-selected-bg: rgba(0, 212, 255, 0.12);
+    --sudoku-selected-ring: #00d4ff;
+    --sudoku-related-bg: rgba(0, 212, 255, 0.04);
+    --sudoku-locked-text: #c8e8ff;
+    --sudoku-input-text: #00d4ff;
+    --sudoku-error-text: #ff3366;
+    --sudoku-border: #0d2d4a;
+    --sudoku-border-box: #1a5f8a;
+
+    /* ── Terminal effects ── */
+    --scanline-color: rgba(0, 212, 255, 0.015);
+    --glow-text: 0 0 10px rgba(0, 212, 255, 0.8);
+    --glow-border: 0 0 8px rgba(0, 212, 255, 0.4);
+    --glow-strong: 0 0 20px rgba(0, 212, 255, 0.6), 0 0 40px rgba(0, 212, 255, 0.2);
 
     /* ── Shadows ── */
-    --shadow-glow: 0 0 24px rgba(56, 189, 248, 0.15);
-    --shadow-board: 0 8px 48px rgba(0, 0, 0, 0.9), 0 0 0 1px #38bdf8;
+    --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.8);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.9);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.95);
+    --shadow-glow: 0 0 24px rgba(0, 212, 255, 0.15);
+    --shadow-board: 0 0 0 1px #0d2d4a, 0 0 32px rgba(0, 212, 255, 0.08), 0 8px 48px rgba(0, 0, 0, 0.9);
 
-    /* ── Radii (Mantenemos la estructura) ── */
-    --radius-sm: 0px;
-    /* Estilo terminal más anguloso */
-    --radius-md: 2px;
-    --radius-lg: 4px;
-    --radius-full: 0px;
+    /* ── Radii ── */
+    --radius-sm: 2px;
+    --radius-md: 4px;
+    --radius-lg: 6px;
+    --radius-xl: 8px;
+    --radius-2xl: 12px;
+    --radius-full: 9999px;
 
     /* ── Transitions ── */
     --ease-fast: 80ms ease;
     --ease-base: 160ms ease;
     --ease-slow: 280ms ease;
-
-    /* ── Z-index ── */
-    --z-base: 1;
-    --z-raised: 10;
-    --z-overlay: 100;
-    --z-modal: 1000;
 }
