@@ -223,7 +223,7 @@ class Board
     elsif move.t == MoveType::CASTLE
       place(from, move.to)
       rook_from = Coords.new(from.rank, move.to.file == 6 ? 7 : 0)
-      rook_to = Coords.new(from.rank, rook_from.file == 7 ? 5 : 2)
+      rook_to = Coords.new(from.rank, rook_from.file == 7 ? 5 : 3) 
       place(rook_from, rook_to)
       @en_passant = Coords.new(NO, NO)
       if @turn == GameStatus::WHITE
