@@ -1,33 +1,33 @@
 import { useRef } from 'react';
+import { useParams, Navigate } from 'react-router-dom';
 import { SudokuBoard } from './SudokuBoard';
 import { useSudokuGame } from './hooks/useSudokuGame';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
-import { InlineLoader, ErrorMessage, Button } from '@/components';
+import { InlineLoader, Button } from '@/components';
+import { TerminalCard } from '@/components/TerminalCard';
+import { ErrorMessage } from '@/components/ErrorMessage';
+import { Badge } from '@/components/Badge';
 import { useMatchStore } from '@/store';
 
 const styles = {
   page:
-    'min-h-screen bg-bg-base flex flex-col items-center justify-center ' +
-    'px-4 py-8 gap-6',
+    'min-h-screen flex flex-col items-center justify-center px-4 py-8 gap-6',
   topBar:
-    'flex items-center justify-between w-full max-w-[450px]',
+    'flex items-center justify-between w-full max-w-[500px]',
   gameId:
     'text-xs font-mono text-text-muted tracking-widest truncate',
-  boardCard:
-    'flex flex-col items-center gap-5 w-full max-w-[500px] ' +
-    'bg-bg-surface rounded-2xl border border-border ' +
-    'p-6 shadow-lg animate-fade-in',
   actionRow:
     'flex items-center justify-center gap-3 w-full',
   hintText:
     'text-xs font-mono text-text-muted text-center',
 } as const;
 
-interface SudokuGamePageProps {
-  gameId: string;
-}
+export const SudokuGamePage = () => {
+  // ── Fix: read gameId from URL params ──────────────────────────────────
+  const { id: gameId } = useParams<{ id: string }>();
 
-export const SudokuGamePage = ({ gameId }: SudokuGamePageProps) => {
+  if (!gameId) return <Navigate to="/" replace />;
+
   const { sudokuGame, sendMove, connectionStatus } = useSudokuGame(gameId);
 
   const error      = useMatchStore((s) => s.error);
@@ -68,26 +68,42 @@ export const SudokuGamePage = ({ gameId }: SudokuGamePageProps) => {
         <span className={styles.gameId}>#{gameId}</span>
       </div>
 
-      <div className={styles.boardCard}>
-        <SudokuBoard
-          gameState={sudokuGame}
-          originalGrid={originalGridRef.current}
-          onMove={sendMove}
-          disabled={isLocked}
-        />
+      <TerminalCard
+        title={`sudoku — game_${gameId}`}
+        status={sudokuGame.status.toUpperCase()}
+        statusVariant={
+          sudokuGame.status === 'won'  ? 'active'  :
+          sudokuGame.status === 'lost' ? 'error'   : 'warning'
+        }
+        maxWidth="max-w-[540px]"
+      >
+        <div className="flex flex-col items-center gap-5">
 
-        {!isLocked && sudokuGame.status === 'active' && (
-          <p className={styles.hintText}>
-            Click a cell, then type 1–9 or use the pad
-          </p>
-        )}
+          {/* Difficulty badge */}
+          <Badge variant="accent" dot>
+            {sudokuGame.difficulty}
+          </Badge>
 
-        <div className={styles.actionRow}>
-          <Button variant="ghost" size="sm" onClick={resetMatch}>
-            New puzzle
-          </Button>
+          <SudokuBoard
+            gameState={sudokuGame}
+            originalGrid={originalGridRef.current}
+            onMove={sendMove}
+            disabled={isLocked}
+          />
+
+          {!isLocked && sudokuGame.status === 'active' && (
+            <p className={styles.hintText}>
+              Click a cell, then type 1–9 or use the pad
+            </p>
+          )}
+
+          <div className={styles.actionRow}>
+            <Button variant="ghost" size="sm" onClick={resetMatch}>
+              New puzzle
+            </Button>
+          </div>
         </div>
-      </div>
+      </TerminalCard>
     </div>
   );
 };

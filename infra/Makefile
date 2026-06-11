@@ -134,7 +134,7 @@ help:
 	@echo -e "There are various targets to manage the build, launch and management of \
 the containers in this project.\n\
 The targets are:\n \
-* ft_transcendence (or all, or no target)\tlaunch the whole project\n \
+* transcendence (or all, or no target)\tlaunch the whole project\n \
 * builds\t\tTODO build all the containers needed for the project\n \
 * stop\t\thalt any running containers, using compose\n \
 * make_volume (?)\t\tTODO (maybe)\n \

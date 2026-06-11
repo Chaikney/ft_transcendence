@@ -1,6 +1,7 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store';
 import type { ConnectionStatusType } from '@/types';
+import { Footer } from '@/components/Footer';
 
 // ── Styles ────────────────────────────────────────────────────────────────
 const styles = {
@@ -22,7 +23,7 @@ const styles = {
   logoText:
     'text-text-primary font-mono text-sm font-bold tracking-widest uppercase',
   logoDim:
-    'text-text-muted font-mono text-xs',
+    'text-white-200 font-mono text-xs font-semibold',
 
   // Center — nav links
   navLinks:
@@ -35,8 +36,7 @@ const styles = {
     'text-accent border-accent-border bg-accent-bg ' +
     'shadow-[0_0_8px_rgba(0,212,255,0.2)]',
   navLinkInactive:
-    'text-text-muted border-transparent ' +
-    'hover:text-text-secondary hover:border-border-strong',
+    'text-gray-200 border-transparent hover:text-white hover:border-gray-500 font-medium',
 
   // Right — status + user
   navRight:
@@ -50,7 +50,7 @@ const styles = {
   userWrap:
     'flex items-center gap-2 px-2 py-1 ' +
     'border border-border-strong ' +
-    'font-mono text-xs text-text-secondary',
+    'font-mono text-xs text-white font-semibold',
   userElo:
     'text-accent',
 
@@ -184,7 +184,7 @@ export const RootLayout = () => {
           <Outlet />
         </div>
       </main>
-
+      <Footer />
     </div>
   );
 };

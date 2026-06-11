@@ -8,6 +8,8 @@ import { NotFoundPage } from '@/pages/NotFoundPage';
 import { ChessGamePage } from '@/features/chess/ChessGamePage';
 import { SudokuGamePage } from '@/features/sudoku/SudokuGamePage';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { PrivacyPolicyPage } from '@/pages/PrivacyPolicyPage';
+import { TermsOfServicePage } from '@/pages/TermsOfServicePage';
 
 export const router = createBrowserRouter([
   {
@@ -27,10 +29,11 @@ export const router = createBrowserRouter([
         element: <CallbackPage />,
       },
       {
+        // :id comes from URL — e.g. /game/chess/chess-001
         path: 'game/chess/:id',
         element: (
           <ProtectedRoute>
-            <ChessGamePage gameId="chess-001" />
+            <ChessGamePage />
           </ProtectedRoute>
         ),
       },
@@ -38,7 +41,7 @@ export const router = createBrowserRouter([
         path: 'game/sudoku/:id',
         element: (
           <ProtectedRoute>
-            <SudokuGamePage gameId="sudoku-001" />
+            <SudokuGamePage />
           </ProtectedRoute>
         ),
       },
@@ -53,6 +56,14 @@ export const router = createBrowserRouter([
       {
         path: '*',
         element: <NotFoundPage />,
+      },
+      {
+        path: 'privacy',
+        element: <PrivacyPolicyPage />,
+      },
+      {
+        path: 'terms',
+        element: <TermsOfServicePage />,
       },
     ],
   },

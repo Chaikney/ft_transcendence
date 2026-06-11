@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store';
 
 const BOOT_LINES = [
-  '> INITIALIZING ft_transcendence v2.0...',
+  '> INITIALIZING transcendence v2.0...',
   '> LOADING game modules............. OK',
   '> CONNECTING to server............. PENDING',
   '> AUTH module...................... READY',
@@ -158,7 +158,7 @@ export const LandingPage = () => {
           <span className={styles.terminalDot} style={{ background: '#ffaa00' }} />
           <span className={styles.terminalDot} style={{ background: '#00ff88' }} />
           <span className={styles.terminalTitle}>
-            ft_transcendence — system boot
+            transcendence — system boot
           </span>
         </div>
         {BOOT_LINES.slice(0, visibleLines).map((line, i) => {
@@ -186,10 +186,9 @@ export const LandingPage = () => {
       {/* ── Hero ── */}
       {booted && (
         <div className={styles.heroWrap + ' animate-fade-in'}>
-          <span className={styles.heroEyebrow}>// welcome to</span>
+          <span className={styles.heroEyebrow}>welcome to</span>
           <h1 className={styles.heroTitle}>
-            <span className={styles.heroGlow}>ft_</span>
-            transcendence
+            <span className={styles.heroGlow}>transcendence</span>
           </h1>
           <p className={styles.heroSub}>
             Multiplayer gaming platform. Chess and Sudoku. Real-time WebSocket sync. Built on Rails + React.

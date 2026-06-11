@@ -181,7 +181,7 @@ export const ProfilePage = () => {
                 {username}
               </h1>
               <span className={styles.userSince}>
-                // member since 2024 · ft_transcendence
+                // member since 2026 · transcendence
               </span>
             </div>
             <div className={styles.userRight}>

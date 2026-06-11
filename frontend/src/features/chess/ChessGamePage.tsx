@@ -1,32 +1,29 @@
-import { ChessBoard } from "./ChessBoard";
-import { useChessGame } from "./hooks/useChessGame";
-import { ConnectionStatus } from "@/components/ConnectionStatus";
-import { InlineLoader, ErrorMessage, Button } from '@/components';
+import { useParams, Navigate } from 'react-router-dom';
+import { ChessBoard } from './ChessBoard';
+import { useChessGame } from './hooks/useChessGame';
+import { ConnectionStatus } from '@/components/ConnectionStatus';
+import { InlineLoader, Button } from '@/components';
+import { TerminalCard } from '@/components/TerminalCard';
+import { ErrorMessage } from '@/components/ErrorMessage';
 import { useMatchStore } from '@/store';
 
 const styles = {
   page:
-    'min-h-screen bg-bg-base flex flex-col items-center justify-center ' +
-    'px-4 py-8 gap-6',
+    'min-h-screen flex flex-col items-center justify-center px-4 py-8 gap-6',
   topBar:
-    'flex items-center justify-between w-full max-w-[480px]',
+    'flex items-center justify-between w-full max-w-[520px]',
   gameId:
     'text-xs font-mono text-text-muted tracking-widest truncate',
-  boardCard:
-    'flex flex-col items-center gap-5 w-full max-w-[520px] ' +
-    'bg-bg-surface rounded-2xl border border-border ' +
-    'p-6 shadow-lg animate-fade-in',
   actionRow:
     'flex items-center justify-center gap-3 w-full',
-  secondaryActions:
-    'flex items-center gap-2',
 } as const;
 
-interface ChessGamePageProps {
-  gameId: string;
-}
+export const ChessGamePage = () => {
+  // ── Fix: read gameId from URL params ──────────────────────────────────
+  const { id: gameId } = useParams<{ id: string }>();
 
-export const ChessGamePage = ({ gameId }: ChessGamePageProps) => {
+  if (!gameId) return <Navigate to="/" replace />;
+
   const { chessGame, sendMove, requestAIMove, connectionStatus } =
     useChessGame(gameId);
 
@@ -63,29 +60,32 @@ export const ChessGamePage = ({ gameId }: ChessGamePageProps) => {
         <span className={styles.gameId}>#{gameId}</span>
       </div>
 
-      <div className={styles.boardCard}>
-        <ChessBoard
-          gameState={chessGame}
-          onMove={sendMove}
-          disabled={isLocked}
-        />
-
-        <div className={styles.actionRow}>
-          <Button
-            variant="primary"
-            onClick={requestAIMove}
-            disabled={isLocked || chessGame.status !== 'active'}
-          >
-            Request AI move
-          </Button>
-          <div className={styles.secondaryActions}>
+      <TerminalCard
+        title={`chess — game_${gameId}`}
+        status={chessGame.status.toUpperCase()}
+        statusVariant={chessGame.status === 'active' ? 'active' : 'error'}
+        maxWidth="max-w-[560px]"
+      >
+        <div className="flex flex-col items-center gap-5">
+          <ChessBoard
+            gameState={chessGame}
+            onMove={sendMove}
+            disabled={isLocked}
+          />
+          <div className={styles.actionRow}>
+            <Button
+              variant="primary"
+              onClick={requestAIMove}
+              disabled={isLocked || chessGame.status !== 'active'}
+            >
+              Request AI move
+            </Button>
             <Button variant="ghost" size="sm" onClick={resetMatch}>
               New game
             </Button>
           </div>
         </div>
-      </div>
+      </TerminalCard>
     </div>
   );
 };
-

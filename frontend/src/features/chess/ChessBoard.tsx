@@ -39,27 +39,28 @@ const getSquareBg = (
 
 // ── Static styles ──────────────────────────────────────────────────────────
 const styles = {
-  wrapper:   'flex flex-col items-center gap-3 animate-board-reveal',
+  wrapper: 'flex flex-col items-center gap-3 animate-board-reveal',
 
   statusBar: 'flex items-center gap-2 h-7',
-  turnDot:   'w-2.5 h-2.5 rounded-full border border-black/20',
+  turnDot: 'w-2.5 h-2.5 rounded-full border border-black/20',
   turnLabel: 'text-xs font-mono tracking-widest uppercase text-text-secondary',
-  gameOver:  'text-xs font-mono tracking-widest uppercase text-status-error',
+  gameOver: 'text-xs font-mono tracking-widest uppercase text-status-error',
 
   boardFrame:
     'relative rounded-lg overflow-hidden ' +
-    'border border-[#252a3d] ' +
-    'shadow-[var(--shadow-board)]',
+    'border border-accent-border ' +
+    'shadow-[var(--shadow-glow)] ' +
+    'bg-bg-surface',
 
   rankLabels:
     'absolute left-0 top-0 flex flex-col pointer-events-none z-10',
   rankLabel:
     'flex items-center justify-center text-[10px] font-mono ' +
-    'text-accent select-none',
+    'text-accent font-bold select-none',
 
   fileLabels: 'flex',
   fileLabel:
-    'flex-1 text-center text-[10px] font-mono text-[#7880a0] ' +
+    'flex-1 text-center text-[10px] font-mono text-accent/70 ' +
     'select-none pt-1',
 
   boardGrid: 'grid grid-cols-8',

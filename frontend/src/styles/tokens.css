@@ -17,10 +17,16 @@
     --border-strong: #1a5f8a;
 
     /* ── Text ── */
-    --text-primary: #c8e8ff;
+    /*     --text-primary: #c8e8ff;
     --text-secondary: #4a9eca;
     --text-muted: #1e4d6b;
-    --text-inverse: #020408;
+    --text-inverse: #020408; */
+
+    /* ── Text ── */
+    --text-primary: #e5eaec !important;
+    --text-secondary: #ffff00 !important;
+    --text-muted: #ff0000 !important;
+    --text-inverse: #00ff00 !important;
 
     /* ── Accent — electric cyan/blue ── */
     --accent: #00d4ff;
@@ -46,24 +52,25 @@
     --status-info-bg: rgba(0, 212, 255, 0.08);
 
     /* ── Chess Board ── */
-    --chess-light: #0d2a3d;
-    --chess-dark: #061420;
+    --chess-light: #f0d9b5;
+    --chess-dark: #b58863;
     --chess-selected: rgba(0, 212, 255, 0.35);
     --chess-lastmove: rgba(0, 212, 255, 0.15);
     --chess-border: #0d2d4a;
     --chess-coord: #1e4d6b;
 
     /* ── Sudoku ── */
-    --sudoku-cell-bg: #060d14;
-    --sudoku-cell-hover: #0a1628;
-    --sudoku-selected-bg: rgba(0, 212, 255, 0.12);
+    --sudoku-cell-light: #fdfbf7;      /* Crema muy claro (Fondo A) */
+    --sudoku-cell-dark: #eee8d9;       /* Crema un poco más oscuro (Fondo B) */
+    --sudoku-cell-hover: #e0d7c5;      /* Tono al pasar el ratón */
+    --sudoku-selected-bg: rgba(0, 212, 255, 0.2);
     --sudoku-selected-ring: #00d4ff;
-    --sudoku-related-bg: rgba(0, 212, 255, 0.04);
-    --sudoku-locked-text: #c8e8ff;
-    --sudoku-input-text: #00d4ff;
-    --sudoku-error-text: #ff3366;
-    --sudoku-border: #0d2d4a;
-    --sudoku-border-box: #1a5f8a;
+    --sudoku-related-bg: rgba(0, 212, 255, 0.1);
+    --sudoku-locked-text: #2d2a26;     /* Gris oscuro/carbón (Para leer bien en crema) */
+    --sudoku-input-text: #00d4ff;      /* Mantenemos tu Cian Cyber para tus números */
+    --sudoku-error-text: #e63946;      /* Rojo un poco más suave */
+    --sudoku-border: #dcd6c8;          /* Borde suave estilo papel */
+    --sudoku-border-box: #b8a994;      /* Borde de caja más marcado */
 
     /* ── Terminal effects ── */
     --scanline-color: rgba(0, 212, 255, 0.015);

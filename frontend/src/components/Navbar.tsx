@@ -17,7 +17,7 @@ const styles = {
   logoText:
     'text-sm font-display font-semibold text-text-primary tracking-tight',
   logoDim:
-    'text-text-muted',
+    'text-text-secondary',
   tabs:
     'flex items-center gap-1 ' +
     'bg-bg-elevated rounded-lg p-1 border border-border',
@@ -27,13 +27,13 @@ const styles = {
   tabActive:
     'bg-accent text-white shadow-sm',
   tabInactive:
-    'text-text-secondary hover:text-text-primary hover:bg-bg-overlay',
+    '<text-text-primary></text-text-primary> hover:text-text-primary hover:bg-bg-overlay',
   right:
     'flex items-center gap-4',
   userBadge:
     'flex items-center gap-2 px-3 py-1.5 ' +
     'bg-bg-elevated rounded-lg border border-border ' +
-    'text-xs font-mono text-text-secondary',
+    'text-xs font-mono text-text-primary',
   eloBadge:
     'text-accent font-medium',
 } as const;
