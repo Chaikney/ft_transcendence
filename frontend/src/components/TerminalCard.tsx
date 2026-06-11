@@ -60,7 +60,7 @@ export const TerminalCard = ({
   title,
   status,
   statusVariant = 'muted',
-  maxWidth      = 'max-w-md',
+  maxWidth      = 'max-w-3xl',
   padding       = 'p-8',
   className     = '',
   noBrackets    = false,

@@ -67,6 +67,14 @@ const styles = {
   padButton: 'aspect-square flex items-center justify-center font-mono font-medium text-sm rounded-md transition-all duration-200 border border-[#9A9184] bg-[#D1C7B7] hover:bg-[#BDB2A5] text-black',
 } as const;
 
+// ── Props definition ──
+interface SudokuBoardProps {
+  gameState:    SudokuGameState;
+  originalGrid: number[][];
+  onMove:       (payload: SudokuMovePayload) => void;
+  disabled?:    boolean;
+}
+
 // ── Component ─────────────────────────────────────────────────────────────
 export const SudokuBoard = ({
   gameState,
