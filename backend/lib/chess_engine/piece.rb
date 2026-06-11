@@ -24,7 +24,6 @@ class Piece
     @legal_moves = other.legal_moves.dup
   end
 
-  # El enrutador mágico que sustituye a los punteros a funciones de C++
   def calculate_legal_moves(board)
     case @type
     when PieceType::NONE   then 0
@@ -76,20 +75,17 @@ class Piece
 
   private
 
-  # --- LÓGICA DE MOVIMIENTOS REFACTORIZADA ---
-
   def calculate_legal_pawn_moves(board)
     count = 0
-    dir = @col # +1 para Blancas, -1 para Negras
+    dir = @col
     start_rank = (@col == GameStatus::WHITE) ? 1 : 6
     promo_rank = (@col == GameStatus::WHITE) ? 7 : 0
     ep_rank = (@col == GameStatus::WHITE) ? 4 : 3
 
-    # 1. Avance frontal
     if board.board[@rank + dir][@file].type == PieceType::NONE
       copy = board.deep_copy
-      copy.board[@rank + dir][@file] = self.dup
-      copy.board[@rank][@file] = Piece.new
+      copy.board[@rank + dir][@file].set_piece(self.piece_value)
+      copy.board[@rank][@file].set_piece(0)
       
       if !copy.is_check?(@col)
         if @rank + dir == promo_rank
@@ -101,11 +97,10 @@ class Piece
         end
       end
 
-      # Avance doble desde el inicio
       if @rank == start_rank && board.board[@rank + 2 * dir][@file].type == PieceType::NONE
         copy = board.deep_copy
-        copy.board[@rank + 2 * dir][@file] = self.dup
-        copy.board[@rank][@file] = Piece.new
+        copy.board[@rank + 2 * dir][@file].set_piece(self.piece_value)
+        copy.board[@rank][@file].set_piece(0)
         if !copy.is_check?(@col)
           count += 1
           add_move(@rank + 2 * dir, @file, MoveType::MOVE)
@@ -113,13 +108,12 @@ class Piece
       end
     end
 
-    # 2. Capturas diagonales
     [-1, 1].each do |df|
       target_f = @file + df
       if board.on_board?(@rank + dir, target_f) && board.board[@rank + dir][target_f].col == -@col
         copy = board.deep_copy
-        copy.board[@rank + dir][target_f] = self.dup
-        copy.board[@rank][@file] = Piece.new
+        copy.board[@rank + dir][target_f].set_piece(self.piece_value)
+        copy.board[@rank][@file].set_piece(0)
         
         if !copy.is_check?(@col)
           if @rank + dir == promo_rank
@@ -133,20 +127,18 @@ class Piece
       end
     end
 
-    # 3. Captura al Paso (En Passant)
     ep = board.get_en_passant
     if ep.rank == ep_rank && @rank == ep_rank && (@file - ep.file).abs == 1
       copy = board.deep_copy
-      copy.board[@rank + dir][ep.file] = self.dup
-      copy.board[@rank][ep.file] = Piece.new # Elimina el peón comido
-      copy.board[@rank][@file] = Piece.new # Vacía la casilla de origen
+      copy.board[@rank + dir][ep.file].set_piece(self.piece_value)
+      copy.board[@rank][ep.file].set_piece(0)
+      copy.board[@rank][@file].set_piece(0)
       
       if !copy.is_check?(@col)
         count += 1
         add_move(@rank + dir, ep.file, MoveType::ENPASSANT)
       end
     end
-
     count
   end
 
@@ -162,8 +154,8 @@ class Piece
       next if target.col == @col
 
       copy = board.deep_copy
-      copy.board[r][f] = self.dup
-      copy.board[@rank][@file] = Piece.new
+      copy.board[r][f].set_piece(self.piece_value)
+      copy.board[@rank][@file].set_piece(0)
 
       if !copy.is_check?(@col)
         add_move(r, f, target.col != 0 ? MoveType::CAPTURE : MoveType::MOVE)
@@ -173,7 +165,6 @@ class Piece
     count
   end
 
-  # Función centralizada para Alfiles, Torres y Reinas (¡Adiós a la repetición!)
   def calculate_slider_moves(board, directions)
     count = 0
     directions.each do |dr, df|
@@ -182,23 +173,22 @@ class Piece
         break unless board.on_board?(r, f)
 
         target = board.board[r][f]
-        break if target.col == @col # Bloqueado por pieza propia
+        break if target.col == @col 
 
         copy = board.deep_copy
-        copy.board[r][f] = self.dup
-        copy.board[@rank][@file] = Piece.new
+        copy.board[r][f].set_piece(self.piece_value)
+        copy.board[@rank][@file].set_piece(0)
 
         if !copy.is_check?(@col)
           if target.col != 0
             add_move(r, f, MoveType::CAPTURE)
             count += 1
-            break # Paramos de deslizar tras capturar
+            break
           else
             add_move(r, f, MoveType::MOVE)
             count += 1
           end
         else
-          # FIX CRÍTICO: Aunque el movimiento sea ilegal por jaque, la pieza no puede saltar al enemigo.
           break if target.col != 0 
         end
       end
@@ -221,7 +211,6 @@ class Piece
   def calculate_legal_king_moves(board)
     count = 0
 
-    # 1. Movimientos normales del Rey
     [-1, 0, 1].each do |dr|
       [-1, 0, 1].each do |df|
         next if dr == 0 && df == 0
@@ -232,8 +221,8 @@ class Piece
         next if target.col == @col
 
         copy = board.deep_copy
-        copy.board[r][f] = self.dup
-        copy.board[@rank][@file] = Piece.new
+        copy.board[r][f].set_piece(self.piece_value)
+        copy.board[@rank][@file].set_piece(0)
 
         if !copy.is_check?(@col)
           add_move(r, f, target.col != 0 ? MoveType::CAPTURE : MoveType::MOVE)
@@ -242,7 +231,6 @@ class Piece
       end
     end
 
-    # 2. Enroques (Adaptado y limpio)
     if @col == GameStatus::WHITE && (board.wkc || board.wqc)
       if @rank != 0 || @file != 4
         board.wkc, board.wqc = false, false

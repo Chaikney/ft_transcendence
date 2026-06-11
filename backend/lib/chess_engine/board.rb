@@ -1,20 +1,24 @@
 # board.rb
 require_relative 'chess_types'
 require_relative 'piece'
-# require_relative 'san_parser' # Lo activaremos en el próximo paso
+# require_relative 'san_parser'
 
 class Board
   attr_accessor :wkc, :wqc, :bkc, :bqc, :turn, :move_rule, :full_moves, 
                 :board, :status, :en_passant, :draw_tracker
 
   def initialize(fen = START_POSITION)
-    @board = Array.new(8) { Array.new(8) { Piece.new } }
+    # FIX: Inicializamos la malla física. Las 64 casillas saben exactamente dónde están desde el inicio.
+    @board = Array.new(8) do |r| 
+      Array.new(8) do |f| 
+        Piece.new(PieceType::NONE, GameStatus::CONTINUE, r, f) 
+      end 
+    end
     @draw_tracker = Hash.new(0)
     from_fen(fen)
     update_legal_moves
   end
 
-  # Necesario para que Piece simule movimientos sin alterar el juego real
   def deep_copy
     copy = Board.allocate
     copy.wkc, copy.wqc = @wkc, @wqc
@@ -47,17 +51,14 @@ class Board
   def is_attacked?(col, coord)
     r, f = coord.rank, coord.file
     
-    # Amenaza de Caballo
     [[1, 2], [1, -2], [-1, 2], [-1, -2], [2, 1], [-2, 1], [2, -1], [-2, -1]].each do |dr, df|
       return true if on_board?(r + dr, f + df) && @board[r + dr][f + df].piece_value == -col * PieceType::KNIGHT
     end
 
-    # Amenaza de Peón
     [-1, 1].each do |df|
       return true if on_board?(r + col, f + df) && @board[r + col][f + df].piece_value == -col * PieceType::PAWN
     end
 
-    # Amenaza de Rey
     [-1, 0, 1].each do |dr|
       [-1, 0, 1].each do |df|
         next if dr == 0 && df == 0
@@ -65,7 +66,6 @@ class Board
       end
     end
 
-    # Amenazas ortogonales (Torre / Reina)
     [[1, 0], [-1, 0], [0, 1], [0, -1]].each do |dr, df|
       (1..7).each do |i|
         nr, nf = r + dr * i, f + df * i
@@ -73,11 +73,10 @@ class Board
         target = @board[nr][nf]
         next if target.type == PieceType::NONE
         return true if target.piece_value == -col * PieceType::ROOK || target.piece_value == -col * PieceType::QUEEN
-        break # Bloqueado por otra pieza
+        break 
       end
     end
 
-    # Amenazas diagonales (Alfil / Reina)
     [[1, 1], [1, -1], [-1, 1], [-1, -1]].each do |dr, df|
       (1..7).each do |i|
         nr, nf = r + dr * i, f + df * i
@@ -121,7 +120,6 @@ class Board
     move = piece.legal_moves.find { |m| m.to.rank == destiny.rank && m.to.file == destiny.file }
     raise "MoveError: Intentaste un movimiento ilegal" unless move
 
-    # Limpiar movimientos legales del tablero actual
     @board.each { |row| row.each(&:empty_moves) }
 
     unless special_move?(from, move)
@@ -140,7 +138,6 @@ class Board
 
     @turn = -@turn
 
-    # Quitar derechos de enroque si se mueven Reyes o Torres
     if from.rank == 0 && from.file == 4
       @wkc = @wqc = false
     elsif from.rank == 7 && from.file == 4
@@ -158,6 +155,47 @@ class Board
     @status = update_legal_moves
   end
 
+  def get_fen
+    res = ""
+    7.downto(0) do |i|
+      count = 0
+      (0..7).each do |j|
+        piece = @board[i][j]
+        if piece.type != PieceType::NONE
+          res << count.to_s if count > 0
+          count = 0
+          res << piece.get_letter
+        else
+          count += 1
+        end
+      end
+      res << count.to_s if count > 0
+      res << '/' if i > 0
+    end
+
+    res << ' '
+    res << (@turn == GameStatus::WHITE ? 'w' : 'b')
+    res << ' '
+
+    castling = ""
+    castling << 'K' if @wkc
+    castling << 'Q' if @wqc
+    castling << 'k' if @bkc
+    castling << 'q' if @bqc
+    res << (castling.empty? ? '-' : castling)
+    res << ' '
+
+    if @en_passant && @en_passant.rank != NO
+      res << (@en_passant.file + 'a'.ord).chr
+      res << (@en_passant.rank == 2 ? '3' : '6')
+    else
+      res << '-'
+    end
+
+    res << " #{@move_rule} #{@full_moves}"
+    res
+  end
+
   private
 
   def place(from, to)
@@ -173,7 +211,7 @@ class Board
       place(from, move.to)
     elsif move.t == MoveType::MOVE || move.t == MoveType::CAPTURE
       return false
-    elsif move.t <= MoveType::CAPTURE_N # Promoción
+    elsif move.t <= MoveType::CAPTURE_N 
       promoted_type = (move.t - 2) % 4
       @board[move.to.rank][move.to.file].set_piece(@turn * (promoted_type + 2))
       @board[from.rank][from.file].set_piece(0)
@@ -197,38 +235,35 @@ class Board
     true
   end
 
-  # Traducción ultrarrápida del parser de FEN de C++
   def from_fen(fen)
     sections = fen.split(' ')
     raise "FenError: Formato FEN incorrecto" if sections.size != 6
 
-    # 1. Posiciones
     lines = sections[0].split('/')
     rank = 7
     lines.each do |line|
       file = 0
       line.each_char do |c|
         if c.match?(/\d/)
+          # FIX: No creamos piezas nuevas, solo saltamos el archivo
           file += c.to_i
         else
-          type = char_to_int(c)
-          @board[rank][file] = Piece.new(type, type > 0 ? GameStatus::WHITE : GameStatus::BLACK, rank, file)
+          val = char_to_int(c)
+          # FIX: Modificamos el valor, así nunca pierden su rank/file original
+          @board[rank][file].set_piece(val)
           file += 1
         end
       end
       rank -= 1
     end
 
-    # 2. Turno
     @turn = sections[1] == 'w' ? GameStatus::WHITE : GameStatus::BLACK
 
-    # 3. Enroques
     @wkc = sections[2].include?('K')
     @wqc = sections[2].include?('Q')
     @bkc = sections[2].include?('k')
     @bqc = sections[2].include?('q')
 
-    # 4. En Passant
     if sections[3] == '-'
       @en_passant = Coords.new(NO, NO)
     else
@@ -237,10 +272,8 @@ class Board
       @en_passant = Coords.new(r, f)
     end
 
-    # 5 & 6. Movimientos
     @move_rule = sections[4].to_i
     @full_moves = sections[5].to_i
-    
     @status = GameStatus::CONTINUE
   end
 
