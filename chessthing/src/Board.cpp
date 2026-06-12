@@ -273,6 +273,10 @@ int Board::play_move(coords from, move to) {
 		this->matTrack.at(capturedType) -= 1;
 	}
 
+	if (to.t >= Q && to.t <= CAPTURE_N) {
+		this->matTrack.at(PAWN * this->turn) -= 1;
+		this->matTrack.at(((to.t - 2) % 4 + 2) * this->turn) += 1;
+	}
 
 	if (to.t == ENPASSANT)
 		this->matTrack.at(PAWN * (-this->turn)) -= 1;
