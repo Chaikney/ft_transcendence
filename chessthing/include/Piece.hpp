@@ -23,7 +23,7 @@
 #include <algorithm>
 #include <cstdint>
 
-#define START_POSITION "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
+#define START_POSITION "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 #define FEN 0
 #define PGN 1
 #define NO -1

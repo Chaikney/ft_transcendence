@@ -6,7 +6,7 @@
 /*   By: gcassi-d <gcassi-d@42urduliz.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/19 16:06:23 by gcassi-d          #+#    #+#             */
-/*   Updated: 2026/06/08 11:15:21 by gcassi-d         ###   ########.fr       */
+/*   Updated: 2026/06/12 12:50:32 by gcassi-d         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ Board& Board::operator=(const Board& other) {
 	this->wqc = other.wqc;
 	this->moveRule = other.moveRule;
 	this->fullMoves = other.fullMoves;
-	this->cur = other.cur;
+	this->matTrack = other.matTrack;
 	this->drawTracker = other.drawTracker;
 	this->status = other.status;
 	this->turn = other.turn;
@@ -246,7 +246,9 @@ bool Board::isAtacked(int col, coords c) {
 	return (false);
 }
 
-int Board::makeMove(coords from, move to) {
+int Board::play_move(coords from, move to) {
+	int capturedType;
+
 	if (this->status)
 		throw (MoveError("attempted to make a move on a finished game"));
 	if (!onBoard(from.rank, from.file))
@@ -266,6 +268,15 @@ int Board::makeMove(coords from, move to) {
 		throw(MoveError("Attempted to make an illegal move"));
 	}
 
+	if (to.t == CAPTURE || (to.t >= CAPTURE_Q  && to.t <= CAPTURE_N)) {
+		capturedType = this->board[to.to.rank][to.to.file].getPiece();
+		this->matTrack.at(capturedType) -= 1;
+	}
+
+
+	if (to.t == ENPASSANT)
+		this->matTrack.at(PAWN * (-this->turn)) -= 1;
+
 	for (int i = 0; i < 8; i++) {
 		for (int j = 0; j < 8; j++)
 			this->board[i][j].emptyMoves();
@@ -282,6 +293,7 @@ int Board::makeMove(coords from, move to) {
 		this->drawTracker[cur] += 1;
 		if (this->drawTracker.at(cur) == 3) {
 			this->status = DRAW;
+			this->updateLegalMoves();
 			return (DRAW);
 		}
 	} else{
@@ -293,9 +305,12 @@ int Board::makeMove(coords from, move to) {
 		this->moveRule = 0;
 	if (this->turn == BLACK)
 		this->fullMoves += 1;
-	if (this->moveRule == 100) {
-		this->status = DRAW;
-		return (DRAW);
+	if (this->moveRule == 99) {
+		int a = this->updateLegalMoves();
+		if (abs(a) != 1)
+			a = DRAW;
+		this->status = a;
+		return (a);
 	}
 	this->turn = -this->turn;
 
@@ -318,7 +333,9 @@ int Board::makeMove(coords from, move to) {
 
 	int flag = this->updateLegalMoves();
 	this->status = flag;
-	return (flag);
+	if (this->insufficientMaterial())
+		this->status = DRAW;
+	return (this->status);
 }
 
 bool Board::specialMove(coords from, move to) {
@@ -358,11 +375,11 @@ bool Board::specialMove(coords from, move to) {
 	return true;
 }
 
-int Board::makeMove(std::string san) {
+int Board::play_move(std::string san) {
 	SANParser p(san);
 	fmove m = p.getMove(san, *this);
 	move mm = {m.to, m.t};
-	return (this->makeMove(m.from, mm));
+	return (this->play_move(m.from, mm));
 }
 
 std::ostream& operator<<(std::ostream& os, const move& m) {
@@ -373,4 +390,33 @@ std::ostream& operator<<(std::ostream& os, const move& m) {
 std::ostream& operator<<(std::ostream& os, const fmove& m) {
 	os << "from: " << m.from << "; to: " << m.to << "; type: " << m.t;
 	return os;
+}
+
+int Board::play_move(coords from, coords destiny) {
+	Piece& p = this->board[from.rank][from.file];
+	if (p.getCol() != this->turn)
+		throw (MoveError("Attempted to move a piece of the wrong colour"));
+	for (auto it: p.getLegalMoves()) {
+		if (it.to == destiny)
+			return (this->play_move(from, it));
+	}
+	throw(MoveError("Attempted to play an illegal move"));
+}
+
+bool Board::insufficientMaterial() {
+	for (int i = -ROOK; i <= ROOK; i++) {
+		if (this->matTrack.at(i))
+			return (false);
+	}
+
+	int w = this->matTrack.at(KNIGHT) + this->matTrack.at(BISHOP);
+	int b = this->matTrack.at(-KNIGHT) + this->matTrack.at(-BISHOP);
+
+	if (w >= 3 || b >= 3)
+		return (false);
+	
+	if ((w == 2 && this->matTrack.at(KNIGHT) != 2) || (b == 2 && this->matTrack.at(-KNIGHT) != 2))
+		return (false);
+	
+	return (true);
 }

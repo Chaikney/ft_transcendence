@@ -6,7 +6,7 @@
 /*   By: gcassi-d <gcassi-d@42urduliz.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/19 15:39:18 by gcassi-d          #+#    #+#             */
-/*   Updated: 2026/05/23 17:18:38 by gcassi-d         ###   ########.fr       */
+/*   Updated: 2026/06/12 12:39:51 by gcassi-d         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ class Board {
 		int moveRule; //if 100 half moves have been made without a pawn being pushed or a piece being taken, the game ends in a draw
 		int fullMoves;
 		std::map<pos, int> drawTracker; //will keep track of positions that happened, positions will be hashed as 8 size_ts wrapped in struct position
-		std::vector<Piece*> cur;
+		std::map<int, int> matTrack;
 		int status;
 		coords	enPassant;
 
@@ -36,6 +36,7 @@ class Board {
 		void makePassable(const coords);
 		void place(coords from, coords to);
 		bool specialMove(coords from, move to);
+		bool insufficientMaterial();
 
 	public:
 		Board();
@@ -71,8 +72,9 @@ class Board {
 		coords getEnPassant() const;
 		void setEnPassant(coords c);
 		bool onBoard(int rank, int file);
-		int makeMove(coords from, move to);
-		int makeMove(std::string san);
+		int play_move(coords from, move to);
+		int play_move(std::string san);
+		int play_move(coords from, coords destiny);
 
 		const char letters[9];
 
