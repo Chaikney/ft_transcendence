@@ -131,8 +131,12 @@ class Board
     @move_rule = 0 if move.t != MoveType::MOVE && move.t != MoveType::CASTLE || piece.type == PieceType::PAWN
     @full_moves += 1 if @turn == GameStatus::BLACK
     
-    if @move_rule == 100
-      @status = GameStatus::DRAW
+    if @move_rule == 99
+      a = update_legal_moves()
+      unless a == GameStatus::WHITE || a == GameStatus::BLACK
+        a = GameStatus::DRAW
+      end
+      @status = a
       return @status
     end
 
@@ -153,6 +157,53 @@ class Board
     end
 
     @status = update_legal_moves
+    if @status == GameStatus::WHITE || @status == GameStatus::BLACK || @status == GameStatus::DRAW
+      return @status
+    end
+
+    # Corrección 1: Uso del Hash Rocket (=>) para constantes
+    b = { PieceType::PAWN => 0, PieceType::ROOK => 0, PieceType::KNIGHT => 0, PieceType::BISHOP => 0, PieceType::QUEEN => 0, PieceType::KING => 0 }
+    w = { PieceType::PAWN => 0, PieceType::ROOK => 0, PieceType::KNIGHT => 0, PieceType::BISHOP => 0, PieceType::QUEEN => 0, PieceType::KING => 0 }
+
+    7.downto(0) do |i|
+      (0..7).each do |j|
+        # Limpiamos la legibilidad guardando la pieza en una variable
+        piece = @board[i][j]
+        
+        if piece.type == PieceType::NONE || piece.type == PieceType::KING
+          next
+        elsif piece.col == GameStatus::WHITE
+          w[piece.type] += 1
+        else
+          b[piece.type] += 1
+        end
+      end
+    end
+
+    # Corrección 2: Explicitamente revisar > 0 (En Ruby el 0 es verdadero)
+    if b[PieceType::PAWN] > 0 || b[PieceType::ROOK] > 0 || b[PieceType::QUEEN] > 0 || 
+      w[PieceType::PAWN] > 0 || w[PieceType::ROOK] > 0 || w[PieceType::QUEEN] > 0
+      return @status
+    elsif b[PieceType::KNIGHT] == 2
+      if b[PieceType::BISHOP] > 0 || w[PieceType::KNIGHT] > 0 || w[PieceType::BISHOP] > 0
+        return @status
+      end
+    elsif w[PieceType::KNIGHT] == 2
+      if w[PieceType::BISHOP] > 0 || b[PieceType::KNIGHT] > 0 || b[PieceType::BISHOP] > 0
+        return @status
+      end
+    elsif b[PieceType::BISHOP] == 2 || w[PieceType::BISHOP] == 2
+      return @status
+    elsif b[PieceType::BISHOP] == 1
+      if b[PieceType::KNIGHT] == 1 || (w[PieceType::BISHOP] == 1 && w[PieceType::KNIGHT] == 1)
+        return @status
+      end
+    # Corrección 3: 'w' en minúscula
+    elsif w[PieceType::BISHOP] == 1 && w[PieceType::KNIGHT] == 1 
+      return @status 
+    end
+    @status = GameStatus::DRAW
+    return @status
   end
 
   def get_fen

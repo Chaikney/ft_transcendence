@@ -22,7 +22,16 @@ puts "♟️ Iniciando Motor de Ajedrez (Ruby Port)..."
 partida = Board.new
 
 # Lista de movimientos reales en notación algebraica (Apertura Ruy López)
-movimientos = ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6"]
+movimientos = ["Nf3", "d5", "d4", "c6", "c4", "e6", "Nbd2", "Nf6", "e3", "Nbd7", 
+  "Bd3", "Bd6", "e4", "dxe4", "Nxe4", "Nxe4", "Bxe4", "O-O", "O-O", "h6", 
+  "Bc2", "e5", "Re1", "exd4", "Qxd4", "Bc5", "Qc3", "a5", "a3", "Nf6", 
+  "Be3", "Bxe3", "Rxe3", "Bg4", "Ne5", "Re8", "Rae1", "Be6", "f4", "Qc8", 
+  "h3", "b5", "f5", "Bxc4", "Nxc4", "bxc4", "Rxe8+", "Nxe8", "Re4", "Nf6", 
+  "Rxc4", "Nd5", "Qe5", "Qd7", "Rg4", "f6", "Qd4", "Kh7", "Re4", "Rd8", 
+  "Kh1", "Qc7", "Qf2", "Qb8", "Ba4", "c5", "Bc6", "c4", "Rxc4", "Nb4", 
+  "Bf3", "Nd3", "Qh4", "Qxb2", "Qg3", "Qxa3", "Rc7", "Qf8", "Ra7", "Ne5", 
+  "Rxa5", "Qf7", "Rxe5", "fxe5", "Qxe5", "Re8", "Qf4", "Qf6", "Bh5", "Rf8", 
+  "Bg6+", "Kh8", "Qc7", "Qd4", "Kh2", "Ra8", "Bh5", "Qf6", "Bg6", "Rg8"]
 
 puts "\nTablero Inicial:"
 print_board(partida)
@@ -36,6 +45,7 @@ movimientos.each do |mov|
   
   # 2. El Tablero ejecuta el movimiento
   partida.play_move_coords(m.from, m.to)
+  print_board(partida)
 end
 
 puts "Tablero Final tras los movimientos:"
