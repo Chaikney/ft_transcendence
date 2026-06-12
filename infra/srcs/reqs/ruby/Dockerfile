@@ -10,10 +10,10 @@ ARG RUBY_VERSION=4.0.5
 # NOTE Every time that RUBY_VERSION changes, this must be updated
 ARG RUBY_DOWNLOAD_SHA256=7d6149079a63f8ae1d326c9fa65c6019ba2dc3155eae7b39159817911c88958e
 
-# NOTE The difference between ARG and ENV is...?
-# FIXME This is not getting used.
-ARG RB_FILES=/usr/src/app
+# Location where our app files will go
+ARG RB_FILES=/usr/src/api/
 ARG RB_DBHOST=db:5432
+ARG RB_BUILD=ruby-${RUBY_VERSION}/build
 
 RUN mkdir --parents $RB_FILES
 # WORKDIR $RB_FILES
@@ -36,8 +36,9 @@ RUN ["apk", "add", "build-base", "autoconf", "linux-headers", "bzip2-dev", "libf
 RUN ["apk", "add", "yaml-dev", "ca-certificates"]
 # https://docs.ruby-lang.org/en/master/contributing/building_ruby_md.html
 RUN ./ruby-${RUBY_VERSION}/autogen.sh
-RUN mkdir ruby-${RUBY_VERSION}/build
-WORKDIR ruby-${RUBY_VERSION}/build
+RUN mkdir ${RB_BUILD}
+WORKDIR ${RB_BUILD}
+# NOTE --prefix sets the install location (right?)
 RUN ../configure --prefix=/usr/local
 RUN make -j"$(nproc)"
 RUN make test
@@ -46,14 +47,16 @@ RUN make install
 # NOTE from here the slowest part is done, try and avoid changes above here!
 #
 # TODO Confirm what extra packages are needed for our app
-# Install bundler if you need gems at build time (optional)
+# Install bundler if you need gems at build time (we do) (but it is already there?)
 # RUN gem install bundler --no-document
 # ...probably a database driver? "pg"?
 # TODO Check these locations are correct...
-# TODO what does *this* line do?
-RUN bundle config --global frozen 1
-COPY tools/src/Gemfile tools/src/Gemfile.lock ./
+# TODO what does *this* line do? Sets *global* config, fobids further changes but the 1?
+# ....commented out for mistrust / experiment
+# RUN bundle config --global frozen 1
+COPY tools/src/Gemfile tools/src/Gemfile.lock $RB_FILES
 # NOTE as well as the app folder we need (at least) config and db
+# TODO Ensure that this gives us 3 separate folderes in $RB_FILES!
 COPY tools/src/app $RB_FILES
 COPY tools/src/config $RB_FILES
 COPY tools/src/db $RB_FILES
@@ -61,6 +64,7 @@ COPY tools/src/db $RB_FILES
 RUN bundle lock --add-platform x86_64-linux-musl
 # TODO Run as a different user? bundler complains if run as root...
 RUN bundle install
+
 
 # Clean builder to keep artifacts small (remove source tarball & build dir)
 WORKDIR /
@@ -73,17 +77,18 @@ org.opencontainers.image.description="Ruby ${RUBY_VERSION} built from source"
 
 
 
-
 # NOTE This stage copies the compiled ruby and relevant pieces to a fresh Alpine
 # final runtime stage
 FROM alpine:${ALP_VERSION} AS runtime
 
-ARG RB_FILES=/usr/src/app
+ARG RB_FILES=/usr/src/api/
 ENV GEM_HOME=/usr/local/bundle
 ENV PATH=$PATH:/usr/local/bin:/usr/local/bundle/bin
 
 RUN mkdir --parents $RB_FILES
 
+# Copy app source files into the image
+COPY --from=baseimage ${RB_FILES}Gemfile ${RB_FILES}Gemfile.lock ${RB_FILES}
 # Copy only runtime files from builder. Commented lines are not (currently) present
 COPY --from=baseimage /usr/local/bin/ruby /usr/local/bin/ruby
 COPY --from=baseimage /usr/local/bin/erb /usr/local/bin/erb
@@ -105,8 +110,8 @@ COPY --from=baseimage /etc/ssl/certs /etc/ssl/certs
 
 WORKDIR $RB_FILES
 
-# TODO Copy app source files into the image
 # COPY Gemfile Gemfile.lock ./
+# TODO We already did this, so should not be needed?
 # RUN bundle install
 
 # NOTE I have no idea what this would do, its from https://hub.docker.com/_/ruby/
@@ -131,4 +136,5 @@ ENV IMAGE_TAG="My awesome ruby box"
 
 # CMD ["irb"]
 # FIXME CMD should be rails but launching the app correctly
-CMD ["rails", "server"]
+# CMD ["rails", "server"]
+CMD ["rails", "server", "-b", "0.0.0.0"]
