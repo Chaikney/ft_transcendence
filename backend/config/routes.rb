@@ -24,5 +24,7 @@ Rails.application.routes.draw do
     post '/friends/request', to: 'friendships#create'
     patch '/friends/accept', to: 'friendships#accept'
     delete '/friends/reject', to: 'friendships#reject'
+    get 'users/:id/matches', to: 'matches#index'
+    
   end
 end
