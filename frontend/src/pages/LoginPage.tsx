@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store';
+import { useToast } from '@/components/Toast';
 
 // ── 42 OAuth URL ───────────────────────────────────────────────────────────
 const OAUTH_URL = `https://api.intra.42.fr/oauth/authorize?client_id=${
@@ -97,14 +98,18 @@ export const LoginPage = () => {
   const isMock     = import.meta.env.VITE_USE_MOCK === 'true';
   const [loading, setLoading] = useState(false);
 
+  const { info, success } = useToast();
+
   // Real OAuth — redirect to 42
   const handleOAuth = () => {
     setLoading(true);
+    info('Redirecting to 42...', 'Authentication');
     window.location.href = OAUTH_URL;
   };
 
   // Mock login — bypass OAuth in dev
   const handleMockLogin = () => {
+    success('Sesión de desarrollo iniciada', 'Mock Login');
     setUser({ id: 1, username: 'mdiaz-or', elo: 1247 });
     navigate('/');
   };

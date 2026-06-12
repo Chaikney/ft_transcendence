@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store';
+import { useToast } from '@/components/Toast';
 
 const BOOT_LINES = [
   '> INITIALIZING transcendence v2.0...',
@@ -125,6 +126,7 @@ export const LandingPage = () => {
   const navigate        = useNavigate();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const isMock          = import.meta.env.VITE_USE_MOCK === 'true';
+  const { info, success } = useToast();
 
   // Boot sequence animation
   const [visibleLines, setVisibleLines] = useState<number>(0);
@@ -135,7 +137,10 @@ export const LandingPage = () => {
       const t = setTimeout(() => setVisibleLines((v) => v + 1), 120);
       return () => clearTimeout(t);
     } else {
-      const t = setTimeout(() => setBooted(true), 300);
+      const t = setTimeout(() => {
+        setBooted(true);
+        success('Operating system ready', 'System Online'); // <--- Feedback visual
+      }, 300);
       return () => clearTimeout(t);
     }
   }, [visibleLines]);

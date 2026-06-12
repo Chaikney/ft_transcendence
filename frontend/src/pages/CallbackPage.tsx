@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store';
 import { post } from '@/services/api';
 import type { User } from '@/types';
+import { useToast } from '@/components/Toast';
 
 type CallbackStatus =
   | 'extracting'
@@ -100,9 +101,10 @@ const STEPS: Step[] = ['extracting', 'exchanging', 'fetching'];
 export const CallbackPage = () => {
   const navigate = useNavigate();
   const setUser  = useAuthStore((s) => s.setUser);
+  const { error, success } = useToast();
 
   const [status,    setStatus]    = useState<CallbackStatus>('extracting');
-  const [error,     setError]     = useState<string | null>(null);
+  const [authError,     setAuthError]     = useState<string | null>(null);
   const [user,      setLocalUser] = useState<User | null>(null);
   const [completed, setCompleted] = useState<Set<Step>>(new Set());
 
@@ -144,7 +146,9 @@ export const CallbackPage = () => {
 
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'Unknown error.';
-        setError(msg);
+        
+        error(msg, 'Auth Failed');
+        setAuthError(msg);
         setStatus('error');
       }
     };
@@ -249,7 +253,6 @@ export const CallbackPage = () => {
         {status === 'error' && (
           <div className={styles.errorWrap}>
             <div className={styles.errorMsg}>
-              // ERROR: {error}
             </div>
             <button
               className={styles.retryBtn}

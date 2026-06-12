@@ -2,6 +2,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store';
 import type { ConnectionStatusType } from '@/types';
 import { Footer } from '@/components/Footer';
+import { ToastContainer } from '@/components/Toast';
 
 // ── Styles ────────────────────────────────────────────────────────────────
 const styles = {
@@ -69,6 +70,7 @@ const styles = {
   // Page wrapper
   pageWrap:
     'relative z-10 min-h-full',
+  pageContent: 'flex-1',
 } as const;
 
 // ── Nav items ──────────────────────────────────────────────────────────────
@@ -178,13 +180,19 @@ export const RootLayout = () => {
         </div>
       </nav>
 
-      {/* ── Page content ── */}
+      {/* Page content */}
       <main className={styles.content}>
         <div className={styles.pageWrap}>
-          <Outlet />
+          <div className={styles.pageContent}>
+            <Outlet />
+          </div>
+          {/* Footer on every page */}
+          <Footer />
         </div>
       </main>
-      <Footer />
+
+      {/* Toast notifications — portal, always on top */}
+      <ToastContainer />
     </div>
   );
 };

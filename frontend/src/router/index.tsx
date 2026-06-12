@@ -11,6 +11,7 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { PrivacyPolicyPage } from '@/pages/PrivacyPolicyPage';
 import { TermsOfServicePage } from '@/pages/TermsOfServicePage';
 
+
 export const router = createBrowserRouter([
   {
     path: '/',
