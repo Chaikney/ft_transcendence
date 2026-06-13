@@ -1,26 +1,27 @@
 # syntax=docker/dockerfile:1
 
 ARG ALP_VERSION=3.23.4
+ARG RB_FILES=/usr/src/api/
+ARG RB_DBHOST=db:5432
+ARG GEM_HOME=/usr/local/bundle
 
 # NOTE n is working on ruby 4.0.3 but the base Alpine images only have 3.4.9-r0
 # This first stage gets and compiles ruby 4.0.3 (now 4.0.5) on Alpine linux
 FROM alpine:${ALP_VERSION} AS baseimage
-
+# ARGs from global that we want to use in this stage
+ARG RB_FILES
+ARG GEM_HOME
+ENV GEM_HOME=${GEM_HOME}
+# stage-specific ARGs
 ARG RUBY_VERSION=4.0.5
 # NOTE Every time that RUBY_VERSION changes, this must be updated
 ARG RUBY_DOWNLOAD_SHA256=7d6149079a63f8ae1d326c9fa65c6019ba2dc3155eae7b39159817911c88958e
-
-# Location where our app files will go
-ARG RB_FILES=/usr/src/api/
-ARG RB_DBHOST=db:5432
+# We build ruby in a subfolder of the extracted source tarball
 ARG RB_BUILD=ruby-${RUBY_VERSION}/build
 
-RUN mkdir --parents $RB_FILES
-# WORKDIR $RB_FILES
-
+# HACK debug value can be removed
 RUN echo $RUBY_VERSION
 ENV RUBY_DOWNLOAD_URL=https://cache.ruby-lang.org/pub/ruby/4.0/ruby-${RUBY_VERSION}.tar.gz
-ENV GEM_HOME=/usr/local/bundle
 
 # Download Ruby version
 # HACK to debug the download
@@ -44,46 +45,37 @@ RUN ../configure --prefix=/usr/local
 RUN make -j"$(nproc)"
 RUN make test
 RUN make install
-#
+
 # NOTE from here the slowest part is done, try and avoid changes above here!
-#
-# TODO Confirm what extra packages are needed for our app
-# Install bundler if you need gems at build time (we do) (but it is already there?)
-# RUN gem install bundler --no-document
-# ...probably a database driver? "pg"?
-# TODO Check these locations are correct...
-# TODO what does *this* line do? Sets *global* config, fobids further changes but the 1?
-# ....commented out for mistrust / experiment
-# RUN bundle config --global frozen 1
-# FIXME Later we lack tzinfo-data
+
+RUN echo ${GEM_HOME}
+RUN mkdir -p ${RB_FILES}
+RUN mkdir -p ${GEM_HOME}/
+# FIXME tzdata is not found by the app and I have no idea why
 COPY tools/src/Gemfile tools/src/Gemfile.lock $RB_FILES
 # NOTE as well as the app folder we need (at least) config and db
-# TODO Ensure that this gives us 3 separate folderes in $RB_FILES!
-# FIXME It does not
-# TODO Could be a single line...
-# COPY tools/src/app/ $RB_FILES
-# COPY tools/src/config/ $RB_FILES
-# COPY tools/src/db/ $RB_FILES
+# NOTE but only in the next stage!Ensure that this gives us 3 separate folderes in $RB_FILES!
 # NOTE We *must* have this else can't run it on our Alpine container
 # Change Workdir else we can't find the Gemfile
 WORKDIR ${RB_FILES}
 COPY tools/src/Gemfile tools/src/Gemfile.lock ./
-RUN gem install bundler --no-document \
-&& bundle config set --local path '/usr/local/bundle' \
-&& bundle lock --add-platform x86_64-linux-musl \
-&& bundle config set  clean true \
-&& bundle install --jobs 4 --retry 3  \
-&& bundle config set --local bin '/usr/local/bundle' \
-&& bundle binstubs --all
-# RUN bundle lock --add-platform x86_64-linux-musl
+# NOTE A lot of careful setup that may not be needed
+RUN gem install bundler --no-document
+RUN bundle config set --local path ${GEM_HOME}
+RUN bundle add tzinfo-data
+RUN bundle lock --add-platform x86_64-linux-musl
+RUN bundle config set  clean true
+RUN bundle install --jobs 4 --retry 3
+RUN bundle config set --local bin ${GEM_HOME}
+RUN bundle binstubs --all
 # TODO Run as a different user? bundler complains if run as root...
-# NOTE this is a slow step can i avoid it?
-# RUN bundle install
 # HACK more debug
+# FIXME rails not found here, but is it checking anything useful?
 RUN ls -la /usr/local/bundle /usr/local/bundle/bin \
 && bundle list | sed -n '1,200p' \
 && /usr/local/bundle/bin/rails --version || true
-COPY tools/src/ ${RB_FILES}
+#  HACK test do we even need this?
+#  COPY tools/src/ ${RB_FILES}
 
 # HACK debug what we got where
 RUN pwd
@@ -94,8 +86,7 @@ RUN rm -rf /ruby-${RUBY_VERSION} /ruby.tar.gz /var/cache/apk/*
 
 LABEL org.opencontainers.image.tag="rubybase" \
 org.opencontainers.image.vendor="${author}" \
-org.opencontainers.image.repo="memememe" \
-org.opencontainers.image.description="Ruby ${RUBY_VERSION} built from source"
+org.opencontainers.image.description="Ruby ${RUBY_VERSION} built from source, including Gems"
 
 
 
@@ -103,9 +94,11 @@ org.opencontainers.image.description="Ruby ${RUBY_VERSION} built from source"
 # final runtime stage
 FROM alpine:${ALP_VERSION} AS runtime
 
-# TODO How can I ensure that this value is the same as in the previous stage. Copy from?
-ARG RB_FILES=/usr/src/api/
-ENV GEM_HOME=/usr/local/bundle
+# NOTE ARG without default re-uses the global from the top of the file
+ARG RB_FILES
+ARG GEM_HOME
+# Set ENV used in this stage
+ENV GEM_HOME=${GEM_HOME}
 ENV BUNDLE_PATH=/usr/local/bundle
 ENV BUNDLE_BIN=/usr/local/bundle/bin
 # HACK the path should be set using variables referring to previous build stage
@@ -135,10 +128,11 @@ COPY --from=baseimage /usr/lib /usr/lib
 COPY --from=baseimage /etc/ssl/certs /etc/ssl/certs
 
 WORKDIR $RB_FILES
-# COPY --from=baseimage ${RB_FILES}app $RB_FILES
-# COPY --from=baseimage ${RB_FILES}config $RB_FILES
 
-COPY --from=baseimage ${RB_FILES} ${RB_FILES}
+# TODO Better copy the files now?
+# COPY --from=baseimage ${RB_FILES} ${RB_FILES}
+COPY tools/src ${RB_FILES}
+
 # COPY tools/src/app/ $RB_FILES/app/
 # COPY tools/src/config/ $RB_FILES/config/
 # COPY tools/src/db/ $RB_FILES/db/
@@ -173,7 +167,8 @@ ENV IMAGE_TAG="My awesome ruby box"
 # NOTE Example that relies on the preseence/configuration of rails healthcontroller
 # IT is inactive for now
 # HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl -f http://localhost:3000/up || exit 1
-
+RUN apk add --no-cache yaml-dev
+# ENV TZINFO_ZONEINFO=/usr/share/zoneinfo
 # HACK debug check
 RUN bundle list
 # RUN bundle show tzinfo-data
