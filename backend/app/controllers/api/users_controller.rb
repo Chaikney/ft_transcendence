@@ -18,8 +18,7 @@ module Api
     end
 
     # Operación de Destrucción (DELETE /api/profile)
-    def destroy
-      @current_user.destroy
+    def destroy      @current_user.destroy
       render json: { message: "Cuenta eliminada permanentemente del sistema" }, status: :ok
     end
 
