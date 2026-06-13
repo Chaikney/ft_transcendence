@@ -10,9 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_24_014405) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_13_104352) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "blocks", force: :cascade do |t|
+    t.bigint "blocked_id", null: false
+    t.bigint "blocker_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["blocked_id"], name: "index_blocks_on_blocked_id"
+    t.index ["blocker_id", "blocked_id"], name: "index_blocks_on_blocker_id_and_blocked_id", unique: true
+    t.index ["blocker_id"], name: "index_blocks_on_blocker_id"
+  end
 
   create_table "friendships", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -37,6 +47,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_24_014405) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "messages", force: :cascade do |t|
+    t.text "content", null: false
+    t.datetime "created_at", null: false
+    t.bigint "receiver_id", null: false
+    t.bigint "sender_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["receiver_id"], name: "index_messages_on_receiver_id"
+    t.index ["sender_id"], name: "index_messages_on_sender_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "elo", default: 1000
@@ -49,8 +69,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_24_014405) do
     t.integer "wins", default: 0
   end
 
+  add_foreign_key "blocks", "users", column: "blocked_id"
+  add_foreign_key "blocks", "users", column: "blocker_id"
   add_foreign_key "friendships", "users"
   add_foreign_key "friendships", "users", column: "friend_id"
   add_foreign_key "games", "users", column: "player1_id"
   add_foreign_key "games", "users", column: "player2_id"
+  add_foreign_key "messages", "users", column: "receiver_id"
+  add_foreign_key "messages", "users", column: "sender_id"
 end
