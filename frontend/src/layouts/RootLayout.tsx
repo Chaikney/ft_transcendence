@@ -78,6 +78,7 @@ const NAV_ITEMS = [
   { label: '> home',    path: '/' },
   { label: '> chess',   path: '/game/chess/chess-001' },
   { label: '> sudoku',  path: '/game/sudoku/sudoku-001' },
+  { label: '> spectate', path: '/spectate' },
 ] as const;
 
 // ── Connection dot ─────────────────────────────────────────────────────────

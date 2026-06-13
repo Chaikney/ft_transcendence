@@ -10,7 +10,8 @@ import { SudokuGamePage } from '@/features/sudoku/SudokuGamePage';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { PrivacyPolicyPage } from '@/pages/PrivacyPolicyPage';
 import { TermsOfServicePage } from '@/pages/TermsOfServicePage';
-
+import { SpectatorPage } from '@/pages/SpectatorPage';
+import { ActiveGamesPage } from '@/pages/ActiveGamesPage';
 
 export const router = createBrowserRouter([
   {
@@ -45,6 +46,14 @@ export const router = createBrowserRouter([
             <SudokuGamePage />
           </ProtectedRoute>
         ),
+      },
+      {
+        path: 'spectate',
+        element: <ProtectedRoute><ActiveGamesPage /></ProtectedRoute>,
+      },
+      {
+        path: 'spectate/:id',
+        element: <ProtectedRoute><SpectatorPage /></ProtectedRoute>,
       },
       {
         path: 'profile/:username',
