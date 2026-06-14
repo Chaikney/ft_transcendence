@@ -1,0 +1,60 @@
+@import "tailwindcss";
+@import './styles/tokens.css';
+@import './styles/globals.css';
+
+@theme {
+    /* ── Base Surfaces ── */
+    --color-bg-base:        #020408;
+    --color-bg-surface:     #060d14;
+    --color-bg-elevated:    #0a1628;
+    --color-bg-overlay:     #0d1f35;
+
+    /* ── Borders ── */
+    --color-border: #38bdf8;
+    --color-border-subtle: #1e293b;
+    --color-border-strong: #38bdf8;
+
+    /* ── Text ── */
+    --color-text-primary:   #c8e8ff;
+    --color-text-secondary: #4a9eca;
+    --color-text-muted:     #1e4d6b;
+    --color-text-inverse: #05070a;
+
+    /* ── Accent ── */
+    --color-accent:         #00d4ff;
+    --color-accent-dim:     #0088aa;
+    --color-accent-hover:   #33ddff;
+    --color-accent-bg:      rgba(0, 212, 255, 0.06);
+    --color-accent-border:  rgba(0, 212, 255, 0.25);
+
+    /* ── Status ── */
+    --color-status-success: #00ff88;
+    --color-status-warning: #ffaa00;
+    --color-status-error:   #ff3366;
+    --color-status-info: #38bdf8;
+
+    /* ── Chess Board ── */
+    --color-chess-light: #1e293b;
+    --color-chess-dark: #0f172a;
+    --color-chess-selected: rgba(56, 189, 248, 0.4);
+    --color-chess-lastmove: rgba(56, 189, 248, 0.2);
+    --color-chess-border: #38bdf8;
+    --color-chess-coord: #38bdf8;
+
+    /* ── Sudoku ── */
+    --color-sudoku-cell: #0c1017;
+    --color-sudoku-selected: rgba(56, 189, 248, 0.15);
+    --color-sudoku-locked: #e0f2fe;
+    --color-sudoku-input: #38bdf8;
+    --color-sudoku-error: #f87171;
+    --color-sudoku-border: #1e293b;
+    --color-sudoku-border-box: #38bdf8;
+
+    /* ── Fonts ── */
+    --font-display: 'JetBrains Mono', monospace;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    /* ── Shadows ── */
+    --shadow-glow: 0 0 24px rgba(56, 189, 248, 0.15);
+    --shadow-board: 0 8px 48px rgba(0, 0, 0, 0.9), 0 0 0 1px #38bdf8;
+}

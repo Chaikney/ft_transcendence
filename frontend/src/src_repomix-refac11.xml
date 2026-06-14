@@ -1,0 +1,1437 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+assets/
+  hero.png
+  react.svg
+  vite.svg
+components/
+  ConnectionStatus.tsx
+features/
+  chess/
+    hooks/
+      useChessBoard.ts
+      useChessGame.ts
+    ChessBoard.tsx
+    ChessGamePage.tsx
+    index.ts
+    service.ts
+    types.ts
+  sudoku/
+    hooks/
+      useSudokuBoard.ts
+      useSudokuGame.ts
+    index.ts
+    service.ts
+    SudokuBoard.tsx
+    SudokuGamePage.tsx
+    types.ts
+hooks/
+  index.ts
+  useActionCable.ts
+  useGameChannel.ts
+mocks/
+  auth.mock.ts
+  chess.mock.ts
+  index.ts
+  sudoku.mock.ts
+services/
+  api.ts
+store/
+  authStore.ts
+  index.ts
+  matchStore.ts
+types/
+  index.ts
+utils/
+  .gitkeep
+App.css
+App.tsx
+index.css
+main.tsx
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="assets/react.svg">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--logos" width="35.93" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 228"><path fill="#00D8FF" d="M210.483 73.824a171.49 171.49 0 0 0-8.24-2.597c.465-1.9.893-3.777 1.273-5.621c6.238-30.281 2.16-54.676-11.769-62.708c-13.355-7.7-35.196.329-57.254 19.526a171.23 171.23 0 0 0-6.375 5.848a155.866 155.866 0 0 0-4.241-3.917C100.759 3.829 77.587-4.822 63.673 3.233C50.33 10.957 46.379 33.89 51.995 62.588a170.974 170.974 0 0 0 1.892 8.48c-3.28.932-6.445 1.924-9.474 2.98C17.309 83.498 0 98.307 0 113.668c0 15.865 18.582 31.778 46.812 41.427a145.52 145.52 0 0 0 6.921 2.165a167.467 167.467 0 0 0-2.01 9.138c-5.354 28.2-1.173 50.591 12.134 58.266c13.744 7.926 36.812-.22 59.273-19.855a145.567 145.567 0 0 0 5.342-4.923a168.064 168.064 0 0 0 6.92 6.314c21.758 18.722 43.246 26.282 56.54 18.586c13.731-7.949 18.194-32.003 12.4-61.268a145.016 145.016 0 0 0-1.535-6.842c1.62-.48 3.21-.974 4.76-1.488c29.348-9.723 48.443-25.443 48.443-41.52c0-15.417-17.868-30.326-45.517-39.844Zm-6.365 70.984c-1.4.463-2.836.91-4.3 1.345c-3.24-10.257-7.612-21.163-12.963-32.432c5.106-11 9.31-21.767 12.459-31.957c2.619.758 5.16 1.557 7.61 2.4c23.69 8.156 38.14 20.213 38.14 29.504c0 9.896-15.606 22.743-40.946 31.14Zm-10.514 20.834c2.562 12.94 2.927 24.64 1.23 33.787c-1.524 8.219-4.59 13.698-8.382 15.893c-8.067 4.67-25.32-1.4-43.927-17.412a156.726 156.726 0 0 1-6.437-5.87c7.214-7.889 14.423-17.06 21.459-27.246c12.376-1.098 24.068-2.894 34.671-5.345a134.17 134.17 0 0 1 1.386 6.193ZM87.276 214.515c-7.882 2.783-14.16 2.863-17.955.675c-8.075-4.657-11.432-22.636-6.853-46.752a156.923 156.923 0 0 1 1.869-8.499c10.486 2.32 22.093 3.988 34.498 4.994c7.084 9.967 14.501 19.128 21.976 27.15a134.668 134.668 0 0 1-4.877 4.492c-9.933 8.682-19.886 14.842-28.658 17.94ZM50.35 144.747c-12.483-4.267-22.792-9.812-29.858-15.863c-6.35-5.437-9.555-10.836-9.555-15.216c0-9.322 13.897-21.212 37.076-29.293c2.813-.98 5.757-1.905 8.812-2.773c3.204 10.42 7.406 21.315 12.477 32.332c-5.137 11.18-9.399 22.249-12.634 32.792a134.718 134.718 0 0 1-6.318-1.979Zm12.378-84.26c-4.811-24.587-1.616-43.134 6.425-47.789c8.564-4.958 27.502 2.111 47.463 19.835a144.318 144.318 0 0 1 3.841 3.545c-7.438 7.987-14.787 17.08-21.808 26.988c-12.04 1.116-23.565 2.908-34.161 5.309a160.342 160.342 0 0 1-1.76-7.887Zm110.427 27.268a347.8 347.8 0 0 0-7.785-12.803c8.168 1.033 15.994 2.404 23.343 4.08c-2.206 7.072-4.956 14.465-8.193 22.045a381.151 381.151 0 0 0-7.365-13.322Zm-45.032-43.861c5.044 5.465 10.096 11.566 15.065 18.186a322.04 322.04 0 0 0-30.257-.006c4.974-6.559 10.069-12.652 15.192-18.18ZM82.802 87.83a323.167 323.167 0 0 0-7.227 13.238c-3.184-7.553-5.909-14.98-8.134-22.152c7.304-1.634 15.093-2.97 23.209-3.984a321.524 321.524 0 0 0-7.848 12.897Zm8.081 65.352c-8.385-.936-16.291-2.203-23.593-3.793c2.26-7.3 5.045-14.885 8.298-22.6a321.187 321.187 0 0 0 7.257 13.246c2.594 4.48 5.28 8.868 8.038 13.147Zm37.542 31.03c-5.184-5.592-10.354-11.779-15.403-18.433c4.902.192 9.899.29 14.978.29c5.218 0 10.376-.117 15.453-.343c-4.985 6.774-10.018 12.97-15.028 18.486Zm52.198-57.817c3.422 7.8 6.306 15.345 8.596 22.52c-7.422 1.694-15.436 3.058-23.88 4.071a382.417 382.417 0 0 0 7.859-13.026a347.403 347.403 0 0 0 7.425-13.565Zm-16.898 8.101a358.557 358.557 0 0 1-12.281 19.815a329.4 329.4 0 0 1-23.444.823c-7.967 0-15.716-.248-23.178-.732a310.202 310.202 0 0 1-12.513-19.846h.001a307.41 307.41 0 0 1-10.923-20.627a310.278 310.278 0 0 1 10.89-20.637l-.001.001a307.318 307.318 0 0 1 12.413-19.761c7.613-.576 15.42-.876 23.31-.876H128c7.926 0 15.743.303 23.354.883a329.357 329.357 0 0 1 12.335 19.695a358.489 358.489 0 0 1 11.036 20.54a329.472 329.472 0 0 1-11 20.722Zm22.56-122.124c8.572 4.944 11.906 24.881 6.52 51.026c-.344 1.668-.73 3.367-1.15 5.09c-10.622-2.452-22.155-4.275-34.23-5.408c-7.034-10.017-14.323-19.124-21.64-27.008a160.789 160.789 0 0 1 5.888-5.4c18.9-16.447 36.564-22.941 44.612-18.3ZM128 90.808c12.625 0 22.86 10.235 22.86 22.86s-10.235 22.86-22.86 22.86s-22.86-10.235-22.86-22.86s10.235-22.86 22.86-22.86Z"></path></svg>
+</file>
+
+<file path="assets/vite.svg">
+<svg xmlns="http://www.w3.org/2000/svg" width="77" height="47" fill="none" aria-labelledby="vite-logo-title" viewBox="0 0 77 47"><title id="vite-logo-title">Vite</title><style>.parenthesis{fill:#000}@media (prefers-color-scheme:dark){.parenthesis{fill:#fff}}</style><path fill="#9135ff" d="M40.151 45.71c-.663.844-2.02.374-2.02-.699V34.708a2.26 2.26 0 0 0-2.262-2.262H24.493c-.92 0-1.457-1.04-.92-1.788l7.479-10.471c1.07-1.498 0-3.578-1.842-3.578H15.443c-.92 0-1.456-1.04-.92-1.788l9.696-13.576c.213-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.472c-1.07 1.497 0 3.578 1.842 3.578h11.376c.944 0 1.474 1.087.89 1.83L40.153 45.712z"/><mask id="a" width="48" height="47" x="14" y="0" maskUnits="userSpaceOnUse" style="mask-type:alpha"><path fill="#000" d="M40.047 45.71c-.663.843-2.02.374-2.02-.699V34.708a2.26 2.26 0 0 0-2.262-2.262H24.389c-.92 0-1.457-1.04-.92-1.788l7.479-10.472c1.07-1.497 0-3.578-1.842-3.578H15.34c-.92 0-1.456-1.04-.92-1.788l9.696-13.575c.213-.297.556-.474.92-.474H53.93c.92 0 1.456 1.04.92 1.788L47.37 13.03c-1.07 1.498 0 3.578 1.842 3.578h11.376c.944 0 1.474 1.088.89 1.831L40.049 45.712z"/></mask><g mask="url(#a)"><g filter="url(#b)"><ellipse cx="5.508" cy="14.704" fill="#eee6ff" rx="5.508" ry="14.704" transform="rotate(269.814 20.96 11.29)scale(-1 1)"/></g><g filter="url(#c)"><ellipse cx="10.399" cy="29.851" fill="#eee6ff" rx="10.399" ry="29.851" transform="rotate(89.814 -16.902 -8.275)scale(1 -1)"/></g><g filter="url(#d)"><ellipse cx="5.508" cy="30.487" fill="#8900ff" rx="5.508" ry="30.487" transform="rotate(89.814 -19.197 -7.127)scale(1 -1)"/></g><g filter="url(#e)"><ellipse cx="5.508" cy="30.599" fill="#8900ff" rx="5.508" ry="30.599" transform="rotate(89.814 -25.928 4.177)scale(1 -1)"/></g><g filter="url(#f)"><ellipse cx="5.508" cy="30.599" fill="#8900ff" rx="5.508" ry="30.599" transform="rotate(89.814 -25.738 5.52)scale(1 -1)"/></g><g filter="url(#g)"><ellipse cx="14.072" cy="22.078" fill="#eee6ff" rx="14.072" ry="22.078" transform="rotate(93.35 31.245 55.578)scale(-1 1)"/></g><g filter="url(#h)"><ellipse cx="3.47" cy="21.501" fill="#8900ff" rx="3.47" ry="21.501" transform="rotate(89.009 35.419 55.202)scale(-1 1)"/></g><g filter="url(#i)"><ellipse cx="3.47" cy="21.501" fill="#8900ff" rx="3.47" ry="21.501" transform="rotate(89.009 35.419 55.202)scale(-1 1)"/></g><g filter="url(#j)"><ellipse cx="14.592" cy="9.743" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(39.51 14.592 9.743)"/></g><g filter="url(#k)"><ellipse cx="61.728" cy="-5.321" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 61.728 -5.32)"/></g><g filter="url(#l)"><ellipse cx="55.618" cy="7.104" fill="#00c2ff" rx="5.971" ry="9.665" transform="rotate(37.892 55.618 7.104)"/></g><g filter="url(#m)"><ellipse cx="12.326" cy="39.103" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 12.326 39.103)"/></g><g filter="url(#n)"><ellipse cx="12.326" cy="39.103" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 12.326 39.103)"/></g><g filter="url(#o)"><ellipse cx="49.857" cy="30.678" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 49.857 30.678)"/></g><g filter="url(#p)"><ellipse cx="52.623" cy="33.171" fill="#00c2ff" rx="5.971" ry="15.297" transform="rotate(37.892 52.623 33.17)"/></g></g><path d="M6.919 0c-9.198 13.166-9.252 33.575 0 46.789h6.215c-9.25-13.214-9.196-33.623 0-46.789zm62.424 0h-6.215c9.198 13.166 9.252 33.575 0 46.789h6.215c9.25-13.214 9.196-33.623 0-46.789" class="parenthesis"/><defs><filter id="b" width="60.045" height="41.654" x="-5.564" y="16.92" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="7.659"/></filter><filter id="c" width="90.34" height="51.437" x="-40.407" y="-6.762" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="7.659"/></filter><filter id="d" width="79.355" height="29.4" x="-35.435" y="2.801" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="e" width="79.579" height="29.4" x="-30.84" y="20.8" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="f" width="79.579" height="29.4" x="-29.307" y="21.949" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="g" width="74.749" height="58.852" x="29.961" y="-17.13" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="7.659"/></filter><filter id="h" width="61.377" height="25.362" x="37.754" y="3.055" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="i" width="61.377" height="25.362" x="37.754" y="3.055" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="j" width="56.045" height="63.649" x="-13.43" y="-22.082" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="k" width="54.814" height="64.646" x="34.321" y="-37.644" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="l" width="33.541" height="35.313" x="38.847" y="-10.552" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="m" width="54.814" height="64.646" x="-15.081" y="6.78" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="n" width="54.814" height="64.646" x="-15.081" y="6.78" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="o" width="54.814" height="64.646" x="22.45" y="-1.645" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="p" width="39.409" height="43.623" x="32.919" y="11.36" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter></defs></svg>
+</file>
+
+<file path="components/ConnectionStatus.tsx">
+import type { ConnectionStatusType } from '../features/chess/types';
+
+const STATUS_CONFIG: Record<ConnectionStatusType, { label: string; color: string; pulse: boolean }> = {
+  connecting:    { label: 'Connecting...',  color: 'bg-yellow-400', pulse: true  },
+  connected:     { label: 'Connected',      color: 'bg-green-400',  pulse: false },
+  disconnected:  { label: 'Disconnected',   color: 'bg-red-500',    pulse: false },
+  reconnecting:  { label: 'Reconnecting...', color: 'bg-yellow-400', pulse: true },
+};
+
+interface ConnectionStatusProps {
+  status: ConnectionStatusType;
+}
+
+export const ConnectionStatus = ({ status }: ConnectionStatusProps) => {
+  const config = STATUS_CONFIG[status] || STATUS_CONFIG['disconnected'];
+  
+  const { label, color, pulse } = config;
+
+  return (
+    <div className="flex items-center gap-2 text-xs font-mono text-gray-400">
+      <span
+        className={[
+          'w-2 h-2 rounded-full',
+          color,
+          pulse ? 'animate-pulse' : '',
+        ].join(' ')}
+      />
+      {label}
+    </div>
+  );
+};
+</file>
+
+<file path="features/chess/hooks/useChessBoard.ts">
+import { useState } from 'react';
+import type { ChessMove } from '../types';
+
+interface UseChessBoardReturn {
+  selectedSquare: string | null;
+  selectSquare: (square: string) => void;
+  pendingMove: ChessMove | null;
+  clearSelection: () => void;
+}
+
+export const useChessBoard = (
+  onMoveReady: (move: Omit<ChessMove, 'piece'>) => void
+): UseChessBoardReturn => {
+  const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
+  const [pendingMove, setPendingMove] = useState<ChessMove | null>(null);
+
+  const selectSquare = (square: string) => {
+    if (!selectedSquare) {// first click - select origin
+      setSelectedSquare(square);
+      return;
+    }
+    if (selectedSquare === square) {//clicked same squre - deselected
+      setSelectedSquare(null);
+      return;
+    }
+    // Second click — emit move upward, never calculate chess logic here
+    onMoveReady({ from: selectedSquare, to: square });
+    setSelectedSquare(null);
+    setPendingMove(null);
+  };
+
+  const clearSelection = () => {
+    setSelectedSquare(null);
+    setPendingMove(null);
+  };
+  return { selectedSquare, selectSquare, pendingMove, clearSelection };
+}
+</file>
+
+<file path="features/chess/hooks/useChessGame.ts">
+import { useEffect } from "react";
+import { useMatchStore } from "@/store";
+import { getChessGame, postChessMove, postChessAIMove } from "../service";
+import { useGameChannel } from "@/hooks";
+import type { ChessMovePayload } from '../types';
+
+// TODO: Dev flag - flip to false when the backend is ready
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
+
+export const useChessGame = (gameId: string) => {
+  const chessGame = useMatchStore((s) => s.chessGame);
+  const setChessGame = useMatchStore((s) => s.setChessGame);
+  const startLoading = useMatchStore((s) => s.startLoading);
+  const setError = useMatchStore((s) => s.setError);
+  const { connectionStatus } = useGameChannel(USE_MOCK ? null : gameId);
+
+  // load initial game state
+  useEffect(() => {
+    const load = async () => {
+      startLoading('chess');
+      try {
+        if (USE_MOCK) {
+          // <- MOCK
+          const { mockChessGame } = await import('@/mocks');
+          setChessGame(mockChessGame);
+        }
+        else {
+          // REAL
+          const res = await getChessGame(gameId);
+          setChessGame(res.data);
+        }
+      } catch (err) {
+        setError('Failed to load game. Please try again');
+      }
+    };
+    load();
+  }, [gameId]);
+
+  // send a move
+  const sendMove = async (payload: Omit<ChessMovePayload, 'game_id'>) => {
+    if (!chessGame) return;
+    try {
+      if (USE_MOCK) {
+        // <- MOCK: simulate opponent response
+        const { mockChessGameAfterMove } = await import('@/mocks');
+        setChessGame(mockChessGameAfterMove);
+      } else {
+        // <- REAL: backend will broadcast update via actioCable
+        await postChessMove({ ...payload, game_id: gameId });
+        // no need to setchessgame here = websocket handle its
+      }
+    } catch (err) {
+      setError('Move failed. Please try again.');
+    }
+  };
+
+  // Request AI move
+  const requestAIMove = async () => {
+    if (!chessGame) return;
+    try {
+      if (USE_MOCK) {
+        const { mockChessGameAfterMove } = await import('@/mocks');
+        setChessGame(mockChessGameAfterMove);
+      } else {
+        await postChessAIMove(gameId);
+        // Again - websocket broadcast the result
+      }
+    } catch (err) {
+      setError('AI move failed.');
+    }
+  };
+  return { chessGame, sendMove, requestAIMove, connectionStatus };
+};
+</file>
+
+<file path="features/chess/ChessBoard.tsx">
+import { useMemo } from 'react';
+import { useChessBoard } from './hooks/useChessBoard';
+import type { ChessGameState, ChessMove } from './types'
+
+// FEN parser - converts FEN string to 8x8 matrix of piece symbols
+const parseFen = (fen: string): (string | null)[][] => {
+  const rows = fen.split(' ')[0].split('/');
+  return rows.map((row) => {
+    const cells: (string | null)[] = [];
+    for (const char of row) {
+      if (isNaN(Number(char))) {
+        cells.push(char);// piece simbol
+      } else {
+        cells.push(...Array(Number(char)).fill(null));// empty squares
+      }
+    }
+    return cells;
+  });
+};
+
+// Squares notation from row/col index 
+const toSquare = (row: number, col: number): string => {
+  const file = String.fromCharCode(97 + col); // a-h
+  const rank = String(8 - row);
+  return `${file}${rank}`;
+};
+
+const PIECE_UNICODE: Record<string, string> = {
+  K: '♔', Q: '♕', R: '♖', B: '♗', N: '♘', P: '♙', // white ♔	 en hexadecimal = U+2654
+  k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟', // black ♛	 en javascript =	\u265B
+};
+
+interface ChessBoardProps {
+  gameState: ChessGameState;
+  onMove: (move: Omit<ChessMove, 'piece'>) => void;
+  disabled?: boolean; // lock board during AI move or opponent's turn
+}
+
+export const ChessBoard = ({ gameState, onMove, disabled = false }: ChessBoardProps) => {
+  const { selectedSquare, selectSquare } = useChessBoard(onMove);
+  const board = useMemo(() => parseFen(gameState.fen), [gameState.fen]);
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+
+      {/* Status bar */}
+      <div className="text-sm font-mono text-gray-400 mb-1">
+        {gameState.status === 'active'
+          ? `${gameState.turn === 'white' ? '⬜' : '⬛'} ${gameState.turn}'s turn` // Cuadrado Blanco Grande	U+2B1C	\u2B1C
+          : `Game over — ${gameState.status}`}
+      </div>
+
+      {/* Board */}
+      <div
+        className="grid grid-cols-8 border-2 border-gray-600"
+        style={{ width: 'min(80vw, 480px)', height: 'min(80vw, 480px)' }}
+      >
+        {board.map((row, rowIdx) =>
+          row.map((piece, colIdx) => {
+            const square = toSquare(rowIdx, colIdx);
+            const isLight = (rowIdx + colIdx) % 2 === 0;
+            const isSelected = selectedSquare === square;
+            const isLastMove =
+              gameState.last_move?.from === square ||
+              gameState.last_move?.to === square;
+
+            return (
+              <button
+                key={square}
+                disabled={disabled || gameState.status !== 'active'}
+                onClick={() => selectSquare(square)}
+                className={[
+                  'flex items-center justify-center text-2xl select-none',
+                  'transition-colors duration-100',
+                  isLight ? 'bg-amber-100' : 'bg-amber-800',
+                  isSelected && 'ring-4 ring-inset ring-yellow-400',
+                  isLastMove && !isSelected && 'bg-yellow-300 opacity-80',
+                  disabled ? 'cursor-not-allowed' : 'cursor-pointer hover:opacity-75',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
+                {piece && (
+                  <span
+                    className={
+                      piece === piece.toUpperCase()
+                        ? 'text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]'
+                        : 'text-gray-900 drop-shadow-[0_1px_1px_rgba(255,255,255,0.3)]'
+                    }
+                  >
+                    {PIECE_UNICODE[piece] ?? piece}
+                  </span>
+                )}
+              </button>
+            );
+          })
+        )}
+      </div>
+
+      {/* File labels */}
+      <div className="flex" style={{ width: 'min(80vw, 480px)' }}>
+        {['a','b','c','d','e','f','g','h'].map((f) => (
+          <span key={f} className="flex-1 text-center text-xs text-gray-500 font-mono">
+            {f}
+          </span>
+        ))}
+      </div>
+
+    </div>
+  );
+};
+</file>
+
+<file path="features/chess/ChessGamePage.tsx">
+import { ChessBoard } from "./ChessBoard";
+import { useChessGame } from "./hooks/useChessGame";
+import { ConnectionStatus } from "@/components/ConnectionStatus";
+
+export const ChessGamePage = ({ gameId }: { gameId: string }) => {
+  const { chessGame, sendMove, requestAIMove, ConnectionStatus } = useChessGame(gameId);
+
+  if (!chessGame) return <div className="text-gray-400 font-mono">Loading game...</div>
+
+  return (
+    <div className="flex flex-col items-center gap-4 p-6">
+      <ConnectionStatus status={ConnectionStatus}/>
+      <ChessBoard
+        gameState={chessGame}
+        onMove={sendMove}
+        disabled={ConnectionStatus !== 'connected' && import.meta.env.VITE_USE_MOCK !== 'true'}
+      />
+      <button
+        onClick={requestAIMove}
+        className="px-4 py-2 bg-gray-800 text-white font-mono text-sm rounded hover:bg-gray-700 transition-colors"
+        >
+        Request AI Move
+      </button>
+    </div>
+  );
+};
+</file>
+
+<file path="features/chess/index.ts">
+import { getChessGame } from './service';
+
+export { ChessBoard } from './ChessBoard';
+export { useChessBoard } from './hooks/useChessBoard'
+export type { ChessGameState, ChessMove, ChessMovePayload } from './types';
+</file>
+
+<file path="features/chess/service.ts">
+import { get, post } from '@services/api';
+import type { ChessGameState, ChessMovePayload } from '../chess/types';
+// import type { ApiResponse } from '@/types';
+import type { ApiResponse } from '@/types';
+
+export const getChessGame = (game_id: string): Promise<ApiResponse<ChessGameState>> =>
+  get<ChessGameState>(`/chess/games/${game_id}`); // Corregido: eliminado el ' extra
+
+export const postChessMove = (payload: ChessMovePayload): Promise<ApiResponse<ChessGameState>> =>
+  post<ChessGameState, ChessMovePayload>('/chess/move', payload);
+
+export const postChessAIMove = (game_id: string): Promise<ApiResponse<ChessGameState>> =>
+  post<ChessGameState, { game_id: string }>('/chess/ai_move', { game_id });
+</file>
+
+<file path="features/chess/types.ts">
+export type ConnectionStatusType = 'connecting' | 'connected' | 'disconnected' | 'reconnecting';
+
+export interface ChessGameState {
+	game_id: string;
+	fen: string;				//standar representation board
+	turn: 'white' | 'black';
+	status: 'active' | 'checkmate' | 'draw';
+	last_move: ChessMove | null;
+}
+
+export interface ChessMove {
+	from: string;	// ex: "e2"
+	to: string;		// ex: "e4"
+	piece: string;
+}
+
+export interface ChessMovePayload {
+	game_id: string;
+	from: string;
+	to: string;
+}
+</file>
+
+<file path="features/sudoku/hooks/useSudokuBoard.ts">
+import { useState, useCallback } from "react";
+import type { SudokuMovePayload } from "../types";
+
+interface UseSudokuBoardReturn {
+  selectedCell: [number, number] | null;
+  selectCell: (row: number, col: number) => void;
+  inputValue: (value: number) => void;
+  clearSelection: () => void;
+}
+
+export const useSudokuBoard = (
+  gameId: string,
+  originalGrid: number[][], // the initial state - locked cells
+  onMove: (payload: SudokuMovePayload) => void
+): UseSudokuBoardReturn => {
+  const [selectedCell, setSelectedCell] = useState<[number, number] | null>(null);
+
+  const isLocked = useCallback(
+    (row: number, col: number): boolean => originalGrid[row][col] !== 0,
+    [originalGrid]
+  );
+
+  const selectCell = (row: number, col: number) => {
+    if (isLocked(row, col)) return;
+    setSelectedCell([row, col]);
+  };
+
+  const inputValue = (value: number) => {
+    if (!selectedCell) return;
+    const [row, col] = selectedCell;
+    if (isLocked(row, col)) return;
+
+    // Emit upward — never mutate grid directly here
+    onMove({ game_id: gameId, row, col, value });
+    setSelectedCell(null);
+  };
+  const clearSelection = () => setSelectedCell(null);
+
+  return { selectedCell, selectCell, inputValue, clearSelection };
+};
+</file>
+
+<file path="features/sudoku/hooks/useSudokuGame.ts">
+import { useEffect } from "react";
+import { useMatchStore } from "@/store";
+import { getSudokuGame, postSudokuMove } from "@/services/sudoku.service";
+import { useGameChannel } from "@/hooks";
+import type { SudokuMovePayload } from "../types";
+
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
+
+export const useSudokuGame = (gameId: string) => {
+  const sudokuGame = useMatchStore((s) => s.sudokuGame);
+  const setSudokuGame = useMatchStore((s) => s.setSudokuGame);
+  const startLoading = useMatchStore((s) => s.startLoading);
+  const setError = useMatchStore((s) => s.setError);
+  const { connectionStatus } = useGameChannel(USE_MOCK ? null : gameId);
+
+  useEffect(() => {
+    const load = async () => {
+      startLoading('sudoku');
+      try {
+        if (USE_MOCK) {
+          const { mockSudokuGame } = await import('@/mocks');
+          setSudokuGame(mockSudokuGame);
+        } else {
+          const res = await getSudokuGame(gameId);
+          setSudokuGame(res.data);
+        }
+      } catch (err) {
+        setError('Failed to load sudoku game');
+      }
+    };
+    load();
+  }, [gameId]);
+
+  const sendMove = async (payload: SudokuMovePayload) => {
+    try {
+      if (USE_MOCK) {
+        console.log('[MOCK] Sudoku move:', payload);
+      } else {
+        await postSudokuMove(payload);
+        // websocket broadcasts updated grid
+      }
+    } catch (err) {
+      setError('Move failed.');
+    }
+  };
+  return { sudokuGame, sendMove, connectionStatus };
+};
+</file>
+
+<file path="features/sudoku/index.ts">
+export { SudokuBoard} from './SudokuBoard';
+export { useSudokuBoard } from './hooks/useSudokuBoard'
+export type { SudokuGameState, SudokuMovePayload } from './types'
+</file>
+
+<file path="features/sudoku/service.ts">
+import { get, post } from '@services/api';
+import type { SudokuGameState, SudokuMovePayload } from '../features/sudoku/types';
+import type { ApiResponse } from '../types';
+
+export const getSudokuGame = (game_id: string): Promise<ApiResponse<SudokuGameState>> =>
+  get<SudokuGameState>(`/sudoku/games/${game_id}`);
+
+export const postSudokuMove = (payload: SudokuMovePayload): Promise<ApiResponse<SudokuGameState>> =>
+  post<SudokuGameState, SudokuMovePayload>('/sudoku/move', payload); // Corregido: payload
+</file>
+
+<file path="features/sudoku/SudokuBoard.tsx">
+import { useEffect, useCallback } from "react";
+import { useSudokuBoard } from './hooks/useSudokuBoard';
+import type { CellValue, SudokuGameState, SudokuMovePayload } from "./types";
+
+interface SudokuBoardProps {
+  gameState: SudokuGameState;
+  originalGrid: number[][];
+  onMove: (payload: SudokuMovePayload) => void;
+  disabled?: boolean;
+}
+
+const getCellClasses = (
+  isSelected: boolean,
+  isLocked: boolean,
+  isRelated: boolean,
+  value: CellValue
+): string => {
+  const base = 'relative flex items-center justify-center text-lg font-mono select-none transition-colors duration-100 cursor-pointer';
+
+  const bg = isSelected
+    ? 'bg-blue-400'
+    : isRelated
+    ? 'bg-blue-50'
+    : 'bg-white';
+
+  const text = isLocked
+    ? 'text-gray-800 font-bold cursor-default'
+    : value !== null
+    ? 'text-blue-600'
+    : 'text-transparent';
+
+  return `${base} border border-gray-300 ${bg} ${text}`;
+};
+
+export const SudokuBoard = ({
+  gameState,
+  originalGrid,
+  onMove,
+  disabled = false,
+}: SudokuBoardProps) => {
+  
+  if (!gameState?.grid) return <div>Loading game...</div>;
+  
+  const { selectedCell, selectCell, inputValue, clearSelection } =
+    useSudokuBoard(gameState.game_id, originalGrid, onMove);
+
+  // 1. Función para saber si la celda está bloqueada (original)
+  const isLocked = (row: number, col: number) => {
+    return originalGrid[row]?.[col] !== 0;
+  };
+
+  // 2. Función para resaltar celdas relacionadas
+  const isRelatedCell = useCallback((row: number, col: number) => {
+    if (!selectedCell) return false;
+    const [sr, sc] = selectedCell;
+    const isSameRow = sr === row;
+    const isSameCol = sc === col;
+    const isSameBox = Math.floor(row / 3) === Math.floor(sr / 3) &&
+                      Math.floor(col / 3) === Math.floor(sc / 3);
+    return isSameRow || isSameCol || isSameBox;
+  }, [selectedCell]);
+
+  // 3. Manejador de teclado (definido a nivel de componente, NO dentro de otra función)
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (disabled || gameState.status !== 'active') return;
+    
+    const num = parseInt(e.key);
+    if (num >= 1 && num <= 9) inputValue(num);
+    if (e.key === 'Backspace' || e.key === '0') inputValue(0);
+    if (e.key === 'Escape') clearSelection();
+  }, [disabled, gameState.status, inputValue, clearSelection]);
+  
+  // 4. Efecto para escuchar el teclado
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <div className="text-sm font-mono text-gray-400">
+        {gameState.status === 'active' ? `Difficulty: ${gameState.difficulty}` : gameState.status.toUpperCase()}
+      </div>
+
+      <div className="grid grid-cols-9 border-2 border-gray-700" style={{ width: 'min(80vw, 450px)', height: 'min(80vw, 450px)' }}>
+        {gameState.grid.map((row, rowIdx) =>
+          row.map((value, colIdx) => {
+            const isSelected = selectedCell?.[0] === rowIdx && selectedCell?.[1] === colIdx;
+            
+            return (
+              <button
+                key={`${rowIdx}-${colIdx}`}
+                disabled={disabled || isLocked(rowIdx, colIdx) || gameState.status !== 'active'}
+                onClick={() => selectCell(rowIdx, colIdx)}
+                className={getCellClasses(
+                  isSelected,
+                  isLocked(rowIdx, colIdx),
+                  isRelatedCell(rowIdx, colIdx),
+                  value as CellValue
+                )}
+              >
+                {value !== 0 ? value : ''}
+              </button>
+            );
+          })
+        )}
+      </div>
+
+      {!disabled && gameState.status === 'active' && (
+        <div className="grid grid-cols-9 gap-1" style={{ width: 'min(80vw, 450px)' }}>
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+            <button key={n} onClick={() => inputValue(n)} className="aspect-square rounded bg-gray-100 hover:bg-blue-100 text-gray-700 font-bold">
+              {n}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+</file>
+
+<file path="features/sudoku/SudokuGamePage.tsx">
+import { useRef } from "react";
+import { SudokuBoard } from "./SudokuBoard";
+import { useSudokuBoard } from "./hooks/useSudokuBoard";
+import { ConnectionStatus } from "@/components/ConnectionStatus";
+import { useSudokuGame } from "./hooks/useSudokuGame";
+
+export const SudokuGamePage = ({ gameId }: { gameId: string }) => {
+  const { sudokuGame, sendMove, connectionStatus } = useSudokuGame(gameId);
+
+  // Snapshot original grid on first load - never changes
+  const originalGridRef = useRef<number[][] | null>(null);
+  if (sudokuGame && !originalGridRef.current) {
+    originalGridRef.current = sudokuGame.grid.map((row) => [...row]);
+  }
+  if (!sudokuGame || !originalGridRef.current) {
+    return <div className="text-gray-400 font-mono">Loading game...</div>
+  }
+  return (
+    <div className="flex flex-col items-center gap-4 p-6">
+      <ConnectionStatus status={connectionStatus} />
+      <SudokuBoard
+        gameState={sudokuGame}
+        originalGrid={originalGridRef.current}
+        onMove={sendMove}
+        disabled={connectionStatus !== 'connected' && import.meta.env.VITE_USE_MOCK !== 'true'}
+      />
+    </div>
+  );
+};
+</file>
+
+<file path="features/sudoku/types.ts">
+export type CellValue = number | null;
+
+export type SudokuDifficulty = 'easy' | 'medium' | 'hard';
+export type SudokeStatus = 'active' | 'won' | 'lost';
+
+export type ConnectionStatusType = 'connecting' | 'connected' | 'disconnected' | 'reconnecting';
+
+export interface SudokuGameState {
+	game_id: string;
+	grid: number[][]; // 9x9 matrix
+	difficulty: SudokuDifficulty;
+	status: SudokeStatus;
+}
+
+export interface SudokuMovePayload {
+	game_id: string;
+	row: number;
+	col: number;
+	value: number;
+}
+</file>
+
+<file path="hooks/index.ts">
+export { useActionCable, disconnectConsumer } from './useActionCable';
+export { useGameChannel } from './useGameChannel';
+</file>
+
+<file path="hooks/useActionCable.ts">
+import { useEffect, useRef } from "react";
+import { createConsumer } from "@rails/actioncable";
+import type { Consumer } from "@rails/actioncable";
+
+const CABLE_URL = import.meta.env.VITE_CABLE_URL ?? 'ws://localhost:3000/cable';
+
+// SIngleton consumer - one Websocket for the hole app
+let consumer: Consumer | null = null;
+
+const getConsumer = (): Consumer => {
+  if (!consumer) {
+    consumer = createConsumer(CABLE_URL);
+  }
+  return consumer;
+};
+
+export const disconnectConsumer = (): void => {
+  consumer?.disconnect();
+  consumer = null;
+};
+
+export const useActionCable = () => {
+  const consumerRef = useRef<Consumer>(getConsumer());
+  return { cable: consumerRef.current };
+};
+</file>
+
+<file path="hooks/useGameChannel.ts">
+import { useEffect, useRef, useState } from "react";
+import { useActionCable } from "./useActionCable";
+import type { ChessGameState } from '@features/chess/types';
+import { SudokuGameState } from "@features/sudoku/types";
+import { useMatchStore } from "@/store";
+
+type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'reconecting';
+
+type GameChannelEvent =
+  | { type: 'move_updated'; game: ChessGameState }
+  | { type: 'sudoku_updated'; game: SudokuGameState }
+  | { type: 'game_over'; status: string }
+  | { type: 'opponent_disconnect' };
+
+interface UseGameChanelReturn {
+  connectionStatus: ConnectionStatus;
+  lastEvent: GameChannelEvent | null;
+}
+
+export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
+  const { cable } = useActionCable();
+  const subscriptionRef = useRef<ReturnType<typeof cable.subscriptions.create> | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('connecting');
+  const [lastEvent, setLastEvent] = useState<GameChannelEvent | null>(null);
+
+  const setChessGame = useMatchStore((s) => s.setChessGame);
+  const setSudokuGame = useMatchStore((s) => s.setSudokuGame);
+
+  useEffect(() => {
+    if (!gameId) return;
+
+    setConnectionStatus('connecting');
+
+    subscriptionRef.current = cable.subscriptions.create(
+      { channel: 'GameChannel', game_id: gameId },
+      {
+        connected() {
+          setConnectionStatus('connected');
+        },
+        disconnected() {
+          setConnectionStatus('disconnected');
+          // attempt reconnect after 3 seconds
+          setTimeout(() => {
+            setConnectionStatus('reconecting');
+          }, 3000);
+        },
+        rejected() {
+          setConnectionStatus('disconnected');
+          console.error(`[GameChanel] Subscription rejected for game ${gameId}`);
+        },
+        recieved(raw: unknown) {
+          if (!raw || typeof raw !== 'object') return;
+          const event = raw as GameChannelEvent;
+
+          setLastEvent(event);
+
+          switch (event.type) {
+            case 'move_updated':
+              setChessGame(event.game);
+              break;
+            case 'sudoku_updated':
+              setSudokuGame(event.game);
+              break;
+            case 'game_over':
+              break;
+            case "opponent_disconnect":
+              console.warn('[GameChannel] Opponent disconnected');
+              break;
+            default:
+              console.warn('[GameChannel] Unknown event:', event);
+          }
+        },
+      }
+    );
+    return () => {
+      subscriptionRef.current?.unsubscribe();
+      subscriptionRef.current = null;
+      setConnectionStatus('disconnected');
+    };
+  }, [gameId]);
+  return { connectionStatus, lastEvent };
+}
+</file>
+
+<file path="mocks/auth.mock.ts">
+import type { User } from '../types'
+
+export const mockUser: User = {
+  id: 1,
+  username: 'mdiaz-or',
+  elo: 1200,
+};
+</file>
+
+<file path="mocks/chess.mock.ts">
+import type { ChessGameState } from "@/features/chess/types";
+
+export const mockChessGame: ChessGameState = {
+  game_id: 'chess-mock-001',
+  fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', // standard start
+  turn: 'white',
+  status: 'active',
+  last_move: null,
+};
+
+export const mockChessGameAfterMove: ChessGameState = {
+  game_id: 'chess-mock-001',
+  fen: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1', // e2→e4
+  turn: 'black',
+  status: 'active',
+  last_move: {
+    from: 'e2',
+    to: 'e4',
+    piece: 'P',
+  },
+};
+
+export const mockChessGameCheckmate: ChessGameState = {
+  game_id: 'chess-mock-001',
+  fen: 'rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3', // fool's mate
+  turn: 'white',
+  status: 'checkmate',
+  last_move: {
+    from: 'd8',
+    to: 'h4',
+    piece: 'Q',
+  },
+} ;
+</file>
+
+<file path="mocks/index.ts">
+export { mockChessGame, mockChessGameAfterMove, mockChessGameCheckmate } from './chess.mock';
+export { mockSudokuGame, mockSudokuGameWon } from './sudoku.mock';
+export { mockUser} from './auth.mock';
+</file>
+
+<file path="mocks/sudoku.mock.ts">
+import type { SudokuGameState } from "@/features/sudoku/types";
+
+export const mockSudokuGame: SudokuGameState = {
+  game_id: 'sudoku-mock-001',
+  difficulty: 'easy',
+  status: 'active',
+  grid: [
+    [5, 3, 0, 0, 7, 0, 0, 0, 0],
+    [6, 0, 0, 1, 9, 5, 0, 0, 0],
+    [0, 9, 8, 0, 0, 0, 0, 6, 0],
+    [8, 0, 0, 0, 6, 0, 0, 0, 3],
+    [4, 0, 0, 8, 0, 3, 0, 0, 1],
+    [7, 0, 0, 0, 2, 0, 0, 0, 6],
+    [0, 6, 0, 0, 0, 0, 2, 8, 0],
+    [0, 0, 0, 4, 1, 9, 0, 0, 5],
+    [0, 0, 0, 0, 8, 0, 0, 7, 9],
+  ],
+};
+
+export const mockSudokuGameWon: SudokuGameState = {
+  game_id: 'sudoku-mock-001',
+  difficulty: 'easy',
+  status: 'won',
+  grid: [
+    [5, 3, 4, 6, 7, 8, 9, 1, 2],
+    [6, 7, 2, 1, 9, 5, 3, 4, 8],
+    [1, 9, 8, 3, 4, 2, 5, 6, 7],
+    [8, 5, 9, 7, 6, 1, 4, 2, 3],
+    [4, 2, 6, 8, 5, 3, 7, 9, 1],
+    [7, 1, 3, 9, 2, 4, 8, 5, 6],
+    [9, 6, 1, 5, 3, 7, 2, 8, 4],
+    [2, 8, 7, 4, 1, 9, 6, 3, 5],
+    [3, 4, 5, 2, 8, 6, 1, 7, 9],
+  ],
+};
+</file>
+
+<file path="services/api.ts">
+import axios from 'axios';
+import { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import type { ApiResponse } from '../types';
+
+const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api/v1';
+
+const api: AxiosInstance = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true,
+});
+
+// REQUEST interceptor — attach JWT token
+api.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    const token = localStorage.getItem('auth_token');
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// RESPONSE interceptor
+api.interceptors.response.use(
+  (response: AxiosResponse) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('auth_token');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+export const get = <T>(url: string): Promise<ApiResponse<T>> =>
+  api.get<ApiResponse<T>>(url).then((res) => res.data);
+
+export const post = <T, B = unknown>(url: string, body: B): Promise<ApiResponse<T>> =>
+  api.post<ApiResponse<T>>(url, body).then((res) => res.data);
+
+export default api;
+</file>
+
+<file path="store/authStore.ts">
+import { create } from 'zustand';
+import type { User } from '../types';
+
+interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+
+  // Actions
+  setUser: (user: User) => void;
+  clearUser: () => void;
+  setLoading: (loading: boolean) => void;
+}
+
+export const useAuthStore = create<AuthState>((set) => ({
+  user: null,
+  isAuthenticated: false,
+  isLoading: false,
+
+  setUser: (user) =>
+    set({ user, isAuthenticated: true, isLoading: false }),
+
+  clearUser: () =>
+    set({ user: null, isAuthenticated: false, isLoading: false }),
+
+  setLoading: (loading) =>
+    set({ isLoading: loading }),
+}));
+</file>
+
+<file path="store/index.ts">
+export { useAuthStore } from './authStore';
+export { useMatchStore } from './matchStore';
+</file>
+
+<file path="store/matchStore.ts">
+import { create } from 'zustand';
+import type { ChessGameState } from '@/features/chess/types';
+import type { SudokuGameState } from '@/features/sudoku/types';
+
+type GameType = 'chess' | 'sudoku' | null;
+type MatchStatus = 'idle' | 'loading' | 'in_progress' | 'finished' | 'error';
+
+interface MatchState {
+  status: MatchStatus;
+  gameType: GameType;
+  chessGame: ChessGameState;
+  sudokuGame: SudokuGameState;
+  error: string | null;
+
+  // Actions
+  startLoading: (gameType: GameType) => void;
+  setChessGame: (game: ChessGameState) => void;
+  setSudokuGame: (game: SudokuGameState) => void;
+  setError: (message: string) => void;
+  resetMatch: () => void;
+}
+
+const initialState = {
+  status: 'idle' as MatchStatus,
+  gameType: null as GameType,
+  chessGame: null,
+  sudokuGame: null,
+  error: null,
+};
+
+export const useMatchStore = create<MatchState>((set) => ({
+  ...initialState,
+
+  startLoading: (gameType) =>
+    set({ status: 'loading', gameType, error: null }),
+
+  setChessGame: (game) =>
+    set({ chessGame: game, status: 'in_progress', error: null }),
+
+  setSudokuGame: (game) =>
+    set({ sudokuGame: game, status: 'in_progress', error: null }),
+
+  setError: (message) =>
+    set({ status: 'error', error: message }),
+
+  resetMatch: () =>
+    set({ ...initialState }),
+}));
+</file>
+
+<file path="types/index.ts">
+export interface User {
+	id: number;
+	username: string;
+	elo: number;
+}
+
+export interface ApiResponse<T> {
+	data: T;
+	error?: string;
+}
+</file>
+
+<file path="utils/.gitkeep">
+
+</file>
+
+<file path="App.css">
+.counter {
+  font-size: 16px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 2px solid transparent;
+  transition: border-color 0.3s;
+  margin-bottom: 24px;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.hero {
+  position: relative;
+
+  .base,
+  .framework,
+  .vite {
+    inset-inline: 0;
+    margin: 0 auto;
+  }
+
+  .base {
+    width: 170px;
+    position: relative;
+    z-index: 0;
+  }
+
+  .framework,
+  .vite {
+    position: absolute;
+  }
+
+  .framework {
+    z-index: 1;
+    top: 34px;
+    height: 28px;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
+      scale(1.4);
+  }
+
+  .vite {
+    z-index: 0;
+    top: 107px;
+    height: 26px;
+    width: auto;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
+      scale(0.8);
+  }
+}
+
+#center {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  place-content: center;
+  place-items: center;
+  flex-grow: 1;
+
+  @media (max-width: 1024px) {
+    padding: 32px 20px 24px;
+    gap: 18px;
+  }
+}
+
+#next-steps {
+  display: flex;
+  border-top: 1px solid var(--border);
+  text-align: left;
+
+  & > div {
+    flex: 1 1 0;
+    padding: 32px;
+    @media (max-width: 1024px) {
+      padding: 24px 20px;
+    }
+  }
+
+  .icon {
+    margin-bottom: 16px;
+    width: 22px;
+    height: 22px;
+  }
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+#docs {
+  border-right: 1px solid var(--border);
+
+  @media (max-width: 1024px) {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+#next-steps ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 8px;
+  margin: 32px 0 0;
+
+  .logo {
+    height: 18px;
+  }
+
+  a {
+    color: var(--text-h);
+    font-size: 16px;
+    border-radius: 6px;
+    background: var(--social-bg);
+    display: flex;
+    padding: 6px 12px;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: box-shadow 0.3s;
+
+    &:hover {
+      box-shadow: var(--shadow);
+    }
+    .button-icon {
+      height: 18px;
+      width: 18px;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    li {
+      flex: 1 1 calc(50% - 8px);
+    }
+
+    a {
+      width: 100%;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+  }
+}
+
+#spacer {
+  height: 88px;
+  border-top: 1px solid var(--border);
+  @media (max-width: 1024px) {
+    height: 48px;
+  }
+}
+
+.ticks {
+  position: relative;
+  width: 100%;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: -4.5px;
+    border: 5px solid transparent;
+  }
+
+  &::before {
+    left: 0;
+    border-left-color: var(--border);
+  }
+  &::after {
+    right: 0;
+    border-right-color: var(--border);
+  }
+}
+</file>
+
+<file path="App.tsx">
+import { useEffect} from 'react'
+import { SudokuBoard } from './features/sudoku';
+import { useMatchStore } from './store';
+import { mockSudokuGame } from './mocks';
+import './App.css';
+
+export default function App() {
+  const sudokuGame = useMatchStore((s) => s.sudokuGame);
+  const setSudokuGame = useMatchStore((s) => s.setSudokuGame);
+
+  useEffect(() => {
+    setSudokuGame(mockSudokuGame);
+  }, [setSudokuGame]);
+
+  if (!sudokuGame) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <SudokuBoard
+      gameState={sudokuGame}
+      originalGrid={mockSudokuGame.grid}
+      onMove={(payload) => console.log('Move:', payload)}
+    />
+  );
+}
+</file>
+
+<file path="index.css">
+:root {
+  --text: #6b6375;
+  --text-h: #08060d;
+  --bg: #fff;
+  --border: #e5e4e7;
+  --code-bg: #f4f3ec;
+  --accent: #aa3bff;
+  --accent-bg: rgba(170, 59, 255, 0.1);
+  --accent-border: rgba(170, 59, 255, 0.5);
+  --social-bg: rgba(244, 243, 236, 0.5);
+  --shadow:
+    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 18px/145% var(--sans);
+  letter-spacing: 0.18px;
+  color-scheme: light dark;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #9ca3af;
+    --text-h: #f3f4f6;
+    --bg: #16171d;
+    --border: #2e303a;
+    --code-bg: #1f2028;
+    --accent: #c084fc;
+    --accent-bg: rgba(192, 132, 252, 0.15);
+    --accent-border: rgba(192, 132, 252, 0.5);
+    --social-bg: rgba(47, 48, 58, 0.5);
+    --shadow:
+      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+  }
+
+  #social .button-icon {
+    filter: invert(1) brightness(2);
+  }
+}
+
+#root {
+  width: 1126px;
+  max-width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  border-inline: 1px solid var(--border);
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+h1,
+h2 {
+  font-family: var(--heading);
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+h1 {
+  font-size: 56px;
+  letter-spacing: -1.68px;
+  margin: 32px 0;
+  @media (max-width: 1024px) {
+    font-size: 36px;
+    margin: 20px 0;
+  }
+}
+h2 {
+  font-size: 24px;
+  line-height: 118%;
+  letter-spacing: -0.24px;
+  margin: 0 0 8px;
+  @media (max-width: 1024px) {
+    font-size: 20px;
+  }
+}
+p {
+  margin: 0;
+}
+
+code,
+.counter {
+  font-family: var(--mono);
+  display: inline-flex;
+  border-radius: 4px;
+  color: var(--text-h);
+}
+
+code {
+  font-size: 15px;
+  line-height: 135%;
+  padding: 4px 8px;
+  background: var(--code-bg);
+}
+</file>
+
+<file path="main.tsx">
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.tsx'
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+</file>
+
+</files>

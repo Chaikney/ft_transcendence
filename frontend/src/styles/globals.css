@@ -1,0 +1,325 @@
+/* ── Reset ── */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 2;
+    padding: 8;
+}
+
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: var(--font-mono);
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    min-height: 100dvh;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* ── Scanlines overlay ── */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg,
+            transparent,
+            transparent 2px,
+            var(--scanline-color) 2px,
+            var(--scanline-color) 4px);
+    pointer-events: none;
+    z-index: 9999;
+}
+
+/* ── CRT vignette ── */
+body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center,
+            transparent 60%,
+            rgba(0, 0, 0, 0.7) 100%);
+    pointer-events: none;
+    z-index: 9998;
+}
+
+/* ── Typography ── */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text-primary);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+/* ── Glow text utility ── */
+.glow {
+    text-shadow: var(--glow-text);
+}
+
+.glow-border {
+    box-shadow: var(--glow-border);
+}
+
+/* ── Terminal cursor blink ── */
+.cursor::after {
+    content: '_';
+    animation: blink 1s step-end infinite;
+    color: var(--accent);
+}
+
+/* ── Custom scrollbar ── */
+::-webkit-scrollbar {
+    width: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-base);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 0;
+}
+
+/* ── Focus ── */
+:focus-visible {
+    outline: 1px solid var(--accent);
+    outline-offset: 2px;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.3;
+}
+
+/* ── Selection ── */
+::selection {
+    background: var(--accent-bg);
+    color: var(--accent);
+}
+
+/* ── Keyframes ── */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes board-reveal {
+    from {
+        opacity: 0;
+        transform: scale(0.97) translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+@keyframes pulse-ring {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+@keyframes glitch {
+    0% {
+        clip-path: inset(40% 0 61% 0);
+        transform: translate(-2px, 0);
+    }
+
+    20% {
+        clip-path: inset(92% 0 1% 0);
+        transform: translate(2px, 0);
+    }
+
+    40% {
+        clip-path: inset(43% 0 51% 0);
+        transform: translate(-1px, 0);
+    }
+
+    60% {
+        clip-path: inset(25% 0 58% 0);
+        transform: translate(1px, 0);
+    }
+
+    80% {
+        clip-path: inset(54% 0 7% 0);
+        transform: translate(-2px, 0);
+    }
+
+    100% {
+        clip-path: inset(58% 0 43% 0);
+        transform: translate(2px, 0);
+    }
+}
+
+@keyframes flicker {
+
+    0%,
+    95%,
+    100% {
+        opacity: 1;
+    }
+
+    96% {
+        opacity: 0.6;
+    }
+
+    97% {
+        opacity: 1;
+    }
+
+    98% {
+        opacity: 0.4;
+    }
+
+    99% {
+        opacity: 0.9;
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 280ms ease both;
+}
+
+.animate-board-reveal {
+    animation: board-reveal 350ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-shimmer {
+    animation: shimmer 1.6s infinite;
+}
+
+.animate-pulse-ring {
+    animation: pulse-ring 1.4s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+    animation: spin 2s linear infinite;
+}
+
+.animate-blink {
+    animation: blink 1s step-end infinite;
+}
+
+.animate-flicker {
+    animation: flicker 8s infinite;
+}
+
+/* ── Terminal card ── */
+.terminal-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-strong);
+    box-shadow: var(--glow-border), inset 0 0 60px rgba(0, 212, 255, 0.02);
+    position: relative;
+}
+
+.terminal-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg,
+            rgba(0, 212, 255, 0.03) 0%,
+            transparent 50%,
+            rgba(77, 124, 255, 0.02) 100%);
+    pointer-events: none;
+}
+
+/* ── Corner brackets ── */
+.bracket-corners {
+    position: relative;
+}
+
+.bracket-corners::before,
+.bracket-corners::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-color: var(--accent);
+    border-style: solid;
+}
+
+.bracket-corners::before {
+    top: -1px;
+    left: -1px;
+    border-width: 2px 0 0 2px;
+}
+
+.bracket-corners::after {
+    bottom: -1px;
+    right: -1px;
+    border-width: 0 2px 2px 0;
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+}
+
+.skeleton {
+    border-radius: 2px;
+    background: linear-gradient(90deg,
+            var(--bg-surface) 25%,
+            var(--bg-elevated) 50%,
+            var(--bg-surface) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s infinite;
+}
