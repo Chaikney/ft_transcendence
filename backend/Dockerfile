@@ -1,15 +1,17 @@
 FROM ruby:4.0.3-slim AS base 
-# (Nota: si tu .ruby-version dice otra versión, cambia el 3.2.2 por la tuya)
 
 # Instalamos lo necesario para que PostgreSQL y Rails funcionen
 RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs bash libyaml-dev
 
-# Carpeta donde vivirá el código
+# Carpeta donde vivirá el código dentro del contenedor
 WORKDIR /app
 
-# Copiamos las gemas e instalamos TODO (incluyendo las de desarrollo)
+# Copiamos las gemas e instalamos
 COPY Gemfile Gemfile.lock ./
 RUN bundle install
+
+# 🟢 AÑADIMOS ESTO: Copia todo el resto del código del backend dentro del contenedor
+COPY . .
 
 # El script para evitar el error del server.pid
 COPY entrypoint.sh /usr/bin/

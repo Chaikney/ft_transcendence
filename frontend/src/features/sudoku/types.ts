@@ -3,8 +3,6 @@ export type CellValue = number | null;
 export type SudokuDifficulty = 'easy' | 'medium' | 'hard';
 export type SudokeStatus = 'active' | 'won' | 'lost';
 
-export type ConnectionStatusType = 'connecting' | 'connected' | 'disconnected' | 'reconnecting';
-
 export interface SudokuGameState {
 	game_id: string;
 	grid: number[][]; // 9x9 matrix

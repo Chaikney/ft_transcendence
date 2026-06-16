@@ -1,72 +1,23 @@
-module Api
-  class AuthController < ::ApplicationController
-    
-    # Permite usar estas rutas sin tener token previo
-    skip_before_action :authorize_request, only: [:login, :register]
+class User < ApplicationRecord
+    has_secure_password
+    has_many :games_as_player1, class_name: 'Game', foreign_key: 'player1_id'
+    has_many :games_as_player2, class_name: 'Game', foreign_key: 'player2_id'
 
-    # Necesitamos incluir esto para poder generar la URL completa de la imagen
-    include Rails.application.routes.url_helpers
-    
-    # --- REGISTRO ---
-    def register
-      user = User.new(user_params)
-      
-      if user.save
-        # Al registrarse, fabricamos el token y LE ENSEÑAMOS EL SECRETO al frontend
-        # Usamos el servicio limpio
-        token = JwtService.encode(user_id: user.id)
-        
-        render json: { 
-          user: user_data_with_avatar(user), 
-          token: token, 
-          otp_secret: user.otp_secret # <- La QR para el frontend
-        }, status: :created
-      else
-        render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
-      end
+    def all_games
+        Game.where("player1_id = ? OR player2_id = ?", self.id, self.id)
     end
 
-    # --- LOGIN CON 2FA ---
-    def login
-      user = User.find_by(email: params[:email])
-      
-      # 1º Filtro: Comprobamos el email y la contraseña (Bcrypt)
-      if user && user.authenticate(params[:password])
-        
-        # 2º Filtro: Autenticación en 2 Pasos (ROTP)
-        totp = ROTP::TOTP.new(user.otp_secret)
-        
-        # Comprobamos si el código de 6 dígitos que envió el usuario es válido
-        if params[:totp_code].present? && totp.verify(params[:totp_code])
-          token = JwtService.encode(user_id: user.id)
-          render json: { user: user_data_with_avatar(user), token: token }, status: :ok
-        else
-          # Falló el código del móvil
-          render json: { error: 'Código 2FA incorrecto o caducado' }, status: :unauthorized
-        end
-        
-      else
-        # Falló el email o la contraseña
-        render json: { error: 'Credenciales inválidas' }, status: :unauthorized
-      end
-    end
+    has_many :friendships, dependent: :destroy
+    has_many :friends, through: :friendships
+
+    has_many :inverse_friendships, class_name: 'Friendship', foreign_key: 'friend_id', dependent: :destroy
+    has_many :inverse_friends, through: :inverse_friendships, source: :user
+
+    before_create :generate_otp_secret
 
     private
 
-    def user_params
-      params.permit(:username, :email, :password, :avatar)
+    def generate_otp_secret
+        self.otp_secret = ROTP::Base32.random
     end
-
-    # CORRECCIÓN: La llave '{' baja a la siguiente línea
-    def user_data_with_avatar(user) 
-      {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        elo: user.elo,
-        avatar_url: user.avatar.attached? ? url_for(user.avatar) : "https://api.dicebear.com/7.x/bottts/png?seed=#{user.username}&colors=black,gray" 
-      }
-    end
-    
-  end
 end

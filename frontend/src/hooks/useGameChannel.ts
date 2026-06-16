@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useActionCable } from "./useActionCable";
 import type { ChessGameState } from '@features/chess/types';
-import { SudokuGameState } from "@features/sudoku/types";
+import type { SudokuGameState } from "@features/sudoku/types";
 import { useMatchStore } from "@/store";
 
 type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'reconecting';
