@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      # WHy are these volumes like this?
     volumes:
       - .:/app
       - /app/node_modules

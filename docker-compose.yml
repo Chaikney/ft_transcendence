@@ -1,0 +1,108 @@
+name: ft_transcendence
+
+# NOTE This version is to call the Dockerfile in their own folders
+# TODO First make sure it brings everything up
+services:
+  web:
+    build:
+      context: ./frontend/
+      args:
+        ALP_VERSION: ${ALP_VERSION}
+#    restart: unless-stopped
+    depends_on:
+      - ruby
+    env_file: ".env"
+    # IDEA Does the web volume need access to the ruby files? Or the react ones?
+    volumes:
+       - type: volume
+         source: FE_vol
+         target: ${FE_FILES}
+       - /app
+       - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    networks:
+      - app_int
+    # NOTE Binds to high host ports so that we can run rootlessly
+    # IDEA This may need to change as we get to completion?
+    ports:
+      - "8080:80"
+      - "8443:443"
+      - "5173:5173"
+    # NOTE This is an alternative way to specify healthchecks if they are not in the image
+    # healthcheck:
+    #   test: ["CMD-SHELL","nginx -t"]
+    #   interval: 30s
+    #   timeout: 5s
+    #   retries: 3
+
+  # TODO This is *my* version of the DB container; the backend compose file uses a plain postgres image directly without a Dockerfile
+  db:
+    build:
+      context: ./infra/srcs/reqs/postgres
+      args:
+        ALP_VERSION: ${ALP_VERSION}
+        DB_FILES: ${DB_FILES}
+        POSTGRES_DB: $POSTGRES_DB
+        POSTGRES_USER: $POSTGRES_USER
+        POSTGRES_PASSWORD: /run/secrets/RB_DBPASS
+    secrets:
+      - RB_DBPASS
+#    restart: on-failure:3
+    volumes:
+      - type: volume
+        source: DB_vol
+        target: ${DB_FILES}
+    networks:
+      - app_int
+    expose:
+      - "5432"
+    env_file: ".env"
+    # healthcheck:
+    #   test: ["CMD-SHELL","pg_isready -U postgres || exit 1"]
+    #   interval: 30s
+    #   timeout: 5s
+    #   retries: 3
+
+  ruby:
+    build:
+      context: ./frontend
+      args:
+        ALP_VERSION: ${ALP_VERSION}
+        RB_FILES: ${RB_FILES}
+        RB_DBHOST: ${RB_DBHOST}
+        POSTGRES_DB: $POSTGRES_DB
+        POSTGRES_USER: $POSTGRES_USER
+        POSTGRES_PASSWORD: /run/secrets/RB_DBPASS
+        RUBY_VERSION: ${RUBY_VERSION}
+        RUBY_DOWNLOAD_SHA256: ${RUBY_DOWNLOAD_SHA256}
+    secrets:
+      - RB_DBPASS
+    env_file: ".env"
+    depends_on:
+      - db
+#    restart: on-failure:3
+    # NOTE Without this it stops immediately. One day I will remember why...
+    tty: True
+    networks:
+      - app_int
+    expose:
+      - "3000"
+
+# TODO Do we need a location for the ruby files? Other pieces?
+volumes:
+  DB_vol:
+  FE_vol:
+
+# NOTE This should point to a folder *outside* of version control!
+secrets:
+  # RB_DBUSER:
+  #   file: ../secret/rb_dbuser
+  # RB_DBNAME:
+  #   file: ../secret/rb_dbname
+  RB_DBPASS:
+    file: ../secret/rb_dbpass
+
+# "the presence of these objects is sufficient to define them"
+networks:
+  app_int:
