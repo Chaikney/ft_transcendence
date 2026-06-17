@@ -23,5 +23,7 @@ Rails.application.routes.draw do
     delete '/friends/reject', to: 'friendships#reject'
 
     post '/auth/42/callback', to: 'auth42#callback'
+    post '42/callback', to: 'oauth#callback_42'
+
   end
 end
