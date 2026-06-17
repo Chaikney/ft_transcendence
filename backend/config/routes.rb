@@ -21,5 +21,7 @@ Rails.application.routes.draw do
     post '/friends/request', to: 'friendships#create'
     patch '/friends/accept', to: 'friendships#accept'
     delete '/friends/reject', to: 'friendships#reject'
+
+    post '/auth/42/callback', to: 'auth42#callback'
   end
 end
