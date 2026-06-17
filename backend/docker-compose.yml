@@ -19,8 +19,20 @@ services:
       - "3000:3000"
     env_file:
       - .env
+    environment:
+      CHESS_AI_ADVERSARY_URL: http://ai_adversary:8000
     depends_on:
       - db
+      - ai_adversary
+
+  ai_adversary:
+    build:
+      context: ./ai_adversary
+    command: python main.py
+    volumes:
+      - ./ai_adversary:/app
+    ports:
+      - "8000:8000"
 
 volumes:
   postgres_data:
