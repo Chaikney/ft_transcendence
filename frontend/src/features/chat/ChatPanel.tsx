@@ -1,20 +1,38 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useChatStore } from '@/store/chatStore';
-import { useAuthStore } from '@/store/authStore';
+import { useChatStore } from '../../store/chatStore';
+import { useAuthStore } from '../../store/authStore';
 import { useChatChannel } from '@/hooks/useChatChannel';
-import { Avatar } from '@/components/Avatar';
-import type { ChatRoom } from './types';
+import { Avatar } from '../../components/Avatar';
+import { onForbidden } from '../../services/api';
+import { get } from '../../services/api';
+import type { ChatMessage } from './types';
 
+// ── Types ──────────────────────────────────────────────────────────────────
+interface DirectRoom {
+  friendId:   number;
+  friendName: string;
+  online:     boolean;
+  unread:     number;
+}
+
+// ── Mock loader ────────────────────────────────────────────────────────────
 const loadMockData = async () => {
-  const { mockChatRooms, mockMessages } = await import('@/mocks/chat.mock');
+  const { mockChatRooms, mockMessages } = await import('../../mocks/chat.mock');
   return { mockChatRooms, mockMessages };
 };
 
+// ── Helpers ────────────────────────────────────────────────────────────────
 const fmtTime = (iso: string) => {
   const d = new Date(iso);
-  return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+  return `${d.getHours().toString().padStart(2, '0')}:${d
+    .getMinutes()
+    .toString()
+    .padStart(2, '0')}`;
 };
 
+const getRoomKey = (friendId: number) => String(friendId);
+
+// ── Styles ────────────────────────────────────────────────────────────────
 const s = {
   panel:
     'fixed bottom-20 right-6 z-[900] flex flex-col ' +
@@ -40,43 +58,32 @@ const s = {
   roomList:
     'w-24 flex-shrink-0 border-r border-border flex flex-col overflow-y-auto',
   roomItem:
-    'flex flex-col items-center gap-1 px-1 py-2 cursor-pointer border-b border-border transition-colors',
-  roomItemActive:
-    'bg-accent-bg border-l-2 border-l-accent',
-  roomItemInactive:
-    'hover:bg-bg-elevated',
+    'flex flex-col items-center gap-1 px-1 py-2 cursor-pointer ' +
+    'border-b border-border transition-colors',
+  roomItemActive:  'bg-accent-bg border-l-2 border-l-accent',
+  roomItemInactive: 'hover:bg-bg-elevated',
   roomName:
     'text-[9px] font-mono text-center truncate w-full px-1',
   roomUnread:
-    'w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-mono font-bold',
-  msgArea:
-    'flex-1 flex flex-col overflow-hidden',
+    'w-4 h-4 rounded-full flex items-center justify-center ' +
+    'text-[8px] font-mono font-bold',
+  msgArea:    'flex-1 flex flex-col overflow-hidden',
   msgHeader:
     'px-3 py-1.5 border-b border-border flex items-center gap-2 flex-shrink-0',
   msgHeaderName:
     'text-[10px] font-mono text-text-secondary flex-1 truncate',
   msgList:
     'flex-1 overflow-y-auto flex flex-col gap-1 px-3 py-2',
-  msgRow:
-    'flex flex-col gap-0.5 max-w-[90%]',
-  msgRowOwn:
-    'self-end items-end',
-  msgRowOther:
-    'self-start items-start',
+  msgRow:         'flex flex-col gap-0.5 max-w-[90%]',
+  msgRowOwn:      'self-end items-end',
+  msgRowOther:    'self-start items-start',
   msgBubble:
     'px-3 py-1.5 text-[11px] font-mono leading-relaxed break-words max-w-full',
-  msgBubbleOwn:
-    'text-bg-base',
-  msgBubbleOther:
-    'text-text-primary',
-  msgMeta:
-    'text-[9px] font-mono text-text-muted px-1',
+  msgMeta:        'text-[9px] font-mono text-text-muted px-1',
   typingRow:
     'px-3 py-1 flex items-center gap-1.5 flex-shrink-0',
-  typingDot:
-    'w-1 h-1 rounded-full bg-text-muted',
-  typingText:
-    'text-[9px] font-mono text-text-muted',
+  typingDot:      'w-1 h-1 rounded-full bg-text-muted',
+  typingText:     'text-[9px] font-mono text-text-muted',
   inputRow:
     'flex items-center gap-2 px-3 py-2 border-t border-border flex-shrink-0',
   input:
@@ -86,83 +93,166 @@ const s = {
     'placeholder:text-text-muted transition-all',
   sendBtn:
     'text-accent hover:text-accent-hover font-mono text-xs cursor-pointer ' +
-    'transition-colors px-1 flex-shrink-0 disabled:opacity-30 disabled:cursor-not-allowed',
+    'transition-colors px-1 flex-shrink-0 ' +
+    'disabled:opacity-30 disabled:cursor-not-allowed',
   empty:
     'flex-1 flex flex-col items-center justify-center gap-2 text-center px-4',
-  emptyText:
-    'text-[10px] font-mono text-text-muted leading-relaxed',
-  emptyAccent:
-    'text-accent text-[10px] font-mono animate-blink',
+  emptyText:  'text-[10px] font-mono text-text-muted leading-relaxed',
+  emptyAccent: 'text-accent text-[10px] font-mono animate-blink',
+  blockedBanner:
+    'mx-3 mb-2 px-3 py-2 text-[10px] font-mono border ' +
+    'border-status-error/30 bg-status-error-bg text-status-error',
 } as const;
 
+// ── Component ──────────────────────────────────────────────────────────────
 export const ChatPanel = () => {
   const currentUser = useAuthStore((s) => s.user);
   const isMock      = import.meta.env.VITE_USE_MOCK === 'true';
 
   const {
-    rooms, activeRoomId, messages, typingUsers,
-    setRooms, setMessages, setActiveRoom, closeChat,
+    messages,
+    typingUsers,
+    setMessages,
+    closeChat,
+    markRoomRead,
   } = useChatStore();
 
-  const { sendMessage, sendTyping } = useChatChannel();
+  // ── Local state ───────────────────────────────────────────────────────
+  const [rooms,          setRooms]          = useState<DirectRoom[]>([]);
+  const [activeFriendId, setActiveFriendId] = useState<number | null>(null);
+  const [input,          setInput]          = useState('');
+  const [isTyping,       setIsTyping]       = useState(false);
+  const [blocked,        setBlocked]        = useState(false);
+  const [loadingMsgs,    setLoadingMsgs]    = useState(false);
 
-  const [input,    setInput]    = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const msgEndRef               = useRef<HTMLDivElement>(null);
-  const typingTimerRef          = useRef<ReturnType<typeof setTimeout>>();
-  const inputRef                = useRef<HTMLInputElement>(null);
+  const msgEndRef      = useRef<HTMLDivElement>(null);
+  const typingTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const inputRef       = useRef<HTMLInputElement>(null);
 
-  // Load initial state for development/testing when mock mode is enabled
+  // ── WebSocket — subscribed per active friend ──────────────────────────
+  const { sendMessage, sendTyping } = useChatChannel(activeFriendId);
+
+  // ── Load initial room list ────────────────────────────────────────────
   useEffect(() => {
-    if (!isMock) return;
-    loadMockData().then(({ mockChatRooms, mockMessages }) => {
-      setRooms(mockChatRooms);
-      mockChatRooms.forEach((r: ChatRoom) => {
-        if (mockMessages[r.id]) setMessages(r.id, mockMessages[r.id]);
+    if (isMock) {
+      loadMockData().then(({ mockChatRooms, mockMessages }) => {
+        const mapped: DirectRoom[] = mockChatRooms.map((r) => {
+          const other = r.participants.find((p) => p.id !== currentUser?.id);
+          return {
+            friendId:   other?.id   ?? 0,
+            friendName: other?.username ?? 'unknown',
+            online:     other?.online   ?? false,
+            unread:     r.unread_count,
+          };
+        });
+        setRooms(mapped);
+        // Load mock messages keyed by friendId
+        mockChatRooms.forEach((r) => {
+          const other = r.participants.find((p) => p.id !== currentUser?.id);
+          if (other && mockMessages[r.id]) {
+            setMessages(String(other.id), mockMessages[r.id]);
+          }
+        });
+        setActiveFriendId(mapped[0]?.friendId ?? null);
       });
-      setActiveRoom(mockChatRooms[0]?.id ?? null);
-    });
-  }, []);
+      return;
+    }
 
-  // Auto-scroll to the bottom of the message list whenever new messages arrive or room changes
+    // Real: GET /api/users (friends list doubles as room list)
+    get<{ id: number; username: string; online: boolean }[]>('/users')
+      .then((res) => {
+        const mapped: DirectRoom[] = res.data.map((u) => ({
+          friendId:   u.id,
+          friendName: u.username,
+          online:     u.online,
+          unread:     0,
+        }));
+        setRooms(mapped);
+        if (mapped.length > 0) setActiveFriendId(mapped[0].friendId);
+      })
+      .catch(console.error);
+  }, [currentUser?.id]);
+
+  // ── Load message history when active friend changes ───────────────────
+  useEffect(() => {
+    if (!activeFriendId) return;
+    setBlocked(false);
+
+    const roomKey = getRoomKey(activeFriendId);
+    markRoomRead(roomKey);
+
+    if (isMock) return; // mock messages already loaded above
+
+    setLoadingMsgs(true);
+    get<ChatMessage[]>(`/messages/history/${activeFriendId}`)
+      .then((res) => {
+        setMessages(roomKey, res.data);
+      })
+      .catch((err) => {
+        if (err.response?.status === 403) setBlocked(true);
+        console.error('[ChatPanel] history fetch failed:', err);
+      })
+      .finally(() => setLoadingMsgs(false));
+
+  }, [activeFriendId]);
+
+  // ── Listen for global 403 forbidden events ────────────────────────────
+  useEffect(() => {
+    const unsubscribe = onForbidden((detail) => {
+      if (detail.blocked_id === activeFriendId) {
+        setBlocked(true);
+      }
+    });
+    return unsubscribe;
+  }, [activeFriendId]);
+
+  // ── Scroll to bottom ──────────────────────────────────────────────────
   useEffect(() => {
     msgEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, activeRoomId]);
+  }, [messages, activeFriendId]);
 
-  // Maintain focus on the input field when switching between chat rooms
+  // ── Focus input on room change ────────────────────────────────────────
   useEffect(() => {
     inputRef.current?.focus();
-  }, [activeRoomId]);
+  }, [activeFriendId]);
 
-  const activeRoom     = rooms.find((r) => r.id === activeRoomId);
-  const activeMessages = activeRoomId ? (messages[activeRoomId] ?? []) : [];
-  const typingInRoom   = activeRoomId ? (typingUsers[activeRoomId] ?? []) : [];
+  // ── Derived ───────────────────────────────────────────────────────────
+  const roomKey        = activeFriendId ? getRoomKey(activeFriendId) : null;
+  const activeMessages = roomKey ? (messages[roomKey] ?? []) : [];
+  const typingInRoom   = roomKey ? (typingUsers[roomKey] ?? [])   : [];
+  const activeRoom     = rooms.find((r) => r.friendId === activeFriendId);
 
-  // Handles message transmission and cleans up active typing state
-  const handleSend = useCallback(() => {
-    if (!input.trim() || !activeRoomId || !currentUser) return;
+  // ── Send ──────────────────────────────────────────────────────────────
+  const handleSend = useCallback(async () => {
+    if (!input.trim() || !activeFriendId || !currentUser || blocked) return;
+
+    const content = input.trim();
+    setInput('');
+
+    clearTimeout(typingTimerRef.current);
+    if (isTyping) {
+      sendTyping(false);
+      setIsTyping(false);
+    }
 
     if (isMock) {
-      useChatStore.getState().addMessage(activeRoomId, {
+      // Optimistic update in mock mode only
+      useChatStore.getState().addMessage(getRoomKey(activeFriendId), {
         id:         `msg-${Date.now()}`,
-        content:    input.trim(),
+        content,
         sender_id:  currentUser.id,
         sender:     currentUser.username,
-        room_id:    activeRoomId,
+        room_id:    getRoomKey(activeFriendId),
         created_at: new Date().toISOString(),
         read:       true,
       });
-    } else {
-      sendMessage(activeRoomId, input.trim());
+      return;
     }
 
-    setInput('');
-    clearTimeout(typingTimerRef.current);
-    if (isTyping) {
-      sendTyping(activeRoomId, false);
-      setIsTyping(false);
-    }
-  }, [input, activeRoomId, currentUser, isMock, isTyping]);
+    // Real: POST /api/messages — WS broadcast echoes back
+    await sendMessage(content);
+
+  }, [input, activeFriendId, currentUser, blocked, isMock, isTyping]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -171,33 +261,32 @@ export const ChatPanel = () => {
     }
   };
 
-  // Triggers typing status and implements a debounce (retardo) timer to stop it after inactivity
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
-    if (!activeRoomId || isMock) return;
+    if (!activeFriendId || isMock) return;
     if (!isTyping) {
-      sendTyping(activeRoomId, true);
+      sendTyping(true);
       setIsTyping(true);
     }
     clearTimeout(typingTimerRef.current);
     typingTimerRef.current = setTimeout(() => {
-      sendTyping(activeRoomId, false);
+      sendTyping(false);
       setIsTyping(false);
     }, 2000);
   };
 
-  // Helper to determine the display name based on room type and participants
-  const getRoomDisplayName = (room: ChatRoom) => {
-    if (room.type === 'group') return room.name ?? 'Group';
-    const other = room.participants.find((p) => p.id !== currentUser?.id);
-    return other?.username ?? 'Chat';
+  const handleSelectRoom = (friendId: number) => {
+    setActiveFriendId(friendId);
+    setInput('');
   };
 
+  // ── Render ────────────────────────────────────────────────────────────
   return (
     <div className={s.panel}>
       <span className={s.bracketTL} aria-hidden />
       <span className={s.bracketBR} aria-hidden />
 
+      {/* Header */}
       <div className={s.header}>
         <span className={s.headerTitle}>&gt; chat_client</span>
         <span
@@ -213,46 +302,44 @@ export const ChatPanel = () => {
       </div>
 
       <div className={s.body}>
+
         {/* Room list */}
         <div className={s.roomList}>
           {rooms.map((room) => {
-            const isActive  = room.id === activeRoomId;
-            const name      = getRoomDisplayName(room);
-            const otherUser = room.type === 'direct'
-              ? room.participants.find((p) => p.id !== currentUser?.id)
-              : null;
-
+            const isActive = room.friendId === activeFriendId;
             return (
               <div
-                key={room.id}
+                key={room.friendId}
                 className={[
                   s.roomItem,
                   isActive ? s.roomItemActive : s.roomItemInactive,
                 ].join(' ')}
-                onClick={() => setActiveRoom(room.id)}
+                onClick={() => handleSelectRoom(room.friendId)}
                 role="button"
                 tabIndex={0}
-                onKeyDown={(e) => e.key === 'Enter' && setActiveRoom(room.id)}
-                aria-label={`Chat with ${name}`}
+                onKeyDown={(e) =>
+                  e.key === 'Enter' && handleSelectRoom(room.friendId)
+                }
+                aria-label={`Chat with ${room.friendName}`}
                 aria-pressed={isActive}
               >
                 <Avatar
-                  username={name}
+                  username={room.friendName}
                   size="sm"
-                  status={otherUser?.online ? 'online' : 'offline'}
+                  status={room.online ? 'online' : 'offline'}
                 />
                 <span
                   className={s.roomName}
                   style={{ color: isActive ? '#00d4ff' : '#4a9eca' }}
                 >
-                  {name}
+                  {room.friendName}
                 </span>
-                {room.unread_count > 0 && (
+                {room.unread > 0 && (
                   <span
                     className={s.roomUnread}
                     style={{ background: '#6c63ff', color: '#fff' }}
                   >
-                    {room.unread_count > 9 ? '9+' : room.unread_count}
+                    {room.unread > 9 ? '9+' : room.unread}
                   </span>
                 )}
               </div>
@@ -269,25 +356,41 @@ export const ChatPanel = () => {
             </div>
           ) : (
             <>
+              {/* Room header */}
               <div className={s.msgHeader}>
                 <span className={s.msgHeaderName}>
-                  #{getRoomDisplayName(activeRoom)}
+                  #{activeRoom.friendName}
                 </span>
-                {activeRoom.participants.find(
-                  (p) => p.id !== currentUser?.id
-                )?.online && (
+                {activeRoom.online && (
                   <span
                     style={{
-                      width: '6px', height: '6px', borderRadius: '50%',
-                      background: '#00ff88', boxShadow: '0 0 4px #00ff88',
-                      display: 'inline-block', flexShrink: 0,
+                      width: '6px', height: '6px',
+                      borderRadius: '50%',
+                      background:  '#00ff88',
+                      boxShadow:   '0 0 4px #00ff88',
+                      display:     'inline-block',
+                      flexShrink:  0,
                     }}
                   />
                 )}
               </div>
 
+              {/* Blocked banner */}
+              {blocked && (
+                <div className={s.blockedBanner}>
+                  // messaging unavailable — block is active between
+                  you and {activeRoom.friendName}
+                </div>
+              )}
+
+              {/* Messages */}
               <div className={s.msgList} role="log" aria-live="polite">
-                {activeMessages.length === 0 && (
+                {loadingMsgs && (
+                  <div className={s.empty}>
+                    <span className={s.emptyText}>// loading history...</span>
+                  </div>
+                )}
+                {!loadingMsgs && activeMessages.length === 0 && (
                   <div className={s.empty}>
                     <span className={s.emptyText}>// no messages yet</span>
                   </div>
@@ -305,7 +408,7 @@ export const ChatPanel = () => {
                       <div
                         className={[
                           s.msgBubble,
-                          isOwn ? s.msgBubbleOwn : s.msgBubbleOther,
+                          isOwn ? 'text-bg-base' : 'text-text-primary',
                         ].join(' ')}
                         style={{
                           background: isOwn ? '#00d4ff' : '#0a1628',
@@ -324,13 +427,16 @@ export const ChatPanel = () => {
                 <div ref={msgEndRef} />
               </div>
 
+              {/* Typing indicator */}
               {typingInRoom.length > 0 && (
                 <div className={s.typingRow}>
                   {[0, 1, 2].map((i) => (
                     <span
                       key={i}
                       className={s.typingDot}
-                      style={{ animation: `pulse 1s ${i * 0.2}s ease-in-out infinite` }}
+                      style={{
+                        animation: `pulse 1s ${i * 0.2}s ease-in-out infinite`,
+                      }}
                     />
                   ))}
                   <span className={s.typingText}>
@@ -339,6 +445,7 @@ export const ChatPanel = () => {
                 </div>
               )}
 
+              {/* Input */}
               <div className={s.inputRow}>
                 <input
                   ref={inputRef}
@@ -347,14 +454,19 @@ export const ChatPanel = () => {
                   value={input}
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
-                  placeholder="> type message..."
+                  placeholder={
+                    blocked
+                      ? '// messaging blocked'
+                      : '> type message...'
+                  }
+                  disabled={blocked}
                   maxLength={500}
                   aria-label="Message input"
                 />
                 <button
                   className={s.sendBtn}
                   onClick={handleSend}
-                  disabled={!input.trim()}
+                  disabled={!input.trim() || blocked}
                   aria-label="Send message"
                 >
                   ↵

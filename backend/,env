@@ -1,5 +1,0 @@
-environment:
-  - UID_42=tu_uid_larguisimo_aqui
-  - SECRET_42=tu_secret_larguisimo_aqui
-  - REDIRECT_URI_42=http://localhost:5173/auth/callback
-
