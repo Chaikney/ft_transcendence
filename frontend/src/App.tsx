@@ -4,9 +4,9 @@ import { router } from './router';
 import { useAuthStore } from '@/store/authStore';
 
 export default function App() {
-  // Inicialización de prueba (Mock)
   useEffect(() => {
-    if (import.meta.env.VITE_USE_MOCK === 'true') {
+    if (import.meta.env.MODE === 'development' && import.meta.env.VITE_USE_MOCK === 'true') {
+      console.log("Mock user loaded for development");
       useAuthStore.getState().setUser({ 
         id: 1, 
         username: 'mdiaz-or', 
