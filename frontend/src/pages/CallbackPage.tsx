@@ -128,7 +128,7 @@ export const CallbackPage = () => {
         // Step 2 — exchange code for token
         setStatus('exchanging');
         const res = await post<TokenResponse, { code: string }>(
-          '/auth/callback',
+          '/42/callback',
           { code }
         );
         localStorage.setItem('auth_token', res.data.token);
