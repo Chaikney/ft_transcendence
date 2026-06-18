@@ -11,7 +11,7 @@ export default function AuthCallback() {
     
     if (code) {
       // 2. Se lo enviamos al backend de Rails
-      fetch('http://localhost:3000/api/auth/42/callback', {
+      fetch('http://localhost:3000/api/42/callback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code })

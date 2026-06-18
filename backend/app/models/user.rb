@@ -36,6 +36,8 @@ class User < ApplicationRecord
     # 🟢 3. MÉTODO PARA EL ROL
     def set_default_role
         self.role ||= :player
+        self.banned = false if self.banned.nil?
     end
+
 end
 

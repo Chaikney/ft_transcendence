@@ -27,7 +27,7 @@ export const router = createBrowserRouter([
         element: <LoginPage />,
       },
       {
-        path: 'callback',
+        path: 'auth/callback',
         element: <CallbackPage />,
       },
       {

@@ -7,7 +7,7 @@ import { useToast } from '@/components/Toast';
 const OAUTH_URL = `https://api.intra.42.fr/oauth/authorize?client_id=${
   import.meta.env.VITE_42_CLIENT_ID ?? 'YOUR_CLIENT_ID'
 }&redirect_uri=${
-  encodeURIComponent(import.meta.env.VITE_42_REDIRECT_URI ?? 'http://localhost:5173/callback')
+  encodeURIComponent(import.meta.env.VITE_42_REDIRECT_URI ?? 'http://localhost:5173/auth/callback')
 }&response_type=code`;
 
 // ── Styles ────────────────────────────────────────────────────────────────

@@ -37,13 +37,30 @@ module Api
 
       def exchange_code_for_token(code)
         uri = URI('https://api.intra.42.fr/oauth/token')
-        res = Net::HTTP.post_form(uri, {
+        
+        # 1. Creamos la petición POST
+        req = Net::HTTP::Post.new(uri)
+        
+        # 2. INYECTAMOS LAS CREDENCIALES EN LA CABECERA (Basic Auth)
+        req.basic_auth(ENV['UID_42'], ENV['SECRET_42'])
+        
+        # 3. Ponemos el resto de parámetros en el cuerpo (como un formulario)
+        req.set_form_data(
           'grant_type' => 'authorization_code',
-          'client_id' => ENV['u-s4t2ud-8b88bb52bf805dfccc6336eeab953398a4f08059160682b5a7ec9138cd3e8e12'], # Tu UID de la app de 42
-          'client_secret' => ENV['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'], # Tu Secret de la app de 42
           'code' => code,
           'redirect_uri' => 'http://localhost:5173/auth/callback'
-        })
+        )
+
+        # 4. Enviamos la petición asegurando SSL
+        res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+          http.request(req)
+        end
+
+        # Los chivatos (para ver si ahora sí funciona)
+        puts "🚨 --- RESPUESTA DE 42 API (MODO BASIC AUTH) --- 🚨"
+        puts "RESPUESTA COMPLETA: #{res.body}"
+        puts "🚨 -------------------------------------------- 🚨"
+        
         JSON.parse(res.body)
       end
 

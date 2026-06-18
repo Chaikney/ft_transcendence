@@ -5,7 +5,8 @@ Rails.application.routes.draw do
 
     scope '/admin' do
       get 'users', to: 'admin#index'
-    
+      delete 'users/:id', to: 'admin#destroy'
+      patch 'users/:id/ban', to: 'admin#ban' 
     end
 
     get 'status', to: 'status#index'
