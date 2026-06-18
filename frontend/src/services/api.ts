@@ -2,7 +2,8 @@ import axios from 'axios';
 import type { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import type { ApiResponse } from '../types';
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api/v1';
+// CORRECCIÓN: Quitamos '/v1' para que coincida con tu routes.rb
+const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api';
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -30,12 +31,14 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('auth_token');
+      // Redirigir suavemente sin recargar toda la ventana si es posible
       window.location.href = '/login';
     }
     return Promise.reject(error);
   }
 );
 
+// Helper functions (mantienen la lógica pero ahora usan la base '/api')
 export const get = <T>(url: string): Promise<ApiResponse<T>> =>
   api.get<ApiResponse<T>>(url).then((res) => res.data);
 

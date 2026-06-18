@@ -2,12 +2,8 @@ Rails.application.routes.draw do
   get 'health', to: ->(env) { [200, {'Content-Type' => 'application/json'}, [{status: 'ok'}.to_json]] }
   
   namespace :api do
-
-    scope '/admin' do
-      get 'users', to: 'admin#index'
+    get 'health', to: ->(env) { [200, {'Content-Type' => 'application/json'}, [{status: 'ok'}.to_json]] }
     
-    end
-
     get 'status', to: 'status#index'
     
     resources :games, only: [:create] do
@@ -35,5 +31,6 @@ Rails.application.routes.draw do
     patch '/friends/accept', to: 'friendships#accept'
     delete '/friends/reject', to: 'friendships#reject'
 
+    post '/auth/42/callback', to: 'auth42#callback'
   end
 end
