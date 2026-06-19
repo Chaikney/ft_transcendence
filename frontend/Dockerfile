@@ -1,19 +1,41 @@
-FROM node:20-alpine AS development
-
-# Carpeta de trabajo dentro del contenedor
+ARG ALP_VERSION=3.23.4
+# --- build stage (includes devDependencies for tsc & test typings) ---
+FROM node:20-alpine AS build
 WORKDIR /app
 
-# Copiamos los archivos de dependencias primero para aprovechar la caché de Docker
+# Install common build tools needed for native modules
+RUN apk add --no-cache python3 make g++ git
+
+# Copy package files first to leverage cache
 COPY package.json package-lock.json ./
-
-# Instalamos las dependencias
 RUN npm install
+# Install all deps (including devDependencies required for tsc)
+RUN npm ci
 
-# Copiamos el resto del código del frontend
+# Copy source and build
 COPY . .
+RUN npm run build
 
-# Exponemos el puerto por defecto de Vite
-EXPOSE 5173
+# FIXME this piece does not work (config)
+# --- runtime stage (nginx) ---
+FROM alpine:${ALP_VERSION} AS baseimage
 
-# Arrancamos Vite asegurando que escuche en todas las interfaces de red (--host)
-CMD ["npm", "run", "dev", "--", "--host"]
+# installs nginx (latest by default)
+RUN ["apk", "add", "nginx"]
+# Remove default nginx site and add custom config (optional - provide nginx.conf)
+RUN rm -f /etc/nginx/conf.d/default.conf
+RUN rm -f /etc/nginx.conf
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY default.conf /etc/nginx/conf.d/default.conf
+
+# Copy built static files
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Ensure correct ownership
+RUN chown -R nginx:nginx /usr/share/nginx/html
+
+# Run as non-root
+USER nginx
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
