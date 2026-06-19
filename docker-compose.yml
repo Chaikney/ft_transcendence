@@ -64,6 +64,7 @@ services:
     #   timeout: 5s
     #   retries: 3
 
+# FIXME The ruby container appers to also run vite!
   ruby:
     build:
       context: ./frontend
@@ -78,6 +79,8 @@ services:
         RUBY_DOWNLOAD_SHA256: ${RUBY_DOWNLOAD_SHA256}
     secrets:
       - RB_DBPASS
+      - UID_42
+      - SECRET_42
     env_file: ".env"
     depends_on:
       - db
@@ -102,6 +105,10 @@ secrets:
   #   file: ../secret/rb_dbname
   RB_DBPASS:
     file: ../secret/rb_dbpass
+  UID_42:
+    file: ../secret/42API_ID
+  SECRET_42:
+    file: ../secret/42API_SEC
 
 # "the presence of these objects is sufficient to define them"
 networks:
