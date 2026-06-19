@@ -8,6 +8,7 @@ services:
       context: ./frontend/
       args:
         ALP_VERSION: ${ALP_VERSION}
+        FE_FILES: ${FE_FILES}
 #    restart: unless-stopped
     depends_on:
       - ruby
@@ -17,9 +18,10 @@ services:
        - type: volume
          source: FE_vol
          target: ${FE_FILES}
-       - /app
-       - /app/node_modules
+#        - /app
+#       - /app/node_modules
     environment:
+      # NOTE Do we really want this here??
       - NODE_ENV=development
     networks:
       - app_int
