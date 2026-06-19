@@ -64,10 +64,9 @@ services:
     #   timeout: 5s
     #   retries: 3
 
-# FIXME The ruby container appers to also run vite!
   ruby:
     build:
-      context: ./frontend
+      context: ./backend
       args:
         ALP_VERSION: ${ALP_VERSION}
         RB_FILES: ${RB_FILES}
@@ -77,6 +76,7 @@ services:
         POSTGRES_PASSWORD: /run/secrets/RB_DBPASS
         RUBY_VERSION: ${RUBY_VERSION}
         RUBY_DOWNLOAD_SHA256: ${RUBY_DOWNLOAD_SHA256}
+    # TODO DO the _42 secrets need to be passed into a config?
     secrets:
       - RB_DBPASS
       - UID_42
@@ -86,6 +86,10 @@ services:
       - db
 #    restart: on-failure:3
     # NOTE Without this it stops immediately. One day I will remember why...
+    volumes:
+      - type: volume
+        source: RB_vol
+        target: ${RB_FILES}
     tty: True
     networks:
       - app_int
@@ -96,6 +100,7 @@ services:
 volumes:
   DB_vol:
   FE_vol:
+  RB_vol:
 
 # NOTE This should point to a folder *outside* of version control!
 secrets:
