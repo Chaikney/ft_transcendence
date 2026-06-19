@@ -38,9 +38,10 @@ builds: web-build db-build ruby-build
 	@echo "All containers now built"
 
 # NOTE Podman / OCI format ignores HEALTHCHECK therefore build container with --format=docker
+# HACK too muchh of the command is hardcoded....
 web-build: server_cert
 	@echo "Building NGINX container..."
-	$(BASECMD) build -f $(CONTHOME)/web/Dockerfile --tag $(REPO)/web:0.1
+	$(BASECMD) build -f $(CONTHOME)/frontend/Dockerfile --tag $(REPO)/web:0.1
 
 chess-build:
 	@echo "Building chess container..."
