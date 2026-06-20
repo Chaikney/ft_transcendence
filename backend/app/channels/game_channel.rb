@@ -1,6 +1,7 @@
-# backend/app/channels/game_channel.rb
 class GameChannel < ApplicationCable::Channel
   def subscribed
-    stream_from "game_channel_#{params[:id]}"
+    # Si el frontend envía 'chess-001', el params[:game_id] debe existir.
+    # Asegúrate de que el canal use el ID correcto.
+    stream_from "game_channel_#{params[:game_id]}"
   end
 end

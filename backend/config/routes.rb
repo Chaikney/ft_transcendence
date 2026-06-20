@@ -1,7 +1,15 @@
 Rails.application.routes.draw do
   get 'health', to: ->(env) { [200, {'Content-Type' => 'application/json'}, [{status: 'ok'}.to_json]] }
-  
+
   namespace :api do
+
+    namespace :chess do
+      resources :games, param: :game_id, only: [:show]
+    end
+
+    namespace :sudoku do
+      resources :games, param: :game_id, only: [:show, :create, :update]
+    end
 
     scope '/admin' do
       get 'users', to: 'admin#index'

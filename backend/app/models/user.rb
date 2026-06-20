@@ -39,5 +39,6 @@ class User < ApplicationRecord
         self.banned = false if self.banned.nil?
     end
 
+    has_many :sudoku_games, dependent: :destroy
 end
 

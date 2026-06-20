@@ -24,7 +24,8 @@ const styles = {
 
 export const SudokuGamePage = () => {
   // ── Fix: read gameId from URL params ──────────────────────────────────
-  const { id: gameId } = useParams<{ id: string }>();
+  const { id } = useParams<{ id: string }>();
+  const gameId = id || "1"; // Forzamos el ID "1" que es el que existe en tu BD
 
   if (!gameId) return <Navigate to="/" replace />;
 

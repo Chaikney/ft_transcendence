@@ -11,6 +11,7 @@ export const useSudokuGame = (gameId: string) => {
   const setSudokuGame = useMatchStore((s) => s.setSudokuGame);
   const startLoading = useMatchStore((s) => s.startLoading);
   const setError = useMatchStore((s) => s.setError);
+  
   const { connectionStatus } = useGameChannel(USE_MOCK ? null : gameId);
 
   useEffect(() => {
@@ -21,15 +22,21 @@ export const useSudokuGame = (gameId: string) => {
           const { mockSudokuGame } = await import('@/mocks');
           setSudokuGame(mockSudokuGame);
         } else {
-          const res = await getSudokuGame(gameId);
+          // Extraemos solo los dígitos (ej: "sudoku-001" -> "001")
+          // Esto limpia el ID antes de enviarlo al backend
+          const numericId = gameId.replace(/\D/g, ''); 
+          
+          const res = await getSudokuGame(numericId);
           setSudokuGame(res.data);
         }
       } catch (err) {
+        console.error("Error cargando el juego:", err);
         setError('Failed to load sudoku game');
       }
     };
-    load();
-  }, [gameId]);
+    
+    if (gameId) load();
+  }, [gameId, setSudokuGame, startLoading, setError]);
 
   const sendMove = async (payload: SudokuMovePayload) => {
     try {
@@ -37,11 +44,11 @@ export const useSudokuGame = (gameId: string) => {
         console.log('[MOCK] Sudoku move:', payload);
       } else {
         await postSudokuMove(payload);
-        // websocket broadcasts updated grid
       }
     } catch (err) {
       setError('Move failed.');
     }
   };
+  
   return { sudokuGame, sendMove, connectionStatus };
 };

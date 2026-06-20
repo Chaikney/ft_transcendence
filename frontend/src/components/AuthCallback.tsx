@@ -1,36 +1,39 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { post } from '@/services/api'; // Usamos tu servicio centralizado
 
 export default function AuthCallback() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  
+  // Usamos un ref para evitar que el useEffect se dispare dos veces (típico en React 18+ con StrictMode)
+  const isProcessing = useRef(false);
 
   useEffect(() => {
-    // 1. Atrapamos el código que 42 nos ha puesto en la URL
+    if (isProcessing.current) return;
+    
     const code = searchParams.get('code');
     
     if (code) {
-      // 2. Se lo enviamos al backend de Rails
-      fetch('http://localhost:3000/api/42/callback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.token) {
-          // 3. ¡Éxito! Guardamos el token y vamos al juego
-          localStorage.setItem('jwt_token', data.token);
-          navigate('/'); 
-        } else {
-          console.error("Fallo de autenticación", data);
+      isProcessing.current = true;
+
+      // Usamos tu helper 'post' de api.ts
+      // Nota: Si en api.ts tienes BASE_URL como '.../api', aquí pones solo '/42/callback'
+      post<{ token: string }>('/42/callback', { code })
+        .then((response) => {
+          console.log("Estructura de la respuesta:", response);
+          const token = response.data?.token;
+          if (token) {
+            localStorage.setItem('auth_token', token); // Usamos 'auth_token' que es el que tu api.ts busca
+            navigate('/'); 
+          } else {
+            navigate('/login');
+          }
+        })
+        .catch((err) => {
+          console.error("Error conectando con el backend:", err);
           navigate('/login');
-        }
-      })
-      .catch(err => {
-        console.error("Error conectando con el backend", err);
-        navigate('/login');
-      });
+        });
     }
   }, [searchParams, navigate]);
 

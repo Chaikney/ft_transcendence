@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_18_171609) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_20_151453) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -37,6 +37,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_18_171609) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "sudoku_games", force: :cascade do |t|
+    t.text "board"
+    t.datetime "created_at", null: false
+    t.string "difficulty"
+    t.string "status"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_sudoku_games_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.boolean "banned"
     t.datetime "created_at", null: false
@@ -56,4 +66,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_18_171609) do
   add_foreign_key "friendships", "users", column: "friend_id"
   add_foreign_key "games", "users", column: "player1_id"
   add_foreign_key "games", "users", column: "player2_id"
+  add_foreign_key "sudoku_games", "users"
 end
