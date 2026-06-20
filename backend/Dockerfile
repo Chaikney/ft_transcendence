@@ -140,12 +140,12 @@ RUN bundle --version
 RUN bundle show puma
 RUN pwd
 RUN ls -alr
-# COPY Gemfile Gemfile.lock ./
-# TODO We already did this, so should not be needed?
-# RUN bundle install
 
 ENV RAILS_ENV=production
 ENV DATABASE_URL=${RB_DBHOST}
+ENV POSTGRES_DB=${POSTGRES_DB}
+ENV POSTGRES_USER=${POSTGRES_USER}
+
 WORKDIR ${RB_FILES}
 # NOTE I have no idea what this would do, its from https://hub.docker.com/_/ruby/
 # COPY . .
