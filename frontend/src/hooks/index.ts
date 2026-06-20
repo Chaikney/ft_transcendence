@@ -1,2 +1,2 @@
-export { useActionCable, disconnectConsumer } from './useActionCable';
+export { useActionCable, getConsumer } from './useActionCable';
 export { useGameChannel } from './useGameChannel';

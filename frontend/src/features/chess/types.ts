@@ -1,3 +1,5 @@
+export type ConnectionStatusType = 'connected' | 'connecting' | 'disconnected' | 'reconnecting';
+
 export interface ChessGameState {
 	game_id: string;
 	fen: string;				//standar representation board

@@ -4,7 +4,7 @@ import type { ChessGameState } from '@features/chess/types';
 import type { SudokuGameState } from "@features/sudoku/types";
 import { useMatchStore } from "@/store";
 
-type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'reconecting';
+type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'reconnecting';
 
 type GameChannelEvent =
   | { type: 'move_updated'; game: ChessGameState }
@@ -41,7 +41,7 @@ export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
           setConnectionStatus('disconnected');
           // attempt reconnect after 3 seconds
           setTimeout(() => {
-            setConnectionStatus('reconecting');
+            setConnectionStatus('reconnecting');
           }, 3000);
         },
         rejected() {

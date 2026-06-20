@@ -1,6 +1,6 @@
 import { get, post } from '@services/api';
-import type { SudokuGameState, SudokuMovePayload } from '../features/sudoku/types';
-import type { ApiResponse } from '../types';
+import type { SudokuGameState, SudokuMovePayload } from '@/features/sudoku/types';
+import type { ApiResponse } from '@/types';
 
 export const getSudokuGame = (game_id: string): Promise<ApiResponse<SudokuGameState>> =>
   get<SudokuGameState>(`/sudoku/games/${game_id}`);

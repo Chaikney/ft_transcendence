@@ -8,30 +8,25 @@ import { ErrorMessage } from '@/components/ErrorMessage';
 import { useMatchStore } from '@/store';
 
 const styles = {
-  page:
-    'min-h-screen flex flex-col items-center justify-center px-4 py-8 gap-6',
-  topBar:
-    'flex items-center justify-between w-full max-w-[520px]',
-  gameId:
-    'text-xs font-mono text-text-muted tracking-widest truncate',
-  actionRow:
-    'flex items-center justify-center gap-3 w-full',
+  page: 'min-h-screen flex flex-col items-center justify-center px-4 py-8 gap-6',
+  topBar: 'flex items-center justify-between w-full max-w-[520px]',
+  gameId: 'text-xs font-mono text-text-muted tracking-widest truncate',
+  actionRow: 'flex items-center justify-center gap-3 w-full',
 } as const;
 
 export const ChessGamePage = () => {
-  // ── Fix: read gameId from URL params ──────────────────────────────────
   const { id: gameId } = useParams<{ id: string }>();
 
   if (!gameId) return <Navigate to="/" replace />;
 
-  const { chessGame, sendMove, requestAIMove, connectionStatus } =
-    useChessGame(gameId);
+  // useChessGame ahora gestiona la conexión ActionCable y el estado del juego
+  const { chessGame, sendMove, requestAIMove, connectionStatus } = useChessGame(gameId);
 
-  const error      = useMatchStore((s) => s.error);
+  const error = useMatchStore((s) => s.error);
   const resetMatch = useMatchStore((s) => s.resetMatch);
 
-  const isMock   = import.meta.env.VITE_USE_MOCK === 'true';
-  const isLocked = !isMock && connectionStatus !== 'connected';
+  // ELIMINAMOS isMock: Ahora solo nos importa si el socket está conectado
+  const isLocked = connectionStatus !== 'connected';
 
   if (error) {
     return (
@@ -45,10 +40,13 @@ export const ChessGamePage = () => {
     );
   }
 
+  // Si no hay juego, mostramos el loader. 
+  // Nota: Al usar WebSockets, chessGame será null hasta que recibamos 
+  // el mensaje inicial del backend a través del socket.
   if (!chessGame) {
     return (
       <div className={styles.page}>
-        <InlineLoader label="Loading game..." />
+        <InlineLoader label="Connecting to game..." />
       </div>
     );
   }
@@ -76,6 +74,7 @@ export const ChessGamePage = () => {
             <Button
               variant="primary"
               onClick={requestAIMove}
+              // Bloqueado si el socket no está listo o la partida terminó
               disabled={isLocked || chessGame.status !== 'active'}
             >
               Request AI move
