@@ -68,6 +68,7 @@ secrets: secret_dir secret/rb_dbpass server_cert
 secret_dir:
 	@echo "Creating secrets dir if it doesn't already exist"
 	mkdir --parents secret
+	mkdir --parents frontend/secret
 
 # Generates a random password for database access
 secret/rb_dbpass:
@@ -93,8 +94,8 @@ secret/trans.crt: secret/testprivate.key
 server_cert: secret/trans.crt
 	@echo "Copying web certs to build context"
 	mkdir --parents $(CONTHOME)/web/secret
-	cp --update secret/testprivate.key $(CONTHOME)/web/secret/trans.key
-	cp --update secret/trans.crt $(CONTHOME)/web/secret/trans.crt
+	cp --update secret/testprivate.key $(CONTHOME)/frontend/secret/trans.key
+	cp --update secret/trans.crt $(CONTHOME)/frontend/secret/trans.crt
 
 web_src:
 	@echo "Copying react source to build context"
