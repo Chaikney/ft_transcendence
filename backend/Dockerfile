@@ -1,24 +1,33 @@
-FROM ruby:4.0.3-slim AS base 
+# Usamos una versión específica y estable
+FROM ruby:3.3-slim AS base 
 
-# Instalamos lo necesario para que PostgreSQL y Rails funcionen
-RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs bash libyaml-dev
+# Instalamos dependencias necesarias:
+# - build-essential: para compilar gemas con extensiones C
+# - libpq-dev: requerido por la gema pg (Postgres)
+# - netcat-openbsd: para el script que espera a la base de datos
+# - git/curl: útiles para mantenimiento
+RUN apt-get update -qq && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    netcat-openbsd \
+    && rm -rf /var/lib/apt/lists/*
 
-# Carpeta donde vivirá el código dentro del contenedor
+# Carpeta de trabajo
 WORKDIR /app
 
-# Copiamos las gemas e instalamos
+# Copiamos solo Gemfile y lock para aprovechar la caché de capas de Docker
 COPY Gemfile Gemfile.lock ./
 RUN bundle install
 
-# 🟢 AÑADIMOS ESTO: Copia todo el resto del código del backend dentro del contenedor
+# Copiamos el resto del código
 COPY . .
 
-# El script para evitar el error del server.pid
+# Configuramos el script de entrada
 COPY entrypoint.sh /usr/bin/
 RUN chmod +x /usr/bin/entrypoint.sh
 
 ENTRYPOINT ["entrypoint.sh"]
 EXPOSE 3000
 
-# Arrancamos el servidor vinculándolo a todas las IPs
+# Arrancamos el servidor
 CMD ["rails", "server", "-b", "0.0.0.0"]
