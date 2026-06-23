@@ -8,6 +8,9 @@ Rails.application.routes.draw do
     end
 
     namespace :sudoku do
+      # 🟢 LA SOLUCIÓN: Ruta exacta para POST /api/sudoku/move
+      post 'move', to: 'games#move'
+      
       resources :games, param: :game_id, only: [:show, :create, :update]
     end
 

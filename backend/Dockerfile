@@ -6,10 +6,12 @@ FROM ruby:3.3-slim AS base
 # - libpq-dev: requerido por la gema pg (Postgres)
 # - netcat-openbsd: para el script que espera a la base de datos
 # - git/curl: útiles para mantenimiento
+# - libyaml-dev: requerido para compilar la gema psych (YAML)
 RUN apt-get update -qq && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
     netcat-openbsd \
+    libyaml-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Carpeta de trabajo

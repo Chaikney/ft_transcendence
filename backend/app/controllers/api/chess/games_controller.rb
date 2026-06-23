@@ -13,7 +13,7 @@ module Api
             id: "chess-#{game.id.to_s.rjust(3, '0')}",
             status: game.status,
             # Asegúrate de enviar la clave 'fen' que es la que React suele esperar
-            fen: game.current_board, 
+            fen: game.current_fen, 
             player1: game.player1&.username,
             player2: game.player2&.username
           }, status: :ok

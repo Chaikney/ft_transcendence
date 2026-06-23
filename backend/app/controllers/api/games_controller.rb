@@ -2,6 +2,25 @@ module Api
   class GamesController < ApplicationController
     before_action :authorize_request
 
+    def show
+      # Buscamos por params[:id] o params[:game_id] por si las moscas con el router
+      game = Game.find_by(id: params[:id] || params[:game_id])
+
+      if game.nil?
+        render json: { error: "Partida no encontrada" }, status: :not_found
+        return
+      end
+
+      # Devolvemos los datos que necesita React para pintar la cuadrícula
+      render json: {
+        id: game.id,
+        status: game.status,
+        player1_id: game.player1_id,
+        player2_id: game.player2_id,
+        current_board: game.current_board,
+        initial_board: game.initial_board
+      }, status: :ok
+    end
     # POST /api/games
     def create
       # Creamos la partida. Asumimos que el jugador actual es el Player 1 (el retador)

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_20_151453) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_23_162302) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -28,6 +28,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_20_151453) do
   create_table "games", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "current_board"
+    t.string "current_fen"
     t.string "initial_board"
     t.integer "p1_score", default: 0
     t.integer "p2_score", default: 0

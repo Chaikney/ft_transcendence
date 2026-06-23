@@ -15,7 +15,7 @@ module Api
           render json: {
             id: @game.id,
             status: @game.status,
-            board: @game.board,
+            board: @game.current_board,
             difficulty: @game.difficulty
           }, status: :ok
         else
