@@ -28,7 +28,6 @@ const getCellStyle = (
   const isBoxBottom = rowIdx % 3 === 2 && rowIdx !== 8;
   const isChessLight = (rowIdx + colIdx) % 2 === 0;
 
-  // Selección lógica de fondo
   const getBg = () => {
     if (isSelected) return THEME.focus;
     if (isRelated) return THEME.related;
@@ -42,7 +41,6 @@ const getCellStyle = (
     borderRight:  isBoxRight  ? THEME.borderThick : THEME.borderThin,
     borderBottom: isBoxBottom ? THEME.borderThick : THEME.borderThin,
     
-    // Texto visible siempre que haya valor
     color: (value !== null && value !== 0) 
       ? (isLocked ? THEME.textLocked : THEME.textInput) 
       : 'transparent',
@@ -52,25 +50,16 @@ const getCellStyle = (
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    transition: 'background-color 0.2s ease', // Transición suave para el ámbar
+    transition: 'background-color 0.2s ease',
     fontFamily: "'JetBrains Mono', monospace",
     userSelect: 'none' as const,
   };
 };
 
-// ── Tailwind Classes ──────────────────────────────────────────────────────
-const styles = {
-  wrapper:   'flex flex-col items-center gap-4 animate-board-reveal',
-  boardWrapper: 'rounded-lg overflow-hidden border border-[#9A9184] shadow-[0_4px_16px_rgba(0,0,0,0.4)] bg-[#C5BAAC] p-[2px]',
-  boardGrid: 'grid grid-cols-9',
-  padWrapper: 'grid grid-cols-9 gap-1.5',
-  padButton: 'aspect-square flex items-center justify-center font-mono font-medium text-sm rounded-md transition-all duration-200 border border-[#9A9184] bg-[#D1C7B7] hover:bg-[#BDB2A5] text-black',
-} as const;
-
-// ── Props definition ──
+// ── Props ──
 interface SudokuBoardProps {
   gameState:    SudokuGameState;
-  originalGrid: number[][];
+  originalGrid: number[][]; // Matriz fija para identificar bloqueos
   onMove:       (payload: SudokuMovePayload) => void;
   disabled?:    boolean;
 }
@@ -82,23 +71,21 @@ export const SudokuBoard = ({
   onMove,
   disabled = false,
 }: SudokuBoardProps) => {
+  // Verificación de seguridad: grid ya es number[][] gracias a la transformación
   if (!gameState?.grid) return null;
 
   const { selectedCell, selectCell, inputValue, clearSelection } =
     useSudokuBoard(gameState.game_id, originalGrid, onMove);
 
+  // Un número es bloqueado si el originalGrid original tenía un valor distinto de 0
   const isLocked = (row: number, col: number) => originalGrid[row]?.[col] !== 0;
 
-  // Lógica de Cruz (Fila, Columna, Bloque)
   const isRelatedCell = useCallback(
     (row: number, col: number) => {
       if (!selectedCell) return false;
       const [sr, sc] = selectedCell;
-      const sameRow = sr === row;
-      const sameCol = sc === col;
-      const sameBox = Math.floor(row / 3) === Math.floor(sr / 3) &&
-                      Math.floor(col / 3) === Math.floor(sc / 3);
-      return (sameRow || sameCol || sameBox) && !(sr === row && sc === col);
+      return (sr === row || sc === col || (Math.floor(row / 3) === Math.floor(sr / 3) && Math.floor(col / 3) === Math.floor(sc / 3))) 
+             && !(sr === row && sc === col);
     },
     [selectedCell],
   );
@@ -121,18 +108,16 @@ export const SudokuBoard = ({
 
   const boardSize = 'min(80vw, 450px)';
   const cellSize  = `calc(${boardSize} / 9)`;
-  const isActive  = gameState.status === 'active';
 
   return (
-    <div className={styles.wrapper}>
-      {/* ── Board ── */}
-      <div className={styles.boardWrapper} style={{ width: boardSize, height: boardSize }}>
-        <div className={styles.boardGrid} style={{ width: boardSize, height: boardSize }}>
+    <div className="flex flex-col items-center gap-4 animate-board-reveal">
+      <div className="rounded-lg overflow-hidden border border-[#9A9184] shadow-[0_4px_16px_rgba(0,0,0,0.4)] bg-[#C5BAAC] p-[2px]" style={{ width: boardSize, height: boardSize }}>
+        <div className="grid grid-cols-9" style={{ width: boardSize, height: boardSize }}>
           {gameState.grid.map((row, rowIdx) =>
             row.map((value, colIdx) => {
               const isSelected = selectedCell?.[0] === rowIdx && selectedCell?.[1] === colIdx;
-              const locked  = isLocked(rowIdx, colIdx);
-              const related = isRelatedCell(rowIdx, colIdx);
+              const locked     = isLocked(rowIdx, colIdx);
+              const related    = isRelatedCell(rowIdx, colIdx);
 
               return (
                 <button
@@ -153,11 +138,10 @@ export const SudokuBoard = ({
         </div>
       </div>
 
-      {/* ── Number pad ── */}
-      {!disabled && isActive && (
-        <div className={styles.padWrapper} style={{ width: boardSize }}>
+      {!disabled && gameState.status === 'active' && (
+        <div className="grid grid-cols-9 gap-1.5" style={{ width: boardSize }}>
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
-            <button key={n} onClick={() => inputValue(n)} className={styles.padButton}>
+            <button key={n} onClick={() => inputValue(n)} className="aspect-square flex items-center justify-center font-mono font-medium text-sm rounded-md transition-all duration-200 border border-[#9A9184] bg-[#D1C7B7] hover:bg-[#BDB2A5] text-black">
               {n}
             </button>
           ))}

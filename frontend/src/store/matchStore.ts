@@ -16,6 +16,7 @@ interface MatchState {
   startLoading: (gameType: GameType) => void;
   setChessGame: (game: ChessGameState) => void;
   setSudokuGame: (game: SudokuGameState) => void;
+  updateCell: (row: number, col: number, value: number) => void;
   setError: (message: string) => void;
   resetMatch: () => void;
 }
@@ -39,6 +40,15 @@ export const useMatchStore = create<MatchState>((set) => ({
 
   setSudokuGame: (game) =>
     set({ sudokuGame: game, status: 'in_progress', error: null }),
+
+  updateCell: (row, col, value) =>
+    set((state) => {
+      if (!state.sudokuGame) return state;
+      const newGrid = state.sudokuGame.grid.map((r, rIdx) =>
+        r.map((cell, cIdx) => (rIdx === row && cIdx === col ? value : cell))
+      );
+      return { sudokuGame: { ...state.sudokuGame, grid: newGrid } };
+    }),
 
   setError: (message) =>
     set({ status: 'error', error: message }),

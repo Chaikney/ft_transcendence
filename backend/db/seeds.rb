@@ -7,3 +7,11 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
+
+SudokuGame.create!(
+  id: 1, 
+  user_id: 1, 
+  board: "530070000600195000098000060800060003400803001700020006060000280000419005000080079", 
+  difficulty: "easy", 
+  status: "in_progress"
+)

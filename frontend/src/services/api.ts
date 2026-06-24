@@ -42,4 +42,7 @@ export const get = <T>(url: string): Promise<ApiResponse<T>> =>
 export const post = <T, B = unknown>(url: string, body: B): Promise<ApiResponse<T>> =>
   api.post<ApiResponse<T>>(url, body).then((res) => res.data);
 
+export const patch = <T, B = unknown>(url: string, body: B): Promise<ApiResponse<T>> =>
+  api.patch<ApiResponse<T>>(url, body).then((res) => res.data);
+
 export default api;
