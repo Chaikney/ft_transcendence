@@ -3,16 +3,11 @@ Rails.application.routes.draw do
 
   namespace :api do
 
-    namespace :chess do
-      resources :games, param: :game_id, only: [:show]
-    end
-
-    namespace :sudoku do
-      # 🟢 LA SOLUCIÓN: Ruta exacta para POST /api/sudoku/move
-      post 'move', to: 'games#move'
-      
-      resources :games, param: :game_id, only: [:show, :create, :update]
-    end
+    # 🟢 LA SOLUCIÓN: Rutas directas al controlador general Api::GamesController
+    get 'chess/games/:game_id', to: 'games#show'
+    
+    get 'sudoku/games/:game_id', to: 'games#show'
+    post 'sudoku/move', to: 'games#move'
 
     scope '/admin' do
       get 'users', to: 'admin#index'
@@ -22,7 +17,8 @@ Rails.application.routes.draw do
 
     get 'status', to: 'status#index'
     
-    resources :games, only: [:create] do
+    # Añadimos :show aquí por si acaso el frontend recorta la URL
+    resources :games, only: [:show, :create] do
       member do
         patch :finish, to: 'games#update'
       end

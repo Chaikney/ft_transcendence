@@ -27,7 +27,15 @@ export const useSudokuGame = (gameId: string) => {
           const numericId = gameId.replace(/\D/g, ''); 
           
           const res = await getSudokuGame(numericId);
-          setSudokuGame(res.data);
+          
+          // Imprimimos 'res' entero para confirmar que aquí está tu tabler
+          
+          // 🟢 LA SOLUCIÓN: Si res ya trae el game_id, se lo pasamos directo sin el .data
+          if (res.game_id || res.grid) {
+            setSudokuGame(res);
+          } else {
+            setSudokuGame(res.data);
+          }
         }
       } catch (err) {
         console.error("Error cargando el juego:", err);

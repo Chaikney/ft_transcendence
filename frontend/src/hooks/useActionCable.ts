@@ -2,14 +2,20 @@ import { useEffect, useRef } from "react";
 import { createConsumer } from "@rails/actioncable";
 import type { Consumer } from "@rails/actioncable";
 
-// Asegúrate de que esta URL sea accesible desde el navegador (localhost:3000)
 const CABLE_URL = import.meta.env.VITE_CABLE_URL ?? 'ws://localhost:3000/cable';
 
 let consumer: Consumer | null = null;
 
 export const getConsumer = (): Consumer => {
   if (!consumer) {
-    consumer = createConsumer(CABLE_URL);
+    // 1. Buscamos el token en el almacenamiento
+    const token = localStorage.getItem('auth_token');
+    
+    // 2. Si hay token, lo concatenamos a la URL
+    const urlWithToken = token ? `${CABLE_URL}?token=${token}` : CABLE_URL;
+    
+    // 3. Creamos el consumidor con la URL autenticada
+    consumer = createConsumer(urlWithToken);
   }
   return consumer;
 };
@@ -17,7 +23,6 @@ export const getConsumer = (): Consumer => {
 export const useActionCable = () => {
   const consumerRef = useRef<Consumer>(getConsumer());
   
-  // OPCIONAL: Escuchar errores de conexión en el log del navegador
   useEffect(() => {
     const cable = consumerRef.current;
     

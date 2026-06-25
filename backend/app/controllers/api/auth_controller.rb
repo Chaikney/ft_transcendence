@@ -24,31 +24,29 @@ module Api
     def login
       user = User.find_by(email: params[:email])
       
-      # 1º Filtro: Comprobamos el email y la contraseña (Bcrypt)
       if user && user.authenticate(params[:password])
-        
-        # 2º Filtro: Autenticación en 2 Pasos (ROTP)
-        totp = ROTP::TOTP.new(user.otp_secret)
-        
-        # Comprobamos si el código de 6 dígitos que envió el usuario es válido
-        if params[:totp_code].present? && totp.verify(params[:totp_code])
-          token = JWT.encode({ user_id: user.id }, Rails.application.secret_key_base)
-          render json: { user: user, token: token }, status: :ok
-        else
-          # Falló el código del móvil
-          render json: { error: 'Código 2FA incorrecto o caducado' }, status: :unauthorized
-        end
-        
+        # Entras directo, sin pedir el código del móvil
+        token = JWT.encode({ user_id: user.id }, Rails.application.secret_key_base)
+        render json: { user: user, token: token }, status: :ok
       else
-        # Falló el email o la contraseña
         render json: { error: 'Credenciales inválidas' }, status: :unauthorized
       end
+    end
     end
 
     private
 
     def user_params
       params.permit(:username, :email, :password)
+    end
+
+    def me
+      # @current_user ya existe gracias a tu authorize_request
+      render json: { 
+        id: @current_user.id, 
+        username: @current_user.username, 
+        admin: @current_user.admin 
+      }, status: :ok
     end
   end
 end

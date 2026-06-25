@@ -150,6 +150,15 @@ export const LandingPage = () => {
       navigate('/login');
       return;
     }
+
+    // 🔥 EL HACK DE LOS SUDOKUS INFINITOS 🔥
+    // Si la ruta es la del Sudoku, generamos un ID aleatorio nuevo cada vez
+    if (path.includes('sudoku-001')) {
+      const randomId = Math.floor(Math.random() * 999999);
+      navigate(`/game/sudoku/sudoku-${randomId}`);
+      return;
+    }
+
     navigate(path);
   };
 

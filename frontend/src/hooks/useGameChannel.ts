@@ -48,7 +48,7 @@ export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
           setConnectionStatus('disconnected');
           console.error(`[GameChanel] Subscription rejected for game ${gameId}`);
         },
-        recieved(raw: unknown) {
+        received(raw: unknown) {
           if (!raw || typeof raw !== 'object') return;
           const event = raw as GameChannelEvent;
 
