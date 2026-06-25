@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useMatchStore } from "@/store";
 import { getChessGame, postChessMove, postChessAIMove } from "../service";
 import { useGameChannel } from "@/hooks";
-import type { ChessMovePayload } from '../types';
+import type { ChessGameState, ChessMovePayload } from '../types';
 
 // TODO: Dev flag - flip to false when the backend is ready
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
@@ -27,7 +27,11 @@ export const useChessGame = (gameId: string) => {
         else {
           // REAL
           const res = await getChessGame(gameId);
-          setChessGame(res.data);
+          
+          // Magia a prueba de balas: cogemos res.data si existe, y si no (nuestro caso), cogemos res a secas.
+          // El 'as unknown as ChessGameState' hace que TypeScript se calle y quite la línea roja.
+          const actualData = (res as any).data || res;
+          setChessGame(actualData as unknown as ChessGameState);
         }
       } catch (err) {
         setError('Failed to load game. Please try again');
@@ -41,16 +45,25 @@ export const useChessGame = (gameId: string) => {
     if (!chessGame) return;
     try {
       if (USE_MOCK) {
-        // <- MOCK: simulate opponent response
         const { mockChessGameAfterMove } = await import('@/mocks');
         setChessGame(mockChessGameAfterMove);
       } else {
-        // <- REAL: backend will broadcast update via actioCable
-        await postChessMove({ ...payload, game_id: gameId });
-        // no need to setchessgame here = websocket handle its
+        const res = await postChessMove({ ...payload, game_id: gameId });
+        const actualData = (res as any).data || res;
+
+        // 🥷 EL FIX: Si el backend nos manda la bandera secreta, 
+        // abortamos el movimiento y hacemos snapback silenciosamente.
+        if (actualData.illegal_move) {
+          setChessGame({ ...chessGame });
+          return;
+        }
+
+        // Si no hay bandera, el movimiento es legal y actualizamos el tablero.
+        setChessGame(actualData as unknown as ChessGameState);
       }
     } catch (err) {
-      setError('Move failed. Please try again.');
+      // Ya solo caeremos aquí si el servidor explota de verdad (Error 500)
+      setChessGame({ ...chessGame }); 
     }
   };
 

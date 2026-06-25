@@ -47,13 +47,13 @@ const styles = {
   gameOver: 'text-xs font-mono tracking-widest uppercase text-status-error',
 
   boardFrame:
-    'relative rounded-lg overflow-hidden ' +
+    'flex rounded-lg overflow-hidden ' + // Cambiamos relative por flex
     'border border-accent-border ' +
     'shadow-[var(--shadow-glow)] ' +
     'bg-bg-surface',
 
   rankLabels:
-    'absolute left-0 top-0 flex flex-col pointer-events-none z-10',
+    'flex flex-col justify-between pointer-events-none z-10 py-[calc(var(--square-size)/16)]', // Quitamos absolute
   rankLabel:
     'flex items-center justify-center text-[10px] font-mono ' +
     'text-accent font-bold select-none',
@@ -112,12 +112,16 @@ export const ChessBoard = ({
         )}
       </div>
 
-      <div className={styles.boardFrame} style={{ width: boardSize, height: boardSize }}>
-        <div className={styles.rankLabels} style={{ width: squareSize, height: boardSize }}>
-          {[8, 7, 6, 5, 4, 3, 2, 1].map((rank) => (
-            <span key={rank} className={styles.rankLabel} style={{ height: squareSize }}>{rank}</span>
-          ))}
-        </div>
+      <div className={styles.boardFrame} style={{ width: `calc(${boardSize} + 25px)`, height: boardSize }}>
+  
+      {/* Etiquetas de las filas - Ahora viven en paz al lado del tablero */}
+      <div className={styles.rankLabels} style={{ width: '20px', height: boardSize }}>
+        {[8, 7, 6, 5, 4, 3, 2, 1].map((rank) => (
+          <span key={rank} className={styles.rankLabel} style={{ height: squareSize }}>
+            {rank}
+          </span>
+        ))}
+      </div>
 
         <div data-testid="chess-board" className={styles.boardGrid} style={{ width: boardSize, height: boardSize }}>
           {board.map((row, rowIdx) =>

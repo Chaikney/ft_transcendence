@@ -146,12 +146,29 @@ export const LandingPage = () => {
   }, [visibleLines]);
 
   const handleGameSelect = (path: string) => {
-    if (!isAuthenticated && !isMock) {
-      navigate('/login');
-      return;
-    }
-    navigate(path);
+  if (!isAuthenticated && !isMock) {
+    navigate('/login');
+    return;
+  }
+
+  // ⊞ HACK SUDOKU INFINITO
+  if (path.includes('sudoku-001')) {
+    const randomId = Math.floor(Math.random() * 999999);
+    navigate(`/game/sudoku/sudoku-${randomId}`);
+    return;
+  }
+
+  // ♟️ HACK AJEDREZ INFINITO
+  if (path.includes('chess-001')) {
+    const randomId = Math.floor(Math.random() * 999999);
+    navigate(`/game/chess/chess-${randomId}`);
+    return;
+  }
+
+  // Para cualquier otra ruta (por si en el futuro añades más cosas)
+  navigate(path);
   };
+
 
   return (
     <div className={styles.page}>

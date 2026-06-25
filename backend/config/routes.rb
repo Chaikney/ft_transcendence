@@ -3,10 +3,14 @@ Rails.application.routes.draw do
 
   namespace :api do
 
+    # --- CHESS ---
     namespace :chess do
       resources :games, param: :game_id, only: [:show]
+      post 'move', to: 'games#move'
+      post 'ai_move', to: 'games#ai_move'
     end
 
+    # --- SUDOKU ---
     namespace :sudoku do
       resources :games, param: :game_id, only: [:show, :create, :update]
     end
