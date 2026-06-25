@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store';
 import { useToast } from '@/components/Toast';
+import { createSudokuGame } from '@/features/sudoku/service';
 
 const BOOT_LINES = [
   '> INITIALIZING transcendence v2.0...',
@@ -28,7 +29,7 @@ const GAMES = [
   {
     id:       'sudoku',
     label:    'SUDOKU',
-    path:     '/game/sudoku/sudoku-001',
+    path:     '/game/sudoku', 
     icon:     '⊞',
     desc:     'Logic puzzle. Three difficulty levels. Keyboard supported.',
     tag:      'SINGLE PLAYER',
@@ -43,7 +44,6 @@ const styles = {
     'min-h-screen flex flex-col items-center justify-center ' +
     'px-6 py-16 gap-12',
 
-  // Boot terminal
   terminal:
     'w-full max-w-2xl terminal-card bracket-corners p-4 ' +
     'font-mono text-xs',
@@ -60,7 +60,6 @@ const styles = {
   terminalCursor:
     'inline-block w-2 h-4 bg-accent animate-blink ml-1 align-middle',
 
-  // Hero text
   heroWrap:
     'text-center flex flex-col items-center gap-3',
   heroEyebrow:
@@ -73,7 +72,6 @@ const styles = {
   heroSub:
     'text-sm font-mono text-text-secondary max-w-md leading-relaxed',
 
-  // Game cards
   cardsWrap:
     'w-full max-w-2xl grid grid-cols-1 gap-4 sm:grid-cols-2',
   card:
@@ -110,7 +108,6 @@ const styles = {
     'text-[10px] font-mono text-text-muted ' +
     'group-hover:text-accent transition-colors tracking-widest',
 
-  // Auth prompt
   authPrompt:
     'flex flex-col items-center gap-2',
   authText:
@@ -121,14 +118,12 @@ const styles = {
     'tracking-widest uppercase',
 } as const;
 
-// ── Component ──────────────────────────────────────────────────────────────
 export const LandingPage = () => {
   const navigate        = useNavigate();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const isMock          = import.meta.env.VITE_USE_MOCK === 'true';
   const { info, success } = useToast();
 
-  // Boot sequence animation
   const [visibleLines, setVisibleLines] = useState<number>(0);
   const [booted, setBooted]             = useState(false);
 
@@ -139,24 +134,39 @@ export const LandingPage = () => {
     } else {
       const t = setTimeout(() => {
         setBooted(true);
-        success('Operating system ready', 'System Online'); // <--- Feedback visual
+        success('Operating system ready', 'System Online');
       }, 300);
       return () => clearTimeout(t);
     }
   }, [visibleLines]);
-
-  const handleGameSelect = (path: string) => {
+  
+  const handleGameSelect = async (game: typeof GAMES[number]) => {
     if (!isAuthenticated && !isMock) {
       navigate('/login');
       return;
     }
-    navigate(path);
-  };
 
+    if (game.id === 'sudoku') {
+      try {
+        const res = await createSudokuGame('easy');
+        // Accedemos a 'res.data' (formato estándar de Axios)
+        const newGame = (res as any)?.data;
+        
+        if (newGame && newGame.id) {
+          navigate(`/game/sudoku/sudoku-${String(newGame.id).padStart(3, '0')}`);
+        } else {
+          throw new Error("Estructura de respuesta inválida: no se encontró ID");
+        }
+      } catch (err) {
+        console.error("Failed to launch sudoku:", err);
+      }
+    } else {
+      navigate(game.path);
+    }
+  };
   return (
     <div className={styles.page}>
 
-      {/* ── Boot terminal ── */}
       <div className={styles.terminal}>
         <div className={styles.terminalHeader}>
           <span className={styles.terminalDot} style={{ background: '#ff3366' }} />
@@ -188,7 +198,6 @@ export const LandingPage = () => {
         {!booted && <span className={styles.terminalCursor} />}
       </div>
 
-      {/* ── Hero ── */}
       {booted && (
         <div className={styles.heroWrap + ' animate-fade-in'}>
           <span className={styles.heroEyebrow}>welcome to</span>
@@ -201,14 +210,13 @@ export const LandingPage = () => {
         </div>
       )}
 
-      {/* ── Game cards ── */}
       {booted && (
         <div className={styles.cardsWrap + ' animate-fade-in'}>
           {GAMES.map((game) => (
             <div
               key={game.id}
               className={styles.card}
-              onClick={() => handleGameSelect(game.path)}
+              onClick={() => handleGameSelect(game)}
               style={{ borderColor: '#1a5f8a' }}
             >
               <div className={styles.cardHeader}>
@@ -252,7 +260,6 @@ export const LandingPage = () => {
         </div>
       )}
 
-      {/* ── Auth prompt ── */}
       {booted && !isAuthenticated && !isMock && (
         <div className={styles.authPrompt + ' animate-fade-in'}>
           <span className={styles.authText}>

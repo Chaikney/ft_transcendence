@@ -6,7 +6,7 @@ import { ChatButton } from '@/features/chat/ChatButton';
 import type { ConnectionStatusType } from '@/types';
 
 const styles = {
-  shell:   'min-h-screen bg-bg-base flex flex-col',
+  shell: 'min-h-screen bg-bg-base flex flex-col',
   nav:
     'fixed top-0 left-0 right-0 z-50 h-12 ' +
     'flex items-center justify-between px-6 ' +
@@ -45,44 +45,42 @@ const styles = {
     'font-mono text-xs text-text-secondary cursor-pointer',
   userElo:
     'text-accent',
-  content:  'flex-1 pt-12 relative',
+  content: 'flex-1 pt-12 relative',
   gridBg:
     'fixed inset-0 pointer-events-none opacity-[0.06] z-0 ' +
     '[background-image:linear-gradient(var(--border-strong)_1px,transparent_1px),' +
     'linear-gradient(90deg,var(--border-strong)_1px,transparent_1px)] ' +
     '[background-size:40px_40px]',
-  pageWrap:    'relative z-10 min-h-full flex flex-col',
+  pageWrap: 'relative z-10 min-h-full flex flex-col',
   pageContent: 'flex-1',
 } as const;
 
 const NAV_ITEMS = [
-  { label: '> home',     path: '/' },
-  { label: '> chess',    path: '/game/chess/chess-001' },
-  { label: '> sudoku',   path: '/game/sudoku/sudoku-001' },
+  { label: '> home', path: '/' },
+  { label: '> chess', path: '/game/chess/chess-001' },
+  { label: '> sudoku', path: '/game/sudoku' },
   { label: '> spectate', path: '/spectate' },
 ] as const;
 
 const STATUS_DOT: Record<ConnectionStatusType, { color: string; pulse: boolean }> = {
-  connected:    { color: '#00ff88', pulse: false },
-  connecting:   { color: '#ffaa00', pulse: true  },
-  reconnecting: { color: '#ffaa00', pulse: true  },
+  connected: { color: '#00ff88', pulse: false },
+  connecting: { color: '#ffaa00', pulse: true },
+  reconnecting: { color: '#ffaa00', pulse: true },
   disconnected: { color: '#ff3366', pulse: false },
 };
 
 export const RootLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const user     = useAuthStore((s) => s.user);
+  const user = useAuthStore((s) => s.user);
 
   const connectionStatus: ConnectionStatusType = 'connecting';
   const dot = STATUS_DOT[connectionStatus];
 
   return (
     <div className={styles.shell}>
-
       <div className={styles.gridBg} aria-hidden />
 
-      {/* Navbar */}
       <nav className={styles.nav}>
         <div
           className={styles.logoWrap}
@@ -126,7 +124,7 @@ export const RootLayout = () => {
               ].join(' ')}
               style={{
                 background: dot.color,
-                boxShadow:  `0 0 6px ${dot.color}`,
+                boxShadow: `0 0 6px ${dot.color}`,
               }}
             />
             <span
@@ -156,7 +154,6 @@ export const RootLayout = () => {
         </div>
       </nav>
 
-      {/* Page content */}
       <main className={styles.content}>
         <div className={styles.pageWrap}>
           <div className={styles.pageContent}>
@@ -166,12 +163,9 @@ export const RootLayout = () => {
         </div>
       </main>
 
-      {/* Global overlays — always on top */}
       <ToastContainer />
 
-      {/* Chat — only shown when user is authenticated */}
       {user && <ChatButton />}
-
     </div>
   );
 };

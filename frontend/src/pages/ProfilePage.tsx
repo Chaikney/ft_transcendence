@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store';
+import { createSudokuGame } from '@/features/sudoku/service';
 
 // ── Mock match history (replace with API call when backend ready) ──────────
 const MOCK_HISTORY = [
@@ -230,13 +231,21 @@ export const ProfilePage = () => {
             <div className={styles.actionRow}>
               <button
                 className={[styles.actionBtn, styles.actionBtnPrimary].join(' ')}
-                onClick={() => navigate('/game/chess/chess-001')}
+                onClick={() => navigate('/game/chess/chess-new')}
               >
                 &gt; play_chess()
               </button>
               <button
                 className={[styles.actionBtn, styles.actionBtnPrimary].join(' ')}
-                onClick={() => navigate('/game/sudoku/sudoku-001')}
+                onClick={async () => {
+                  try {
+                    const res = await createSudokuGame('easy');
+                    const newGame = res as { id: number };
+                    navigate(`/game/sudoku/sudoku-${String(newGame.id).padStart(3, '0')}`);
+                  } catch (err) {
+                    console.error("Error al crear juego:", err);
+                  }
+                }}
               >
                 &gt; play_sudoku()
               </button>
