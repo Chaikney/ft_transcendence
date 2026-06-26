@@ -5,7 +5,7 @@ NAME	=	ft_transcendence
 # A name to help tag the containers
 REPO	=	team42
 # Location of the compose file
-BASEDIR	=	./srcs
+BASEDIR	=	./
 # Location of the individual containers (in their subfolders)
 CONTHOME=	$(BASEDIR)/reqs
 
@@ -21,41 +21,39 @@ $(NAME): start
 # NOTE podman compose and podman-compose behave differently! BOOOO!
 # NOTE !! if you get a "cant get socket" error, *LAUNCH THE podman.socket SERVICE!
 start: secrets
-	@echo "Building and launching the 3 containers"
-	@echo "NOTE This command does not work realiably yet!"
+	@echo "Building and launching the containers"
 	$(BASECMD) compose -f "$(abspath $(BASEDIR)/docker-compose.yml)" up
 
 stop:
 # stop all the running containers
 	@echo "Stopping our containers"
-	@echo "NOTE This is untested"
 	$(BASECMD) compose -f "$(abspath $(BASEDIR)/docker-compose.yml)" down
 
 # NOTE These builds run separately from the "compose"-triggered make targets, so mostly for testing.
 # ...containers are "interesting" like that
-builds: web-build db-build ruby-build
-	@echo "All containers now built"
+# builds: web-build db-build ruby-build
+# 	@echo "All containers now built"
 
-# NOTE Podman / OCI format ignores HEALTHCHECK therefore build container with --format=docker
-web-build: server_cert web_src
-	@echo "Building NGINX container..."
-	$(BASECMD) build -f $(CONTHOME)/web/Dockerfile --tag $(REPO)/web:0.1
+# web-build: server_cert web_src
+# 	@echo "Building NGINX container..."
+# 	$(BASECMD) build -f $(CONTHOME)/web/Dockerfile --tag $(REPO)/web:0.1
 
-chess-build: chess_src
-	@echo "Building chess container..."
-	$(BASECMD) build -f $(CONTHOME)/chess/Dockerfile --tag $(REPO)/sf:0.1
+# chess-build: chess_src
+# 	@echo "Building chess container..."
+# 	$(BASECMD) build -f $(CONTHOME)/chess/Dockerfile --tag $(REPO)/sf:0.1
 
-db-build: secrets
-	@echo "Building database container..."
-	$(BASECMD) build -f $(CONTHOME)/postgres/Dockerfile --tag $(REPO)/db:0.1
+# db-build: secrets
+# 	@echo "Building database container..."
+# 	$(BASECMD) build -f $(CONTHOME)/postgres/Dockerfile --tag $(REPO)/db:0.1
 
-# FIXME if we have the ruby version, it should be actually correct and not hardcoded...
-ruby-build: secrets ruby_src
-	@echo "Building ruby container..."
-	$(BASECMD) build -f $(CONTHOME)/ruby/Dockerfile --tag $(REPO)/ruby:4.0.5
+# # FIXME if we have the ruby version, it should be actually correct and not hardcoded...
+# ruby-build: secrets ruby_src
+# 	@echo "Building ruby container..."
+# 	$(BASECMD) build -f $(CONTHOME)/ruby/Dockerfile --tag $(REPO)/ruby:4.0.5
 
 # Launch the cluster with rebuilt containers (will use cache if present)
 rebuild:
+	@echo "Rebuilding and launching the containers"
 	$(BASECMD)-compose -f "$(abspath $(BASEDIR)/docker-compose.yml)" up --build
 
 # Finding or generating secrets that are not in the repo
