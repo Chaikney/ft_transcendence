@@ -6,6 +6,7 @@ import { InlineLoader, Button } from '@/components';
 import { TerminalCard } from '@/components/TerminalCard';
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { useMatchStore } from '@/store';
+import { LobbyScreen } from '@/components/LobbyScreen'; // 👈 1. Importamos el Lobby
 
 const styles = {
   page: 'min-h-screen flex flex-col items-center justify-center px-4 py-8 gap-6',
@@ -22,12 +23,19 @@ export const ChessGamePage = () => {
   // useChessGame ahora gestiona la conexión ActionCable y el estado del juego
   const { chessGame, sendMove, requestAIMove, connectionStatus } = useChessGame(gameId);
 
+  // 👈 2. Traemos el estado general de la partida ('lobby', 'in_progress', etc)
+  const status = useMatchStore((s) => s.status); 
   const error = useMatchStore((s) => s.error);
   const resetMatch = useMatchStore((s) => s.resetMatch);
 
-  // ELIMINAMOS isMock: Ahora solo nos importa si el socket está conectado
   const isLocked = connectionStatus !== 'connected';
 
+  // 🎮 EL LOBBY: Si estamos en fase de presentación, robamos la pantalla completa
+  if (status === 'lobby') {
+    return <LobbyScreen />;
+  }
+
+  // Errores
   if (error) {
     return (
       <div className={styles.page}>
@@ -41,8 +49,6 @@ export const ChessGamePage = () => {
   }
 
   // Si no hay juego, mostramos el loader. 
-  // Nota: Al usar WebSockets, chessGame será null hasta que recibamos 
-  // el mensaje inicial del backend a través del socket.
   if (!chessGame) {
     return (
       <div className={styles.page}>
@@ -51,6 +57,7 @@ export const ChessGamePage = () => {
     );
   }
 
+  // ♟️ TABLERO REAL
   return (
     <div className={styles.page}>
       <div className={styles.topBar}>

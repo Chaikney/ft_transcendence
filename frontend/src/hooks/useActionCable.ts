@@ -75,11 +75,14 @@ export const useAppearanceRadar = () => {
 export const useMatchmaking = () => {
   const { cable } = useActionCable();
   const navigate = useNavigate();
-  // Usamos un ref para guardar la suscripción y poder llamar a sus métodos
-  const subscriptionRef = useRef<any>(null); 
+  // Usamos un ref para mantener la suscripción viva
+  const subscriptionRef = useRef<any>(null);
 
   useEffect(() => {
     if (!cable) return;
+
+    // Si ya estamos suscritos, no lo volvemos a hacer
+    if (subscriptionRef.current) return;
 
     subscriptionRef.current = cable.subscriptions.create(
       { channel: "MatchmakingChannel" },
@@ -89,30 +92,41 @@ export const useMatchmaking = () => {
         },
         received(data) {
           if (data.action === 'match_found') {
-            console.log(`🎉 ¡PARTIDA ENCONTRADA! Oponente: ID ${data.opponent_id} | Sala: ${data.room_id}`);
+            console.log(`🎉 ¡PARTIDA ENCONTRADA! Oponente: ${data.opponent.username} | Sala: ${data.room_id}`);
             
-            // 1. Limpiamos el store (quita el estado 'loading')
-            useMatchStore.getState().resetMatch();
-            
-            // 2. Redirigimos al usuario a la partida (ej: /game/chess/chess-a1b2c3d4)
-            const gameType = data.room_id.split('-')[0];
-            navigate(`/game/${gameType}/${data.room_id}`);
+            try {
+              const gameType = data.room_id.split('-')[0];
+
+              // 1. Pasamos al estado LOBBY guardando al rival
+              useMatchStore.getState().setLobby(gameType, data.opponent);
+              
+              // 2. Le damos 100ms a React para que asimile el estado antes de teletransportar
+              setTimeout(() => {
+                console.log(`🚀 Teletransportando a: /game/${gameType}/${data.room_id}`);
+                navigate(`/game/${gameType}/${data.room_id}`);
+              }, 100);
+
+            } catch (err) {
+              console.error("🚨 Error crítico al intentar entrar a la sala:", err);
+            }
           }
         }
       }
     );
 
-    return () => {
-      subscriptionRef.current?.unsubscribe();
-    };
+    // IMPORTANTE: Quitamos el 'return unsubscribe' para que no corte el cable
+    // cada vez que React re-renderiza la LandingPage.
   }, [cable, navigate]);
 
   // Funciones que llamaremos desde la interfaz
   const joinQueue = (gameType: 'chess' | 'sudoku') => {
     if (subscriptionRef.current) {
-      // Usamos TU método para poner el status en 'loading'
       useMatchStore.getState().startLoading(gameType);
-      subscriptionRef.current.perform('join_queue', { game_type: gameType });
+      
+      // Le damos un respiro de 100ms para asegurar que el canal de Rails esté "Ready"
+      setTimeout(() => {
+        subscriptionRef.current.perform('join_queue', { game_type: gameType });
+      }, 100);
     }
   };
 
@@ -120,7 +134,6 @@ export const useMatchmaking = () => {
     const currentType = useMatchStore.getState().gameType;
     if (subscriptionRef.current && currentType) {
       subscriptionRef.current.perform('leave_queue', { game_type: currentType });
-      // Usamos TU método para devolverlo a 'idle'
       useMatchStore.getState().resetMatch();
     }
   };
