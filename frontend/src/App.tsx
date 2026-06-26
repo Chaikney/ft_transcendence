@@ -2,9 +2,9 @@ import { useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './router';
 import { useAuthStore } from '@/store/authStore';
+import { ToastContainer } from '@/components/Toast';
 
 export default function App() {
-  // Inicialización de prueba (Mock)
   useEffect(() => {
     if (import.meta.env.VITE_USE_MOCK === 'true') {
       useAuthStore.getState().setUser({ 
@@ -15,5 +15,10 @@ export default function App() {
     }
   }, []);
 
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />
+      <ToastContainer />
+    </>
+  );
 }

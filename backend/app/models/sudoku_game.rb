@@ -4,6 +4,50 @@ class SudokuGame < ApplicationRecord
   validates :status, presence: true
   validates :difficulty, presence: true
 
+  # ── Validación de Tablero (Nuevo) ────────────────────────────────────────
+
+  # Valida si el string de 81 caracteres es un Sudoku válido según las reglas
+  def self.valid_board?(board_str)
+    return false unless board_str.is_a?(String) && board_str.length == 81
+    
+    # Convertimos el string a matriz 9x9
+    grid = Array.new(9) { |i| board_str.slice(i * 9, 9).chars.map(&:to_i) }
+    
+    9.times do |r|
+      9.times do |c|
+        val = grid[r][c]
+        next if val == 0 # Saltamos celdas vacías
+        
+        # Validamos que el número no se repita en su fila, columna o caja 3x3
+        return false unless valid_placement_in_grid?(grid, r, c, val)
+      end
+    end
+    true
+  end
+
+  def self.valid_placement_in_grid?(grid, row, col, num)
+    # Temporalmente ponemos 0 en la posición para no auto-validarse
+    original_val = grid[row][col]
+    grid[row][col] = 0
+    
+    # Check row
+    return false if grid[row].include?(num)
+    
+    # Check column
+    return false if grid.map { |r| r[col] }.include?(num)
+    
+    # Check 3x3 box
+    box_r = (row / 3) * 3
+    box_c = (col / 3) * 3
+    box = grid[box_r, 3].flat_map { |r| r[box_c, 3] }
+    return false if box.include?(num)
+    
+    # Restauramos el valor
+    grid[row][col] = original_val
+    true
+  end
+
+
   # ── Puzzle Generator ────────────────────────────────────────────────────
 
   CLUES_BY_DIFFICULTY = {

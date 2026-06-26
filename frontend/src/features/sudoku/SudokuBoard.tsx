@@ -1,6 +1,7 @@
 import { useEffect, useCallback } from 'react';
 import { useSudokuBoard } from './hooks/useSudokuBoard';
 import type { CellValue, SudokuGameState, SudokuMovePayload } from './types';
+import { useToast } from '@/components/Toast';
 
 const THEME = {
   boardBg:      '#C5BAAC',
@@ -115,10 +116,16 @@ export const SudokuBoard = ({
   onMove,
   disabled = false,
 }: SudokuBoardProps) => {
-  if (!gameState?.grid) return null;
+  const { error } = useToast();
 
-  const { selectedCell, selectCell, inputValue, clearSelection } =
-    useSudokuBoard(gameState.game_id, originalGrid, onMove);
+  // 3. Pásalo al hook de Sudoku
+  const { selectedCell, selectCell, inputValue, clearSelection } = useSudokuBoard(
+    gameState.game_id, 
+    originalGrid, 
+    gameState.grid, 
+    onMove,
+    () => error("Ese número no puede ir ahí, intenta otro.", "Movimiento Inválido") // Feedback!
+  );
 
   const conflictCells = getConflictCells(gameState.grid);
 

@@ -35,13 +35,24 @@ module Api
 
       # PATCH /api/sudoku/games/:game_id
       def update
+        # 1. Validación de seguridad: Comprobamos si el nuevo tablero enviado es válido
+        unless SudokuGame.valid_board?(params[:board])
+          return render json: { 
+            error: "Movimiento inválido: El tablero resultante viola las reglas del Sudoku" 
+          }, status: :unprocessable_entity
+        end
+      
         update_params = { board: params[:board] }
-
+      
+        # 2. Asignamos el nuevo tablero
         @game.board = params[:board]
+
+        # 3. Comprobamos si con este movimiento el juego ha finalizado
         if @game.solved?
           update_params[:status] = 'won'
         end
-
+      
+        # 4. Guardamos los cambios
         if @game.update(update_params)
           render json: {
             id: @game.id,
