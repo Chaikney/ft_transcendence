@@ -1,9 +1,12 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/store';
+import { useAuthStore, useRadarStore } from '@/store';
 import { Footer } from '@/components/Footer';
 import { ToastContainer } from '@/components/Toast';
 import { ChatButton } from '@/features/chat/ChatButton';
 import type { ConnectionStatusType } from '@/types';
+import { useAppearanceRadar } from '@/hooks/useActionCable'; // 📡 1. IMPORTAMOS EL RADAR
+import { MatchmakingModal } from '@/components/MatchmakingModal';
+
 
 const styles = {
   shell:   'min-h-screen bg-bg-base flex flex-col',
@@ -74,7 +77,10 @@ export const RootLayout = () => {
   const navigate = useNavigate();
   const user     = useAuthStore((s) => s.user);
 
-  const connectionStatus: ConnectionStatusType = 'connecting';
+  // 📡 2. ENCIENDE EL RADAR AQUÍ (Incondicionalmente)
+  useAppearanceRadar();
+
+  const connectionStatus = useRadarStore((s) => s.status); 
   const dot = STATUS_DOT[connectionStatus];
 
   return (
@@ -168,6 +174,7 @@ export const RootLayout = () => {
 
       {/* Global overlays — always on top */}
       <ToastContainer />
+      <MatchmakingModal />
 
       {/* Chat — only shown when user is authenticated */}
       {user && <ChatButton />}

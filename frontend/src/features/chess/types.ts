@@ -19,3 +19,4 @@ export interface ChessMovePayload {
 	from: string;
 	to: string;
 }
+

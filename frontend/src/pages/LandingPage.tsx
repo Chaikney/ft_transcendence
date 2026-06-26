@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store';
 import { useToast } from '@/components/Toast';
+import { useMatchmaking } from '@/hooks/useActionCable'; // <-- 1. IMPORTAMOS EL HOOK
 
 const BOOT_LINES = [
   '> INITIALIZING transcendence v2.0...',
@@ -18,7 +19,7 @@ const GAMES = [
   {
     id:       'chess',
     label:    'CHESS',
-    path:     '/game/chess/chess-001',
+    path:     '/game/chess/chess-001', // Esto ahora solo sirve como referencia visual o de reserva
     icon:     '♟',
     desc:     'Two-player chess with AI opponent. Real-time via WebSocket.',
     tag:      'MULTIPLAYER / AI',
@@ -127,6 +128,9 @@ export const LandingPage = () => {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const isMock          = import.meta.env.VITE_USE_MOCK === 'true';
   const { info, success } = useToast();
+  
+  // <-- 2. INSTANCIAMOS EL MATCHMAKING
+  const { joinQueue } = useMatchmaking(); 
 
   // Boot sequence animation
   const [visibleLines, setVisibleLines] = useState<number>(0);
@@ -139,36 +143,24 @@ export const LandingPage = () => {
     } else {
       const t = setTimeout(() => {
         setBooted(true);
-        success('Operating system ready', 'System Online'); // <--- Feedback visual
+        success('Operating system ready', 'System Online');
       }, 300);
       return () => clearTimeout(t);
     }
   }, [visibleLines]);
 
-  const handleGameSelect = (path: string) => {
-  if (!isAuthenticated && !isMock) {
-    navigate('/login');
-    return;
-  }
+  // <-- 3. ACTUALIZAMOS LA FUNCIÓN DE CLICK
+  const handleGameSelect = (gameId: string) => {
+    if (!isAuthenticated && !isMock) {
+      navigate('/login');
+      return;
+    }
 
-  // ⊞ HACK SUDOKU INFINITO
-  if (path.includes('sudoku-001')) {
-    const randomId = Math.floor(Math.random() * 999999);
-    navigate(`/game/sudoku/sudoku-${randomId}`);
-    return;
-  }
-
-  // ♟️ HACK AJEDREZ INFINITO
-  if (path.includes('chess-001')) {
-    const randomId = Math.floor(Math.random() * 999999);
-    navigate(`/game/chess/chess-${randomId}`);
-    return;
-  }
-
-  // Para cualquier otra ruta (por si en el futuro añades más cosas)
-  navigate(path);
+    // Usamos nuestro hook de matchmaking real con 'chess' o 'sudoku'
+    if (gameId === 'chess' || gameId === 'sudoku') {
+      joinQueue(gameId);
+    }
   };
-
 
   return (
     <div className={styles.page}>
@@ -225,7 +217,7 @@ export const LandingPage = () => {
             <div
               key={game.id}
               className={styles.card}
-              onClick={() => handleGameSelect(game.path)}
+              onClick={() => handleGameSelect(game.id)} // Le pasamos el ID del juego
               style={{ borderColor: '#1a5f8a' }}
             >
               <div className={styles.cardHeader}>

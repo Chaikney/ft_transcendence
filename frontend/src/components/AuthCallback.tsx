@@ -1,12 +1,13 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { post } from '@/services/api'; // Usamos tu servicio centralizado
+import { post } from '@/services/api'; 
+import { useAuthStore } from '@/store'; // 1. Importamos el store
 
 export default function AuthCallback() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const setUser = useAuthStore((s) => s.setUser); // 2. Traemos la acción para guardar al usuario
   
-  // Usamos un ref para evitar que el useEffect se dispare dos veces (típico en React 18+ con StrictMode)
   const isProcessing = useRef(false);
 
   useEffect(() => {
@@ -17,14 +18,21 @@ export default function AuthCallback() {
     if (code) {
       isProcessing.current = true;
 
-      // Usamos tu helper 'post' de api.ts
-      // Nota: Si en api.ts tienes BASE_URL como '.../api', aquí pones solo '/42/callback'
-      post<{ token: string }>('/42/callback', { code })
+      post<any>('/42/callback', { code })
         .then((response) => {
           console.log("Estructura de la respuesta:", response);
+          
           const token = response.data?.token;
-          if (token) {
-            localStorage.setItem('auth_token', token); // Usamos 'auth_token' que es el que tu api.ts busca
+          const user = response.data?.user; // 3. Sacamos el usuario de la respuesta de Rails
+
+          if (token && user) {
+            // Guardamos el token para sobrevivir al F5
+            localStorage.setItem('auth_token', token); 
+            
+            // 🔥 LE DECIMOS A LA APP QUIÉN ES EL USUARIO (con su avatar incluido)
+            setUser(user); 
+
+            // Redirigimos a la home (o al perfil directamente si prefieres: `/profile/${user.username}`)
             navigate('/'); 
           } else {
             navigate('/login');
@@ -35,13 +43,14 @@ export default function AuthCallback() {
           navigate('/login');
         });
     }
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, setUser]);
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center text-white">
-      <div className="animate-pulse flex flex-col items-center">
-        <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p>Negociando acceso con 42...</p>
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center text-white font-mono">
+      <div className="flex flex-col items-center gap-4">
+        {/* Un spinner un poco más acorde a tu estilo de terminal */}
+        <div className="w-12 h-12 border-4 border-[#00ff88] border-t-transparent rounded-sm animate-spin"></div>
+        <p className="tracking-widest text-[#00ff88] uppercase text-xs">&gt; NEGOTIATING ACCESS WITH 42_API...</p>
       </div>
     </div>
   );
