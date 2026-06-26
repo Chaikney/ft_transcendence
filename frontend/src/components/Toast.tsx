@@ -10,6 +10,7 @@ export interface Toast {
   variant:   ToastVariant;
   duration?: number; 
   title?:    string;
+  size?:     'sm' | 'lg';
 }
 
 interface ToastStore {
@@ -43,7 +44,7 @@ export const useToast = () => {
   const { add, remove, clear } = useToastStore();
 
   const toast = useCallback(
-    (message: string, variant: ToastVariant = 'info', options?: Partial<Pick<Toast, 'title' | 'duration'>>) =>
+    (message: string, variant: ToastVariant = 'info', options?: Partial<Pick<Toast, 'title' | 'duration' | 'size'>>) =>
       add({ message, variant, ...options }),
     [add]
   );
@@ -51,7 +52,7 @@ export const useToast = () => {
   return {
     toast,
     success: (msg: string, title?: string) => toast(msg, 'success', { title }),
-    error:   (msg: string, title?: string) => toast(msg, 'error',   { title, duration: 6000 }),
+    error:   (msg: string, title?: string, size?: 'sm' | 'lg') => toast(msg, 'error', { title, duration: 6000, size }),
     warning: (msg: string, title?: string) => toast(msg, 'warning', { title }),
     info:    (msg: string, title?: string) => toast(msg, 'info',    { title }),
     remove,
@@ -105,6 +106,8 @@ const ToastItem = ({ toast, onRemove }: ToastItemProps) => {
   const config   = VARIANT_CONFIG[toast.variant];
   const duration = toast.duration ?? 4000;
 
+  const isLarge = toast.size === 'lg';
+
   // Auto-dismiss
   useEffect(() => {
     if (duration === 0) return;
@@ -119,8 +122,9 @@ const ToastItem = ({ toast, onRemove }: ToastItemProps) => {
         background:  config.bg,
         border:      `1px solid ${config.border}`,
         boxShadow:   `0 0 12px ${config.border}, 0 4px 16px rgba(0,0,0,0.6)`,
-        minWidth:    '280px',
-        maxWidth:    '400px',
+        minWidth:    isLarge ? '400px' : '280px',
+        maxWidth:    isLarge ? '400px' : '300px',
+        fontSize:    isLarge ? '12px' : '12px',
       }}
       role="alert"
       aria-live="polite"
