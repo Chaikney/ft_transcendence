@@ -29,7 +29,16 @@ module Api
       jwt_token = JWT.encode({ user_id: user.id }, Rails.application.secret_key_base.to_s)
 
       # 5. Devolverlo al frontend
-      render json: { data: { token: jwt_token, user: { id: user.id, username: user.username } } }
+      render json: { 
+        data: { 
+          token: jwt_token, 
+          user: { 
+            id: user.id, 
+            username: user.username,
+            avatar_url: user.avatar_url # <--- EL ESLABÓN PERDIDO
+          } 
+        } 
+      }
     end
 
     private

@@ -8,6 +8,7 @@ class User < ApplicationRecord
     # --- ASOCIACIONES DE JUEGOS ---
     has_many :games_as_player1, class_name: 'Game', foreign_key: 'player1_id'
     has_many :games_as_player2, class_name: 'Game', foreign_key: 'player2_id'
+    has_many :sudoku_games, dependent: :destroy
 
     # --- ASOCIACIONES DE AMIGOS ---
     has_many :friendships, dependent: :destroy
@@ -17,8 +18,6 @@ class User < ApplicationRecord
     has_many :inverse_friends, through: :inverse_friendships, source: :user
 
     # --- CALLBACKS ---
-    before_create :generate_otp_secret
-    
     # 🟢 2. ASIGNAR ROL POR DEFECTO A LOS NUEVOS
     after_initialize :set_default_role, if: :new_record?
 
@@ -27,18 +26,24 @@ class User < ApplicationRecord
         Game.where("player1_id = ? OR player2_id = ?", self.id, self.id)
     end
     
-    private
-
+    # ⚠️ MÉTODOS 2FA (Deben ir AQUÍ, encima de private)
     def generate_otp_secret
-        self.otp_secret = ROTP::Base32.random
+        self.otp_secret = ROTP::Base32.random if self.otp_secret.blank?
+        save!
     end
+
+    def mfa_provisioning_uri
+        # El 'issuer' es el nombre que saldrá en la app del móvil
+        totp = ROTP::TOTP.new(self.otp_secret, issuer: "Noctyve_Transcendence")
+        totp.provisioning_uri(self.username)
+    end
+    
+    private
 
     # 🟢 3. MÉTODO PARA EL ROL
     def set_default_role
         self.role ||= :player
         self.banned = false if self.banned.nil?
+        self.status ||= 'offline'
     end
-
-    has_many :sudoku_games, dependent: :destroy
 end
-

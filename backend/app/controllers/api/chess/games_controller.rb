@@ -38,12 +38,18 @@ module Api
         turn = current_fen.include?(" w ") ? 'white' : 'black'
         status = game.status == 'finished' ? 'checkmate' : 'active'
 
+        player1 = game.player1
+        player2 = game.player2
         # Devolvemos exactamente lo que pide el types.ts de Manu
         render json: {
           game_id: params[:game_id],
           fen: current_fen,
           turn: turn,
           status: status,
+          player: {
+            player1: { name: player1.username, avatar: player1.avatar_url },
+            player2: { name: player2.username, avatar: player2.avatar_url }
+          },
           last_move: nil
         }, status: :ok
       end

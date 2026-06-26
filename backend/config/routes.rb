@@ -48,5 +48,8 @@ Rails.application.routes.draw do
     patch '/friends/accept', to: 'friendships#accept'
     delete '/friends/reject', to: 'friendships#reject'
 
+    get 'profile/2fa/enable', to: 'users#enable_2fa'
+    post 'profile/2fa/verify', to: 'users#verify_2fa'
+
   end
 end
