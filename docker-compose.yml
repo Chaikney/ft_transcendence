@@ -3,15 +3,16 @@ name: ft_transcendence
 services:
   web:
     build:
-      context: .
+      context: ./frontend
       dockerfile: Dockerfile
+      # NOTE This is one bind mount and one storage volume defined on the fly
     volumes:
-      - .:/app
-      - /app/node_modules
+      - ../frontend:/app
+       - /app/node_modules
     ports:
       - "5173:5173"
-    environment:
-      - NODE_ENV=development
+    env_file:
+      - frontend/.env
     networks:
       - app_int
   # web_complex:
@@ -55,15 +56,17 @@ services:
       - app_int
 
   api:
-    build: ./backend
+    build:
+      context: backend
     # Este comando es vital: borra el PID fantasma de Rails y luego arranca el servidor
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    # NOTE Bind mount for development
     volumes:
-      - .:/app  # <--- LA MAGIA: Sincroniza tu carpeta local con el contenedor
+      - ./backend:/app  # <--- LA MAGIA: Sincroniza tu carpeta local con el contenedor
     ports:
       - "3000:3000"
     env_file:
-      - .env
+      - backend/.env
     depends_on:
       - db
     networks:
