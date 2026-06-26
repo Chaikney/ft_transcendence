@@ -1,6 +1,17 @@
 class User < ApplicationRecord
     has_secure_password
 
+    # 🔒 VALIDACIONES PARA EL REGISTRO MANUAL
+    validates :username, presence: true, uniqueness: { case_sensitive: false }, 
+                         length: { minimum: 3, maximum: 15 },
+                         format: { with: /\A[a-zA-Z0-9_-]+\z/, message: "only allows letters, numbers, _ and -" }
+    
+    validates :email, presence: true, uniqueness: { case_sensitive: false },
+                      format: { with: URI::MailTo::EMAIL_REGEXP, message: "must be a valid email address" }
+
+    # La contraseña solo es obligatoria cuando se crea un registro nuevo 
+    # o cuando el usuario la está cambiando explícitamente.
+    validates :password, presence: true, length: { minimum: 6 }, if: :password_digest_changed?
     # 🟢 1. DEFINICIÓN DE ROLES
     # 0 = Jugador normal, 1 = Administrador
     enum :role, { player: 0, admin: 1 }

@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useChessBoard } from './hooks/useChessBoard';
 import type { ChessGameState, ChessMove } from './types';
 
-// ── Pure functions (logic — never touch) ──────────────────────────────────
+// ── Pure functions ──────────────────────────────────
 const parseFen = (fen: string): (string | null)[][] => {
   const rows = fen.split(' ')[0].split('/');
   return rows.map((row) => {
@@ -26,78 +26,57 @@ const PIECE_UNICODE: Record<string, string> = {
   k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟',
 };
 
-// ── Square background resolver (inline — bypasses Tailwind v4 issue) ──────
-const getSquareBg = (
-  isLight:    boolean,
-  isSelected: boolean,
-  isLastMove: boolean,
-): string => {
+const getSquareBg = (isLight: boolean, isSelected: boolean, isLastMove: boolean): string => {
   if (isSelected) return 'var(--chess-selected)';
   if (isLastMove)  return 'var(--chess-lastmove)';
   return isLight ? 'var(--chess-light)' : 'var(--chess-dark)';
 };
 
-// ── Static styles ──────────────────────────────────────────────────────────
 const styles = {
   wrapper: 'flex flex-col items-center gap-3 animate-board-reveal',
-
   statusBar: 'flex items-center gap-2 h-7',
   turnDot: 'w-2.5 h-2.5 rounded-full border border-black/20',
   turnLabel: 'text-xs font-mono tracking-widest uppercase text-text-secondary',
   gameOver: 'text-xs font-mono tracking-widest uppercase text-status-error',
-
-  boardFrame:
-    'flex rounded-lg overflow-hidden ' + // Cambiamos relative por flex
-    'border border-accent-border ' +
-    'shadow-[var(--shadow-glow)] ' +
-    'bg-bg-surface',
-
-  rankLabels:
-    'flex flex-col justify-between pointer-events-none z-10 py-[calc(var(--square-size)/16)]', // Quitamos absolute
-  rankLabel:
-    'flex items-center justify-center text-[10px] font-mono ' +
-    'text-accent font-bold select-none',
-
+  boardFrame: 'flex rounded-lg overflow-hidden border border-accent-border shadow-[var(--shadow-glow)] bg-bg-surface',
+  rankLabels: 'flex flex-col justify-between pointer-events-none z-10 py-[calc(var(--square-size)/16)]',
+  rankLabel: 'flex items-center justify-center text-[10px] font-mono text-accent font-bold select-none',
   fileLabels: 'flex',
-  fileLabel:
-    'flex-1 text-center text-[10px] font-mono text-accent/70 ' +
-    'select-none pt-1',
-
+  fileLabel: 'flex-1 text-center text-[10px] font-mono text-accent/70 select-none pt-1',
   boardGrid: 'grid grid-cols-8',
-
-  squareBase:
-    'relative flex items-center justify-center select-none ' +
-    'transition-[filter] duration-[var(--ease-fast)]',
-
-  pieceWhite:
-    'text-[var(--chess-piece-white)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] transition-transform duration-[var(--ease-fast)]',
-  pieceBlack:
-    'text-[var(--chess-piece-black)] drop-shadow-[0_1px_2px_rgba(56,189,248,0.2)] transition-transform duration-[var(--ease-fast)]',
-
-  lastMoveDot:
-    'absolute bottom-0.5 right-0.5 w-1.5 h-1.5 rounded-none ' +
-    'bg-accent opacity-60',
+  squareBase: 'relative flex items-center justify-center select-none transition-[filter] duration-[var(--ease-fast)]',
+  pieceWhite: 'text-[var(--chess-piece-white)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] transition-transform duration-[var(--ease-fast)]',
+  pieceBlack: 'text-[var(--chess-piece-black)] drop-shadow-[0_1px_2px_rgba(56,189,248,0.2)] transition-transform duration-[var(--ease-fast)]',
+  lastMoveDot: 'absolute bottom-0.5 right-0.5 w-1.5 h-1.5 rounded-none bg-accent opacity-60',
 } as const;
 
-// ── Props ──────────────────────────────────────────────────────────────────
 interface ChessBoardProps {
   gameState: ChessGameState;
   onMove:    (move: Omit<ChessMove, 'piece'>) => void;
   disabled?: boolean;
+  localPlayerColor?: 'w' | 'b';
 }
 
-// ── Component ──────────────────────────────────────────────────────────────
 export const ChessBoard = ({
   gameState,
   onMove,
   disabled = false,
+  localPlayerColor = 'w'
 }: ChessBoardProps) => {
-  const { selectedSquare, selectSquare } = useChessBoard(onMove);
+  
+  const { selectedSquare, selectSquare } = useChessBoard(onMove, gameState, localPlayerColor);
   const board = useMemo(() => parseFen(gameState.fen), [gameState.fen]);
 
   const boardSize  = 'min(80vw, 480px)';
   const squareSize = `calc(${boardSize} / 8)`;
   const isActive   = gameState.status === 'active';
+
+  // 🥷 FIX: Invertimos el renderizado si somos las negras
+  const displayRows = localPlayerColor === 'b' ? [7, 6, 5, 4, 3, 2, 1, 0] : [0, 1, 2, 3, 4, 5, 6, 7];
+  const displayCols = localPlayerColor === 'b' ? [7, 6, 5, 4, 3, 2, 1, 0] : [0, 1, 2, 3, 4, 5, 6, 7];
+  
+  const rankLabels = localPlayerColor === 'b' ? [1, 2, 3, 4, 5, 6, 7, 8] : [8, 7, 6, 5, 4, 3, 2, 1];
+  const fileLabels = localPlayerColor === 'b' ? ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'] : ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
   return (
     <div className={styles.wrapper}>
@@ -105,7 +84,9 @@ export const ChessBoard = ({
         {isActive ? (
           <>
             <span className={styles.turnDot} style={{ background: 'var(--accent)' }} />
-            <span className={styles.turnLabel}>{gameState.turn}&apos;s turn</span>
+            <span className={styles.turnLabel}>
+              {gameState.fen.split(' ')[1] === 'w' ? 'White' : 'Black'}&apos;s turn
+            </span>
           </>
         ) : (
           <span className={styles.gameOver}>Game over — {gameState.status}</span>
@@ -114,20 +95,20 @@ export const ChessBoard = ({
 
       <div className={styles.boardFrame} style={{ width: `calc(${boardSize} + 25px)`, height: boardSize }}>
   
-      {/* Etiquetas de las filas - Ahora viven en paz al lado del tablero */}
-      <div className={styles.rankLabels} style={{ width: '20px', height: boardSize }}>
-        {[8, 7, 6, 5, 4, 3, 2, 1].map((rank) => (
-          <span key={rank} className={styles.rankLabel} style={{ height: squareSize }}>
-            {rank}
-          </span>
-        ))}
-      </div>
+        <div className={styles.rankLabels} style={{ width: '20px', height: boardSize }}>
+          {rankLabels.map((rank) => (
+            <span key={rank} className={styles.rankLabel} style={{ height: squareSize }}>
+              {rank}
+            </span>
+          ))}
+        </div>
 
         <div data-testid="chess-board" className={styles.boardGrid} style={{ width: boardSize, height: boardSize }}>
-          {board.map((row, rowIdx) =>
-            row.map((piece, colIdx) => {
-              const square = toSquare(rowIdx, colIdx);
-              const isLight = (rowIdx + colIdx) % 2 === 0;
+          {displayRows.map((r) =>
+            displayCols.map((c) => {
+              const piece = board[r][c];
+              const square = toSquare(r, c); // Calculamos la posición original
+              const isLight = (r + c) % 2 === 0; // El color de la casilla siempre es el correcto
               const isSelected = selectedSquare === square;
               const isLastMove = gameState.last_move?.from === square || gameState.last_move?.to === square;
               const isDisabled = disabled || !isActive;
@@ -136,7 +117,7 @@ export const ChessBoard = ({
                 <button
                   key={square}
                   disabled={isDisabled}
-                  onClick={() => selectSquare(square)}
+                  onClick={() => selectSquare(square, piece)}
                   className={[
                     styles.squareBase,
                     isSelected ? 'ring-2 ring-inset ring-accent' : '',
@@ -164,7 +145,7 @@ export const ChessBoard = ({
       </div>
 
       <div className={styles.fileLabels} style={{ width: boardSize }}>
-        {['a','b','c','d','e','f','g','h'].map((f) => (
+        {fileLabels.map((f) => (
           <span key={f} className={styles.fileLabel}>{f}</span>
         ))}
       </div>

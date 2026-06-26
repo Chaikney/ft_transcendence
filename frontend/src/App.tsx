@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './router';
 import { useAuthStore } from '@/store'; 
-import { useAppearanceRadar } from './hooks/useActionCable'; // 1️⃣ Sin el .ts
+import { useAppearanceRadar } from './hooks/useActionCable'; 
+import { AuthScreen } from './components/AuthScreen'; // 
 
 export default function App() {
   console.log("🚀 ¡HOLA! APP.TSX SE ESTÁ EJECUTANDO");
@@ -11,8 +12,6 @@ export default function App() {
   const isLoading = useAuthStore((s) => s.isLoading);
   const user = useAuthStore((s) => s.user);
 
-  // 2️⃣ ENCIENDE EL RADAR SIEMPRE
-  // El propio hook se encarga por dentro de abortar si no hay token
   useAppearanceRadar(); 
 
   useEffect(() => {
@@ -46,6 +45,9 @@ export default function App() {
         } finally {
           setLoading(false);
         }
+      } else {
+        // Si no hay token de inicio, terminamos la carga rápido
+        setLoading(false); 
       }
     };
 
@@ -53,8 +55,14 @@ export default function App() {
   }, [setUser, setLoading]);
 
   if (isLoading) {
-    return <div className="loading-screen">INITIALIZING TERMINAL...</div>;
+    return <div className="loading-screen text-accent font-mono">INITIALIZING TERMINAL...</div>;
   }
 
+  // 🛡️ EL GUARDIÁN: Si no hay usuario logueado, le plantamos la pantalla de login
+  if (!user) {
+    return <AuthScreen />;
+  }
+
+  // Si sobrevive al guardián (ya está logueado), le cargamos el juego normal
   return <RouterProvider router={router} />;
 }

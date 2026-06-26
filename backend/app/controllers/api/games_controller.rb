@@ -12,7 +12,12 @@ module Api
         return
       end
 
-      game = Game.new(player1: @current_user, player2: opponent, status: 'in_progress')
+      game = Game.new(
+        player1: @current_user, 
+        player2: opponent, 
+        status: 'in_progress',
+        current_fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1' # 👈 FEN inicial obligatorio
+      )
 
       if game.save
         render json: { message: "Partida iniciada", game_id: game.id }, status: :created

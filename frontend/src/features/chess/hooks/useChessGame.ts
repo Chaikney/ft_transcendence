@@ -5,40 +5,36 @@ import { useGameChannel } from "@/hooks";
 import type { ChessGameState, ChessMovePayload } from '../types';
 
 // TODO: Dev flag - flip to false when the backend is ready
-const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'false';
 
 export const useChessGame = (gameId: string) => {
   const chessGame = useMatchStore((s) => s.chessGame);
   const setChessGame = useMatchStore((s) => s.setChessGame);
   const startLoading = useMatchStore((s) => s.startLoading);
   const setError = useMatchStore((s) => s.setError);
-  const { connectionStatus } = useGameChannel(USE_MOCK ? null : gameId);
+  const { connectionStatus, sendReady } = useGameChannel(USE_MOCK ? null : gameId);
 
   // load initial game state
   useEffect(() => {
-    const load = async () => {
+    // En useChessGame.ts -> load()
+  const load = async () => {
+    if (useMatchStore.getState().status !== 'lobby') {
       startLoading('chess');
-      try {
-        if (USE_MOCK) {
-          // <- MOCK
-          const { mockChessGame } = await import('@/mocks');
-          setChessGame(mockChessGame);
-        }
-        else {
-          // REAL
-          const res = await getChessGame(gameId);
-          
-          // Magia a prueba de balas: cogemos res.data si existe, y si no (nuestro caso), cogemos res a secas.
-          // El 'as unknown as ChessGameState' hace que TypeScript se calle y quite la línea roja.
-          const actualData = (res as any).data || res;
-          setChessGame(actualData as unknown as ChessGameState);
-        }
-      } catch (err) {
-        setError('Failed to load game. Please try again');
-      }
-    };
+    }
+
+    try {
+      const res = await getChessGame(gameId);
+      // IMPORTANTE: Si tu backend devuelve el objeto directo, res es el objeto.
+      const actualData = (res as any).data || res;
+      
+      console.log("DEBUG: Datos recibidos del servidor:", actualData);
+      setChessGame(actualData as ChessGameState);
+    } catch (err) {
+      setError('Failed to load game');
+    }
+  };
     load();
-  }, [gameId]);
+  }, [gameId]); // Nota: no ponemos startLoading en dependencias para evitar bucles
 
   // send a move
   const sendMove = async (payload: Omit<ChessMovePayload, 'game_id'>) => {
@@ -48,21 +44,21 @@ export const useChessGame = (gameId: string) => {
         const { mockChessGameAfterMove } = await import('@/mocks');
         setChessGame(mockChessGameAfterMove);
       } else {
+        // 1. Validamos con el servidor
         const res = await postChessMove({ ...payload, game_id: gameId });
         const actualData = (res as any).data || res;
 
-        // 🥷 EL FIX: Si el backend nos manda la bandera secreta, 
-        // abortamos el movimiento y hacemos snapback silenciosamente.
+        // 2. Si es ilegal, volvemos atrás el estado local para que la pieza no se quede "flotando"
         if (actualData.illegal_move) {
           setChessGame({ ...chessGame });
           return;
         }
 
-        // Si no hay bandera, el movimiento es legal y actualizamos el tablero.
-        setChessGame(actualData as unknown as ChessGameState);
+        // 3. 🚀 AQUÍ ESTÁ LA MAGIA: 
+        // No llamamos a setChessGame aquí. 
+        // Dejamos que el servidor procese el broadcast y el useGameChannel lo reciba.
       }
     } catch (err) {
-      // Ya solo caeremos aquí si el servidor explota de verdad (Error 500)
       setChessGame({ ...chessGame }); 
     }
   };
@@ -82,5 +78,5 @@ export const useChessGame = (gameId: string) => {
       setError('AI move failed.');
     }
   };
-  return { chessGame, sendMove, requestAIMove, connectionStatus };
+  return { chessGame, sendMove, requestAIMove, connectionStatus, sendReady };
 };
