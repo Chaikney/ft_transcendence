@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store';
 import { useToast } from '@/components/Toast';
 import { createSudokuGame } from '@/features/sudoku/service';
+import { useMatchmaking } from '@/hooks/useActionCable';
 
 const BOOT_LINES = [
   '> INITIALIZING transcendence v2.0...',
