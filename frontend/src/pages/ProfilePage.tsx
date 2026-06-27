@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store';
+import { createSudokuGame } from '@/features/sudoku/service';
 
 // ── Mock match history ──────────
 const MOCK_HISTORY = [
@@ -233,8 +234,38 @@ export const ProfilePage = () => {
           {/* ── Actions ── */}
           {isOwnProfile && (
             <div className={styles.actionRow}>
-              <button className={[styles.actionBtn, styles.actionBtnPrimary].join(' ')} onClick={() => navigate('/game/chess/chess-001')}>&gt; play_chess()</button>
-              <button className={[styles.actionBtn, styles.actionBtnSecondary].join(' ')} onClick={handleLogout}>&gt; logout()</button>
+              <button
+                className={[styles.actionBtn, styles.actionBtnPrimary].join(' ')}
+                onClick={() => navigate('/game/chess/chess-new')}
+              >
+                &gt; play_chess()
+              </button>
+              <button
+                className={[styles.actionBtn, styles.actionBtnPrimary].join(' ')}
+                onClick={async () => {
+                  try {
+                    const res = await createSudokuGame('easy');
+
+                    // Verificamos si res es un objeto y tiene la propiedad 'id'
+                    if (res && typeof res === 'object' && 'id' in res) {
+                      const newGame = res as { id: number }; // Ahora es seguro
+                      navigate(`/game/sudoku/sudoku-${String(newGame.id).padStart(3, '0')}`);
+                    } else {
+                      console.error("Invalid game response:", res);
+                    }
+                  } catch (err) {
+                    console.error("Error al crear juego:", err);
+                  }
+              }}
+              >
+                &gt; play_sudoku()
+              </button>
+              <button
+                className={[styles.actionBtn, styles.actionBtnSecondary].join(' ')}
+                onClick={handleLogout}
+              >
+                &gt; logout()
+              </button>
             </div>
           )}
         </div>

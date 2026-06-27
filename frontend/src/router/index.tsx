@@ -7,6 +7,7 @@ import { ProfilePage } from '@/pages/ProfilePage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { ChessGamePage } from '@/features/chess/ChessGamePage';
 import { SudokuGamePage } from '@/features/sudoku/SudokuGamePage';
+import { SudokuLobby } from '@/features/sudoku/SudokuLobby';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { PrivacyPolicyPage } from '@/pages/PrivacyPolicyPage';
 import { TermsOfServicePage } from '@/pages/TermsOfServicePage';
@@ -38,6 +39,10 @@ export const router = createBrowserRouter([
             <ChessGamePage />
           </ProtectedRoute>
         ),
+      },
+      {
+        path: 'game/sudoku',
+        element: <ProtectedRoute><SudokuLobby /></ProtectedRoute>,
       },
       {
         path: 'game/sudoku/:id',

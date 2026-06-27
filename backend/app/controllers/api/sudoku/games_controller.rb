@@ -2,7 +2,6 @@ module Api
   module Sudoku
     class GamesController < ApplicationController
       before_action :authorize_request
-      # Use a private method to find the game to reduce code duplication
       before_action :set_game, only: [:show, :update]
 
       # GET /api/sudoku/games/:game_id
@@ -17,24 +16,50 @@ module Api
 
       # POST /api/sudoku/games
       def create
+        difficulty = params[:difficulty] || 'easy'
+        board = SudokuGame.generate(difficulty)
+
         @game = @current_user.sudoku_games.create!(
           status: 'in_progress',
-          difficulty: params[:difficulty] || 'easy',
-          board: params[:board] || ""
+          difficulty: difficulty,
+          board: board
         )
-        render json: @game, status: :created
+
+        render json: {
+          id: @game.id,
+          status: @game.status,
+          board: @game.board,
+          difficulty: @game.difficulty
+        }, status: :created
       end
 
       # PATCH /api/sudoku/games/:game_id
       def update
-        # Definimos qué parámetros queremos actualizar
+        # 1. Validación de seguridad: Comprobamos si el nuevo tablero enviado es válido
+        unless SudokuGame.valid_board?(params[:board])
+          return render json: { 
+            error: "Movimiento inválido: El tablero resultante viola las reglas del Sudoku" 
+          }, status: :unprocessable_entity
+        end
+      
         update_params = { board: params[:board] }
+      
+        # 2. Asignamos el nuevo tablero
+        @game.board = params[:board]
 
-        # Solo incluimos el status si realmente viene en el request
-        update_params[:status] = params[:status] if params[:status].present?
-
+        # 3. Comprobamos si con este movimiento el juego ha finalizado
+        if @game.solved?
+          update_params[:status] = 'won'
+        end
+      
+        # 4. Guardamos los cambios
         if @game.update(update_params)
-          render json: @game, status: :ok
+          render json: {
+            id: @game.id,
+            status: @game.status,
+            board: @game.board,
+            difficulty: @game.difficulty
+          }, status: :ok
         else
           render json: { error: @game.errors.full_messages.join(', ') }, status: :unprocessable_entity
         end
@@ -44,9 +69,7 @@ module Api
 
       def set_game
         numeric_id = params[:game_id].to_s.gsub(/[^0-9]/, '').to_i
-        
-        # CAMBIO: Si no encuentra el juego a través del usuario, 
-        # intenta buscarlo globalmente (útil en desarrollo si hay problemas de sesión)
+
         @game = @current_user&.sudoku_games&.find_by(id: numeric_id) || SudokuGame.find_by(id: numeric_id)
 
         if @game

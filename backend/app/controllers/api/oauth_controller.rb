@@ -63,11 +63,6 @@ module Api
       res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
         http.request(req)
       end
-
-      # Los chivatos (para ver si ahora sí funciona)
-      puts "🚨 --- RESPUESTA DE 42 API (MODO BASIC AUTH) --- 🚨"
-      puts "RESPUESTA COMPLETA: #{res.body}"
-      puts "🚨 -------------------------------------------- 🚨"
       
       JSON.parse(res.body)
     end

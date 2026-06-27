@@ -3,7 +3,8 @@ import { RouterProvider } from 'react-router-dom';
 import { router } from './router';
 import { useAuthStore } from '@/store'; 
 import { useAppearanceRadar } from './hooks/useActionCable'; 
-import { AuthScreen } from './components/AuthScreen'; // 
+import { AuthScreen } from './components/AuthScreen';
+import { ToastContainer } from '@/components/Toast';
 
 export default function App() {
   console.log("🚀 ¡HOLA! APP.TSX SE ESTÁ EJECUTANDO");
@@ -64,5 +65,10 @@ export default function App() {
   }
 
   // Si sobrevive al guardián (ya está logueado), le cargamos el juego normal
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />
+      <ToastContainer />
+    </>
+  );
 }
