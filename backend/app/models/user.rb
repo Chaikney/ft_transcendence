@@ -28,6 +28,10 @@ class User < ApplicationRecord
     has_many :inverse_friendships, class_name: 'Friendship', foreign_key: 'friend_id', dependent: :destroy
     has_many :inverse_friends, through: :inverse_friendships, source: :user
 
+    has_many :room_memberships
+    has_many :rooms, through: :room_memberships
+    has_many :messages
+
     # --- CALLBACKS ---
     # 🟢 2. ASIGNAR ROL POR DEFECTO A LOS NUEVOS
     after_initialize :set_default_role, if: :new_record?

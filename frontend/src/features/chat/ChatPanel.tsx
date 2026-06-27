@@ -5,11 +5,6 @@ import { useChatChannel } from '@/hooks/useChatChannel';
 import { Avatar } from '@/components/Avatar';
 import type { ChatRoom } from './types';
 
-const loadMockData = async () => {
-  const { mockChatRooms, mockMessages } = await import('@/mocks/chat.mock');
-  return { mockChatRooms, mockMessages };
-};
-
 const fmtTime = (iso: string) => {
   const d = new Date(iso);
   return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
@@ -97,8 +92,7 @@ const s = {
 
 export const ChatPanel = () => {
   const currentUser = useAuthStore((s) => s.user);
-  const isMock      = import.meta.env.VITE_USE_MOCK === 'true';
-
+  
   const {
     rooms, activeRoomId, messages, typingUsers,
     setRooms, setMessages, setActiveRoom, closeChat,
@@ -112,24 +106,30 @@ export const ChatPanel = () => {
   const typingTimerRef          = useRef<ReturnType<typeof setTimeout>>();
   const inputRef                = useRef<HTMLInputElement>(null);
 
-  // Load initial state for development/testing when mock mode is enabled
+  // 1. Fetch de Salas al montar
   useEffect(() => {
-    if (!isMock) return;
-    loadMockData().then(({ mockChatRooms, mockMessages }) => {
-      setRooms(mockChatRooms);
-      mockChatRooms.forEach((r: ChatRoom) => {
-        if (mockMessages[r.id]) setMessages(r.id, mockMessages[r.id]);
-      });
-      setActiveRoom(mockChatRooms[0]?.id ?? null);
-    });
+    fetch('/api/rooms')
+      .then((res) => res.json())
+      .then((data) => setRooms(data))
+      .catch((err) => console.error('Error fetching rooms:', err));
   }, []);
 
-  // Auto-scroll to the bottom of the message list whenever new messages arrive or room changes
+  // 2. Fetch de Mensajes al cambiar de sala
+  useEffect(() => {
+    if (!activeRoomId) return;
+    
+    fetch(`/api/rooms/${activeRoomId}/messages`)
+      .then((res) => res.json())
+      .then((data) => setMessages(activeRoomId, data))
+      .catch((err) => console.error('Error fetching messages:', err));
+  }, [activeRoomId]);
+
+  // Auto-scroll
   useEffect(() => {
     msgEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, activeRoomId]);
 
-  // Maintain focus on the input field when switching between chat rooms
+  // Focus input
   useEffect(() => {
     inputRef.current?.focus();
   }, [activeRoomId]);
@@ -138,31 +138,17 @@ export const ChatPanel = () => {
   const activeMessages = activeRoomId ? (messages[activeRoomId] ?? []) : [];
   const typingInRoom   = activeRoomId ? (typingUsers[activeRoomId] ?? []) : [];
 
-  // Handles message transmission and cleans up active typing state
   const handleSend = useCallback(() => {
     if (!input.trim() || !activeRoomId || !currentUser) return;
 
-    if (isMock) {
-      useChatStore.getState().addMessage(activeRoomId, {
-        id:         `msg-${Date.now()}`,
-        content:    input.trim(),
-        sender_id:  currentUser.id,
-        sender:     currentUser.username,
-        room_id:    activeRoomId,
-        created_at: new Date().toISOString(),
-        read:       true,
-      });
-    } else {
-      sendMessage(activeRoomId, input.trim());
-    }
-
+    sendMessage(activeRoomId, input.trim());
     setInput('');
     clearTimeout(typingTimerRef.current);
     if (isTyping) {
       sendTyping(activeRoomId, false);
       setIsTyping(false);
     }
-  }, [input, activeRoomId, currentUser, isMock, isTyping]);
+  }, [input, activeRoomId, currentUser, isTyping, sendMessage, sendTyping]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -171,10 +157,10 @@ export const ChatPanel = () => {
     }
   };
 
-  // Triggers typing status and implements a debounce (retardo) timer to stop it after inactivity
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
-    if (!activeRoomId || isMock) return;
+    if (!activeRoomId) return;
+    
     if (!isTyping) {
       sendTyping(activeRoomId, true);
       setIsTyping(true);
@@ -186,7 +172,6 @@ export const ChatPanel = () => {
     }, 2000);
   };
 
-  // Helper to determine the display name based on room type and participants
   const getRoomDisplayName = (room: ChatRoom) => {
     if (room.type === 'group') return room.name ?? 'Group';
     const other = room.participants.find((p) => p.id !== currentUser?.id);
@@ -213,7 +198,6 @@ export const ChatPanel = () => {
       </div>
 
       <div className={s.body}>
-        {/* Room list */}
         <div className={s.roomList}>
           {rooms.map((room) => {
             const isActive  = room.id === activeRoomId;
@@ -260,7 +244,6 @@ export const ChatPanel = () => {
           })}
         </div>
 
-        {/* Message area */}
         <div className={s.msgArea}>
           {!activeRoom ? (
             <div className={s.empty}>

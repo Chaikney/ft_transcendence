@@ -29,6 +29,12 @@ Rails.application.routes.draw do
       end
     end
 
+    # Añadimos los mensajes anidados en rooms
+    resources :rooms, only: [:index] do
+      resources :messages, only: [:index]
+    end
+
+
     # --- Authentication ---
     post 'register', to: 'auth#register'
     post 'login', to: 'auth#login'
