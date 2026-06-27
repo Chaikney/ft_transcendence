@@ -54,17 +54,19 @@ interface ChessBoardProps {
   gameState: ChessGameState;
   onMove:    (move: Omit<ChessMove, 'piece'>) => void;
   disabled?: boolean;
+  onDraw: () => void;
   localPlayerColor?: 'w' | 'b';
 }
 
 export const ChessBoard = ({
   gameState,
   onMove,
+  onDraw,
   disabled = false,
   localPlayerColor = 'w'
 }: ChessBoardProps) => {
   
-  const { selectedSquare, selectSquare } = useChessBoard(onMove, gameState, localPlayerColor);
+  const { selectedSquare, selectSquare } = useChessBoard(onMove, onDraw, gameState, localPlayerColor);
   const board = useMemo(() => parseFen(gameState.fen), [gameState.fen]);
 
   const boardSize  = 'min(80vw, 480px)';

@@ -48,13 +48,28 @@ export const useMatchStore = create<MatchState>((set) => ({
   setLobby: (gameType, opponent) =>
     set({ status: 'lobby', gameType, opponent, error: null }),
 
-  setChessGame: (game) =>
-    set((state) => ({ 
-      chessGame: game, 
-      // Si estamos en el lobby, nos quedamos en el lobby. Si no, pasamos a in_progress.
-      status: state.status === 'lobby' ? 'lobby' : 'in_progress', 
-      error: null 
-    })),
+setChessGame: (game) =>
+    set((state) => {
+      // 1. Rescatamos el historial anterior (si existe en el estado actual)
+      const prevHistory = state.chessGame?.fen_history || [];
+      
+      // 2. Si el backend nos manda un historial nuevo, lo usamos. 
+      // Si no, le añadimos nosotros mismos el FEN actual al historial viejo.
+      // (Comprobamos que no sea el mismo para no duplicar fotos si React redibuja dos veces)
+      const isDuplicate = prevHistory[prevHistory.length - 1] === game.fen;
+      const updatedHistory = game.fen_history || (isDuplicate ? prevHistory : [...prevHistory, game.fen]);
+
+      return {
+        // 3. Fusionamos los datos: mantenemos lo viejo (IDs) y sobrescribimos con lo nuevo (FEN)
+        chessGame: { 
+          ...(state.chessGame || {}), // Conserva player_ids, ids del juego, etc.
+          ...game,                    // Sobrescribe FEN, turn y last_move
+          fen_history: updatedHistory // Inyectamos nuestro historial blindado
+        },
+        status: state.status === 'lobby' ? 'lobby' : 'in_progress',
+        error: null
+      };
+    }),
 
   setSudokuGame: (game) =>
     set((state) => ({ 

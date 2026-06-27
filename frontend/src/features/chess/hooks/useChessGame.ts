@@ -5,14 +5,14 @@ import { useGameChannel } from "@/hooks";
 import type { ChessGameState, ChessMovePayload } from '../types';
 
 // TODO: Dev flag - flip to false when the backend is ready
-const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'false';
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
 
 export const useChessGame = (gameId: string) => {
   const chessGame = useMatchStore((s) => s.chessGame);
   const setChessGame = useMatchStore((s) => s.setChessGame);
   const startLoading = useMatchStore((s) => s.startLoading);
   const setError = useMatchStore((s) => s.setError);
-  const { connectionStatus, sendReady } = useGameChannel(USE_MOCK ? null : gameId);
+  const { connectionStatus, sendReady, claimDraw} = useGameChannel(USE_MOCK ? null : gameId);
 
   // load initial game state
   useEffect(() => {
@@ -78,5 +78,5 @@ export const useChessGame = (gameId: string) => {
       setError('AI move failed.');
     }
   };
-  return { chessGame, sendMove, requestAIMove, connectionStatus, sendReady };
+  return { chessGame, sendMove, requestAIMove, connectionStatus, sendReady, claimDraw};
 };

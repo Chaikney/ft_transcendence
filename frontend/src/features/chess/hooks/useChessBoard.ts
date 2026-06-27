@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { Chess } from 'chess.js';
 import type { ChessMove, ChessGameState } from '../types';
 
 interface UseChessBoardReturn {
@@ -10,34 +11,64 @@ interface UseChessBoardReturn {
 
 export const useChessBoard = (
   onMoveReady: (move: Omit<ChessMove, 'piece'>) => void,
+  onDrawReady: () => void,
   gameState: ChessGameState,
   localPlayerColor: 'w' | 'b'
 ): UseChessBoardReturn => {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
   const [pendingMove, setPendingMove] = useState<ChessMove | null>(null);
 
+  // 🧠 Instanciamos el motor de ajedrez solo para que haga de Árbitro
+  const chess = useMemo(() => new Chess(), []);
+
+  // 👨‍⚖️ EL ÁRBITRO LOCAL
+  useEffect(() => {
+    if (!gameState.fen) return;
+    if (chess.fen() !== gameState.fen) {
+      chess.load(gameState.fen);
+    }
+
+    // 1. Regla de 50 movimientos, Material Insuficiente o Ahogado
+    if (chess.isDraw()) {
+      console.log("🛑 ¡EMPATE DECLARADO POR CHESS.JS!");
+      onDrawReady(); // 👈 TOCA EL SILBATO
+    }
+
+    // 2. Triple repetición
+    if (gameState.fen_history && Array.isArray(gameState.fen_history)) {
+      const positionCounts: Record<string, number> = {};
+      for (const historyFen of gameState.fen_history) {
+        const positionState = historyFen.split(' ').slice(0, 4).join(' ');
+        positionCounts[positionState] = (positionCounts[positionState] || 0) + 1;
+        
+        if (positionCounts[positionState] >= 3) {
+          console.log("🛑 ¡EMPATE POR TRIPLE REPETICIÓN!");
+          onDrawReady(); // 👈 TOCA EL SILBATO
+          break;
+        }
+      }
+    }
+  }, [gameState.fen, gameState.fen_history, chess, onDrawReady]);
+
   const selectSquare = (square: string, pieceOnSquare?: string | null) => {
-    // 1. Normalizamos: FEN siempre es 'w' o 'b' después del primer espacio
     const actualTurn = gameState.fen.split(' ')[1]; 
 
-    // DEBUG: Mira esto en la consola (F12) si no te deja mover
-    console.log(`Turno: ${actualTurn}, Tu color: ${localPlayerColor}`);
+    console.log(`[♟️ CLIC] Casilla: ${square}, Pieza: ${pieceOnSquare || 'Vacía'}`);
+    console.log(`[⚙️ LÓGICA] Turno real: ${actualTurn} | Tu navegador cree que tú eres: ${localPlayerColor}`);
 
-    // 🔒 CANDADO: Si no es tu turno, bloqueado
     if (actualTurn !== localPlayerColor) {
+      console.warn(`🔒 Bloqueado: Le toca a ${actualTurn}, pero tu cliente es ${localPlayerColor}`);
       return; 
     }
 
     if (!selectedSquare) {
-      // Si la casilla está vacía, no seleccionamos nada
       if (!pieceOnSquare) return;
 
-      // 🔒 CANDADO: Solo puedes seleccionar TUS piezas
       const isWhitePiece = pieceOnSquare === pieceOnSquare.toUpperCase();
       const pieceColor = isWhitePiece ? 'w' : 'b';
 
       if (pieceColor !== localPlayerColor) {
-        console.log("No puedes mover piezas del rival");
+        console.warn(`🚫 Estás intentando tocar una pieza que no es tuya (Pieza: ${pieceColor})`);
         return; 
       }
 
@@ -45,13 +76,11 @@ export const useChessBoard = (
       return;
     }
 
-    // Clic en la misma casilla: deseleccionar
     if (selectedSquare === square) {
       setSelectedSquare(null); 
       return;
     }
 
-    // Segundo clic: Ejecutar movimiento
     onMoveReady({ from: selectedSquare, to: square });
     setSelectedSquare(null);
     setPendingMove(null);

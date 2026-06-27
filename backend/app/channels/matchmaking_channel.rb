@@ -20,22 +20,36 @@ class MatchmakingChannel < ApplicationCable::Channel
         Rails.logger.info "🎉 [MATCHMAKING] ¡BINGO! Emparejando a #{opponent_id} con #{current_user.id}"
         
         @@waiting_players.delete(game_type)
-        room_id = "#{game_type}-#{SecureRandom.hex(4)}"
         
-        # 1. Buscamos al usuario oponente en la base de datos
+        # 1. ESTA ES LA VARIABLE QUE FALTABA (Asegúrate de copiar esta línea)
+        starting_fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+
+        # 2. Creamos la partida con la variable que acabamos de definir
+        game = Game.create!(
+          player1_id: opponent_id,
+          player2_id: current_user.id,
+          status: 'pending',
+          initial_board: starting_fen,
+          current_board: starting_fen,
+          fen_history: [starting_fen]
+        )
+
+        room_id = "#{game_type}-#{game.id}"
         opponent_user = User.find(opponent_id)
 
-        # 2. Le mandamos al OPONENTE los datos del jugador actual
+        # Le mandamos al OPONENTE
         ActionCable.server.broadcast("matchmaking_#{opponent_id}", { 
           action: 'match_found', 
-          room_id: room_id, 
+          game_id: room_id,
+          room_id: room_id,
           opponent: { id: current_user.id, username: current_user.username, elo: current_user.elo }
         })
         
-        # 3. Le mandamos al JUGADOR ACTUAL los datos del oponente
+        # Le mandamos al JUGADOR ACTUAL
         ActionCable.server.broadcast("matchmaking_#{current_user.id}", { 
           action: 'match_found', 
-          room_id: room_id, 
+          game_id: room_id,
+          room_id: room_id,
           opponent: { id: opponent_user.id, username: opponent_user.username, elo: opponent_user.elo }
         })
       else

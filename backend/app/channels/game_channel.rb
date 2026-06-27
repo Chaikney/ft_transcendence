@@ -27,23 +27,55 @@ class GameChannel < ApplicationCable::Channel
   end
 
   def make_move(data)
-    room = params[:game_id]
-    
-    # 1. Recibimos la nueva posición (FEN) y el último movimiento
-    new_fen = data['fen']
-    last_move = data['last_move']
+  room = params[:game_id]
+  
+  # Extraemos el número (ej: si room es "chess-5", saca el "5")
+  game_id = room.to_s.split('-').last 
+  
+  # 1. Buscamos la partida en BD (⚠️ Cambia 'Match' por 'Game' si tu modelo se llama Game)
+  partida = Match.find(game_id)
+  
+  new_fen = data['fen']
+  last_move = data['last_move']
 
-    # 2. Opcional: Podrías buscar la partida (Game.find) y guardar el new_fen en BD aquí mismo.
+  # 2. Rescatamos el historial viejo y le añadimos el nuevo FEN
+  # Si es el primer turno y está vacío, creamos un array temporal
+  historial_actual = partida.fen_history || []
+  nuevo_historial = historial_actual + [new_fen]
+
+  # Guardamos la partida actualizada en la base de datos
+  partida.update!(
+    current_board: new_fen,     # Usa el nombre de columna que tengas para el FEN actual
+    fen_history: nuevo_historial
+  )
+  
+  # 3. ¡Lo más importante! Rebotamos la jugada INCLUYENDO el historial
+  ActionCable.server.broadcast("game_#{room}", {
+    type: 'move_updated',
+    game: {
+      status: 'active', 
+      fen: new_fen,
+      fen_history: partida.fen_history, # 👈 AQUÍ ESTÁ LA MAGIA PARA TU ÁRBITRO
+      turn: data['turn'], 
+      last_move: last_move
+    }
+  })
+  end
+
+  def claim_draw
+    room = params[:game_id]
+    game_id = room.to_s.split('-').last 
     
-    # 3. ¡Lo más importante! Rebotamos la jugada a los dos jugadores de la sala
+    # 👇 AQUÍ ESTABA EL ERROR. Cambia Match por Game
+    partida = Game.find(game_id) 
+    
+    # Y asegúrate de que el estado que guardas es el correcto 
+    # (si en tu BD el final se llama 'finished' o 'draw')
+    partida.update!(status: 'finished') 
+    
     ActionCable.server.broadcast("game_#{room}", {
-      type: 'move_updated',
-      game: {
-        status: 'active', # o 'checkmate' si tu lógica de React lo detectó
-        fen: new_fen,
-        turn: data['turn'], # 'w' o 'b'
-        last_move: last_move
-      }
+      type: 'game_over',
+      status: 'draw'
     })
   end
 

@@ -21,7 +21,12 @@ module Api
       # 3. Buscar o crear el usuario en tu base de datos
       user = User.find_or_create_by(uid42: user_info['id']) do |u|
         u.username = user_info['login']
-        # Como es de 42, le ponemos un password aleatorio o lo saltamos si la validación lo permite
+        
+        # 👇 ¡ESTA ES LA LÍNEA MÁGICA QUE FALTABA!
+        # Pillamos el email de 42, y si por algún motivo viene vacío, generamos el suyo de estudiante
+        u.email = user_info['email'] || "#{user_info['login']}@student.42.fr"
+        
+        # La contraseña la dejamos tal cual, está perfecta
         u.password = SecureRandom.hex(10) if u.respond_to?(:password=)
       end
 

@@ -1,4 +1,5 @@
 import { useParams, Navigate } from 'react-router-dom';
+import { useEffect, useState } from 'react'; // 👈 IMPORTANTE: Añadimos useEffect y useState
 import { ChessBoard } from './ChessBoard';
 import { useChessGame } from './hooks/useChessGame';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
@@ -17,55 +18,35 @@ const styles = {
 
 export const ChessGamePage = () => {
   const { id: gameId } = useParams<{ id: string }>();
-
-  if (!gameId) return <Navigate to="/" replace />;
-
-  const { chessGame, sendMove, requestAIMove, connectionStatus, sendReady } = useChessGame(gameId);
-
+  
+  const { chessGame, sendMove, requestAIMove, connectionStatus, sendReady, claimDraw } = useChessGame(gameId || "");
+  
   const status = useMatchStore((s) => s.status); 
   const error = useMatchStore((s) => s.error);
   const resetMatch = useMatchStore((s) => s.resetMatch);
-  
   const currentUser = useAuthStore((s) => s.user);
+
+  // 🛡️ EL BLINDAJE CONTRA LA AMNESIA:
+  // Guardamos tu color en un estado fijo.
+  const [localColor, setLocalColor] = useState<'w' | 'b'>('w');
+
+  useEffect(() => {
+    // Solo calculamos el color si el servidor nos manda el ID del jugador 2 (al principio de la partida).
+    // Si en los siguientes turnos el servidor olvida mandar el ID, este useEffect no hará nada,
+    // ¡y tú seguirás conservando tu color correctamente!
+    if (chessGame?.player2_id && currentUser?.id) {
+      const p2 = String(chessGame.player2_id);
+      const me = String(currentUser.id);
+      setLocalColor(p2 === me ? 'b' : 'w');
+    }
+  }, [chessGame?.player2_id, currentUser?.id]);
 
   const isLocked = connectionStatus !== 'connected';
 
-  console.log("DEBUG: Renderizando ChessGamePage");
-  console.log("DEBUG: ID de partida:", gameId);
-  console.log("DEBUG: Estado actual del match:", status);
-
-  if (status === 'lobby') {
-    return <LobbyScreen onAccept={sendReady} />;
-  }
-
-  if (error) {
-    return (
-      <div className={styles.page}>
-        <ErrorMessage title="Failed to load game" message={error} onRetry={resetMatch} />
-      </div>
-    );
-  }
-
-  if (!chessGame) {
-    return (
-      <div className={styles.page}>
-        <InlineLoader label="Connecting to game..." />
-      </div>
-    );
-  }
-
-  // 🥷 FIX: Forzamos a que sean números para evitar el error 1 !== "1"
-  // 🛑 AÑADE ESTO:
-  const p1 = Number(chessGame.player1_id);
-  const p2 = Number(chessGame.player2_id);
-  const me = Number(currentUser?.id);
-
-  // Si p2 es 0 o NaN (no llegó), por defecto es Blancas ('w')
-  // Si me es igual a p2, soy Negras ('b')
-  const localColor = (p2 !== 0 && me === p2) ? 'b' : 'w';
-
-  console.log("DEBUG: Player IDs:", { p1, p2, me, localColor });
-  
+  if (!gameId) return <Navigate to="/" replace />;
+  if (error) return <div className={styles.page}><ErrorMessage title="Failed to load game" message={error} onRetry={resetMatch} /></div>;
+  if (status === 'lobby') return <LobbyScreen onAccept={sendReady} isConnected={connectionStatus === 'connected'} />;
+  if (!chessGame) return <div className={styles.page}><InlineLoader label="Connecting to game..." /></div>;
 
   return (
     <div className={styles.page}>
@@ -76,16 +57,17 @@ export const ChessGamePage = () => {
 
       <TerminalCard
         title={`chess — game_${gameId}`}
-        status={chessGame.status.toUpperCase()}
-        statusVariant={chessGame.status === 'active' ? 'active' : 'error'}
+        status={(chessGame?.status || 'unknown').toUpperCase()} // 👈 Cambio seguro
+        statusVariant={chessGame?.status === 'active' ? 'active' : 'error'} // 👈 Cambio seguro
         maxWidth="max-w-[560px]"
       >
         <div className="flex flex-col items-center gap-5">
           <ChessBoard
             gameState={chessGame}
             onMove={sendMove}
+            onDraw={claimDraw}
             disabled={isLocked}
-            localPlayerColor={localColor} 
+            localPlayerColor={localColor} // 👈 Pasamos tu color blindado
           />
           <div className={styles.actionRow}>
             <Button variant="primary" onClick={requestAIMove} disabled={isLocked || chessGame.status !== 'active'}>

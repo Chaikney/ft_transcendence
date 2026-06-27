@@ -19,6 +19,7 @@ interface UseGameChanelReturn {
   connectionStatus: ConnectionStatus;
   lastEvent: GameChannelEvent | null;
   sendReady: () => void;
+  claimDraw: () => void;
 }
 
 // Mapa global definido UNA sola vez arriba del todo
@@ -75,6 +76,11 @@ export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
                 setSudokuGame(event.game);
                 break;
               case 'game_over':
+                console.log("🏁 El servidor declara el final de la partida:", event.status);
+                useMatchStore.setState((state) => ({
+                  status: 'finished', // Cambia a la pantalla final
+                  chessGame: state.chessGame ? { ...state.chessGame, status: event.status } : null
+                }));
                 break;
               case "opponent_disconnect":
                 console.warn('[GameChannel] Opponent disconnected');
@@ -87,7 +93,11 @@ export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
                 break;
               case 'game_start':
                 console.log(`🚀 [GameChannel] ¡LOS DOS ESTÁN LISTOS! Arrancando...`);
-                useMatchStore.setState({ status: 'in_progress' });
+                // Usamos un pequeño timeout o simplemente evitamos disparar el set del store 
+                // si el estado ya es 'in_progress' para evitar el re-render infinito
+                if (useMatchStore.getState().status !== 'in_progress') {
+                  useMatchStore.setState({ status: 'in_progress' });
+                }
                 break;
               default:
                 console.warn('[GameChannel] Unknown event:', event);
@@ -118,5 +128,10 @@ export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
     }
   };
 
-  return { connectionStatus, lastEvent, sendReady };
+  const claimDraw = () => {
+    console.log("📢 Avisando al servidor del empate...");
+    if (subscriptionRef.current) subscriptionRef.current.perform('claim_draw');
+  };
+
+  return { connectionStatus, lastEvent, sendReady, claimDraw };
 };
