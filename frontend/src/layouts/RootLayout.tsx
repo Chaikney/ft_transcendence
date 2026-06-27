@@ -60,7 +60,7 @@ const styles = {
 
 const NAV_ITEMS = [
   { label: '> home', path: '/' },
-  { label: '> chess', path: '/game/chess/chess-001' },
+  { label: '> chess VS AI', path: '/game/chess/chess-001' },
   { label: '> sudoku', path: '/game/sudoku' },
   { label: '> spectate', path: '/spectate' },
 ] as const;

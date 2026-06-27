@@ -21,7 +21,7 @@ const GAMES = [
     label:    'CHESS',
     path:     '/game/chess/chess-001', // Esto ahora solo sirve como referencia visual o de reserva
     icon:     '♟',
-    desc:     'Two-player chess with AI opponent. Real-time via WebSocket.',
+    desc:     'Two-player chess. Real-time via WebSocket.',
     tag:      'MULTIPLAYER / AI',
     status:   'ONLINE',
     lines:    ['> board: 8x8', '> engine: rails/core', '> mode: pvp | pve'],
