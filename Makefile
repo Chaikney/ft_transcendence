@@ -7,6 +7,7 @@ REPO	=	team42
 # Location of the compose file
 BASEDIR	=	./
 # Location of the individual containers (in their subfolders)
+# FIXME only used for server_cert now, perhaps to be removed...
 CONTHOME=	$(BASEDIR)/reqs
 
 # NOTE Change BASECMD to docker if that is what is being used
@@ -28,28 +29,6 @@ stop:
 # stop all the running containers
 	@echo "Stopping our containers"
 	$(BASECMD) compose -f "$(abspath $(BASEDIR)/docker-compose.yml)" down
-
-# NOTE These builds run separately from the "compose"-triggered make targets, so mostly for testing.
-# ...containers are "interesting" like that
-# builds: web-build db-build ruby-build
-# 	@echo "All containers now built"
-
-# web-build: server_cert web_src
-# 	@echo "Building NGINX container..."
-# 	$(BASECMD) build -f $(CONTHOME)/web/Dockerfile --tag $(REPO)/web:0.1
-
-# chess-build: chess_src
-# 	@echo "Building chess container..."
-# 	$(BASECMD) build -f $(CONTHOME)/chess/Dockerfile --tag $(REPO)/sf:0.1
-
-# db-build: secrets
-# 	@echo "Building database container..."
-# 	$(BASECMD) build -f $(CONTHOME)/postgres/Dockerfile --tag $(REPO)/db:0.1
-
-# # FIXME if we have the ruby version, it should be actually correct and not hardcoded...
-# ruby-build: secrets ruby_src
-# 	@echo "Building ruby container..."
-# 	$(BASECMD) build -f $(CONTHOME)/ruby/Dockerfile --tag $(REPO)/ruby:4.0.5
 
 # Launch the cluster with rebuilt containers (will use cache if present)
 rebuild:
@@ -85,32 +64,17 @@ secret/trans.crt: secret/testprivate.key
 	mv trans.crt $@
 
 # TODO This "relinks"/ never says it has nothing to do, even if the keys are in place
+# FIXME Unsure if this works at the moment with new setup
 server_cert: secret/trans.crt
 	@echo "Copying web certs to build context"
 	mkdir --parents $(CONTHOME)/web/secret
 	cp --update secret/testprivate.key $(CONTHOME)/web/secret/trans.key
 	cp --update secret/trans.crt $(CONTHOME)/web/secret/trans.crt
 
-web_src:
-	@echo "Copying react source to build context"
-	cp -r  --update ../frontend/src $(CONTHOME)/web/tools
-
-chess_src:
-	@echo "Copying chess source to build context"
-	mkdir --parents $(CONTHOME)/chess/tools/src
-	cp -r  --update ../chessthing/ $(CONTHOME)/chess/tools/src
-
-ruby_src:
-	@echo "Copying ruby source to build context"
-	mkdir -p $(CONTHOME)/ruby/tools/src
-	cp -r --update ../backend/* $(CONTHOME)/ruby/tools/src
-
 # Convenience / convention rules; not properly worked out or needed yet
-# TODO test this
 wipe: stop
 	@echo "Removing all storage volumes"
-	@echo "TODO Untested so far"
-	$(BASECMD) volume prune --all --force
+	$(BASECMD) volume prune --force
 
 nuke: stop fclean wipe
 
@@ -135,7 +99,6 @@ The targets are:\n \
 * ft_transcendence (or all, or no target)\tlaunch the whole project\n \
 * builds\t\tTODO build all the containers needed for the project\n \
 * stop\t\thalt any running containers, using compose\n \
-* make_volume (?)\t\tTODO (maybe)\n \
 * secrets\tEnsure we have a database password and web certificates\n \
 * re\t\tTODO launch the containers while forcing their rebuild\n \
 * clean\tremoves the cached parts of containers\n \
