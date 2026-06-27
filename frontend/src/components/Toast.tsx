@@ -122,9 +122,9 @@ const ToastItem = ({ toast, onRemove }: ToastItemProps) => {
         background:  config.bg,
         border:      `1px solid ${config.border}`,
         boxShadow:   `0 0 12px ${config.border}, 0 4px 16px rgba(0,0,0,0.6)`,
-        minWidth:    isLarge ? '400px' : '280px',
-        maxWidth:    isLarge ? '400px' : '300px',
-        fontSize:    isLarge ? '12px' : '12px',
+        minWidth:    isLarge ? '100px' : '280px',
+        maxWidth:    isLarge ? '500px' : '300px',
+        fontSize:    isLarge ? '8px' : '12px',
       }}
       role="alert"
       aria-live="polite"
@@ -227,8 +227,9 @@ export const ToastContainer = () => {
       <div
         className="fixed z-[2000] flex flex-col gap-2 pointer-events-none"
         style={{
-          bottom:  '24px',
-          right:   '24px',
+          top:  '50px',
+          left: '50%',
+          transform: 'translateX(-50%)',
           maxHeight: 'calc(100vh - 48px)',
           overflow: 'hidden',
         }}

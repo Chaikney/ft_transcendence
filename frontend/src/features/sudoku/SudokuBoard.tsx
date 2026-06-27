@@ -5,13 +5,13 @@ import { useToast } from '@/components/Toast';
 
 const THEME = {
   boardBg:      '#C5BAAC',
-  cellDark:     'rgba(0, 0, 0, 0.12)',
-  cellLight:    'transparent',
-  focus:        'rgba(255, 149, 0, 0.4)',
-  sameNumber:   'rgba(220, 50, 50, 0.35)', 
-  conflict:     'rgba(220, 50, 50, 0.35)',
-  borderThick: '4px solid rgba(8, 2, 2, 0.6)', 
-  borderThin:  '1px solid rgba(80, 70, 60, 0.3)',
+  cellDark:     '#C5BAAC',
+  cellLight:    '#C5BAAC',
+  focus:        '#f7a605',
+  sameNumber:   '#c0392b', 
+  conflict:     '#f7230b',
+  borderThick: '4px solid #f1f1f1',
+  borderThin:   '1px solid #bb8416',
   textLocked:   '#000000',
   textInput:    '#1a1a1a',
   textConflict: '#c0392b',
@@ -106,7 +106,7 @@ export const SudokuBoard = ({ gameState, originalGrid, onMove, disabled = false 
 
   const { selectedCell, selectCell, inputValue, clearSelection } = useSudokuBoard(
     gameState.game_id, originalGrid, gameState.grid, onMove,
-    () => error("Ese número no puede ir ahí, intenta otro.", "Movimiento Inválido", 'lg')
+    () => error("That number cannot go there, try another.", "Invalid Move", 'lg')
   );
 
   const conflictCells = getConflictCells(gameState.grid);
@@ -169,7 +169,10 @@ export const SudokuBoard = ({ gameState, originalGrid, onMove, disabled = false 
                   ...getCellStyle(isSelected, isSameNumber, isConflict, locked, value as CellValue, rowIdx, colIdx),
                 }}
               >
-                {value !== 0 ? value : ''}
+                
+                <div style={{ opacity: disabled || (locked && !isSelected) ? 0.4 : 1 }}>
+                  {value !== 0 ? value : ''}
+              </div>
               </button>
             );
           }))}
@@ -187,7 +190,7 @@ export const SudokuBoard = ({ gameState, originalGrid, onMove, disabled = false 
               }}
               className="aspect-square flex items-center justify-center font-mono font-medium text-sm rounded-md transition-all duration-200 border border-[#9A9184] bg-[#D1C7B7] hover:bg-[#BDB2A5] text-black"
             >
-              {n}
+                {n}
             </button>
           ))}
           <button
