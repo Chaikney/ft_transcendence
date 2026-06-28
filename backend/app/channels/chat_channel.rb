@@ -4,19 +4,20 @@ class ChatChannel < ApplicationCable::Channel
   end
 
   def send_message(data)
-    # 1. Buscamos la sala o creamos la 'global' por defecto
-    # Usamos room_id enviado desde el front, o 'global' si no existe
-    room = Room.find_or_create_by(name: data['room_id'] || 'global')
+    # Buscamos la sala por el ID que viene del frontend. 
+    # Si viene nil, por defecto usamos el 1 (Global).
+    target_id = data['room_id'] || 1
+    room = Room.find(target_id)
     
-    # 2. Creamos el mensaje en la base de datos
+    # Creamos el mensaje asociado a la sala correcta
     message = Message.create!(
       room: room,
-      sender: current_user, # Gracias a Connection.rb, tenemos current_user
+      sender: current_user,
       content: data['content'],
       read: false
     )
 
-    # 3. Enviamos el mensaje real (con su ID de BD) a todos
+    # Enviamos el broadcast usando el ID de la sala
     ActionCable.server.broadcast("chat_global", {
       type: 'message_received',
       message: {
@@ -24,14 +25,26 @@ class ChatChannel < ApplicationCable::Channel
         content: message.content,
         sender_id: current_user.id,
         sender: current_user.username,
-        room_id: room.name,
+        room_id: room.id.to_s, # Siempre enviamos el ID como string
         created_at: message.created_at,
         read: message.read
       }
     })
   end
 
-  def unsubscribed
-    # Limpieza si fuera necesaria
+  def typing_start(data)
+    ActionCable.server.broadcast("chat_global", {
+      type: 'typing_start',
+      room_id: data['room_id'],
+      username: current_user.username
+    })
+  end
+
+  def typing_stop(data)
+    ActionCable.server.broadcast("chat_global", {
+      type: 'typing_stop',
+      room_id: data['room_id'],
+      username: current_user.username
+    })
   end
 end

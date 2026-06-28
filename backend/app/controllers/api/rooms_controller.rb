@@ -1,16 +1,18 @@
 module Api
   class RoomsController < ApplicationController
-    # Asumo que tienes un método de autenticación, ej: before_action :authenticate_user!
-    
+    before_action :authorize_request
+
     def index
-      # Devolvemos solo las salas en las que el usuario actual es miembro
-      rooms = current_user.rooms
-      
-      render json: rooms.as_json(
-        include: { 
-          participants: { only: [:id, :username] } 
+      rooms = @current_user.rooms
+      render json: rooms.map { |room|
+        {
+          id: room.id,
+          name: room.name,
+          type: room.respond_to?(:room_type) ? room.room_type : 'group',
+          unread_count: 0,
+          participants: room.users.map { |u| { id: u.id, username: u.username } }
         }
-      )
+      }
     end
   end
 end

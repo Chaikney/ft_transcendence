@@ -36,6 +36,8 @@ class User < ApplicationRecord
     # 🟢 2. ASIGNAR ROL POR DEFECTO A LOS NUEVOS
     after_initialize :set_default_role, if: :new_record?
 
+    # 🟢 4. ASIGNAR SALA GLOBAL AUTOMÁTICAMENTE
+    after_create :add_to_global_chat
     # --- MÉTODOS PÚBLICOS ---
     def all_games
         Game.where("player1_id = ? OR player2_id = ?", self.id, self.id)
@@ -60,5 +62,15 @@ class User < ApplicationRecord
         self.role ||= :player
         self.banned = false if self.banned.nil?
         self.status ||= 'offline'
+    end
+
+    # 🟢 5. MÉTODO PARA AÑADIR A SALA GLOBAL
+    def add_to_global_chat
+        global_room = Room.find_or_create_by!(id: 1) do |r|
+            r.name = "Global"
+            r.type = "group"
+        end
+        
+        RoomMembership.find_or_create_by!(user: self, room: global_room)
     end
 end

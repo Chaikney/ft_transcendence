@@ -1,5 +1,6 @@
 import { useChatStore } from '@/store/chatStore';
 import { ChatPanel } from './ChatPanel';
+import { useChatChannel } from '@/hooks/useChatChannel';
 
 const s = {
   wrapper:
@@ -26,9 +27,16 @@ const s = {
 export const ChatButton = () => {
   const { isOpen, unreadTotal, toggleChat } = useChatStore();
 
+  const { sendMessage, sendTyping } = useChatChannel();
+
   return (
     <div className={s.wrapper}>
-      {isOpen && <ChatPanel />}
+      {isOpen && (
+        <ChatPanel 
+          sendMessage={sendMessage} 
+          sendTyping={sendTyping} 
+        />
+      )}
       <button
         className={[s.btn, isOpen ? s.btnOpen : s.btnClosed].join(' ')}
         onClick={toggleChat}

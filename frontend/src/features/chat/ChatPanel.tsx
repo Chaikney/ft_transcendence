@@ -3,7 +3,13 @@ import { useChatStore } from '@/store/chatStore';
 import { useAuthStore } from '@/store/authStore';
 import { useChatChannel } from '@/hooks/useChatChannel';
 import { Avatar } from '@/components/Avatar';
+import api from '@/services/api';
 import type { ChatRoom } from './types';
+
+interface ChatPanelProps {
+  sendMessage: (roomId: string, content: string) => void;
+  sendTyping: (roomId: string, typing: boolean) => void;
+}
 
 const fmtTime = (iso: string) => {
   const d = new Date(iso);
@@ -90,15 +96,13 @@ const s = {
     'text-accent text-[10px] font-mono animate-blink',
 } as const;
 
-export const ChatPanel = () => {
+export const ChatPanel = ({ sendMessage, sendTyping }: ChatPanelProps) => {
   const currentUser = useAuthStore((s) => s.user);
   
   const {
     rooms, activeRoomId, messages, typingUsers,
     setRooms, setMessages, setActiveRoom, closeChat,
   } = useChatStore();
-
-  const { sendMessage, sendTyping } = useChatChannel();
 
   const [input,    setInput]    = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -108,9 +112,8 @@ export const ChatPanel = () => {
 
   // 1. Fetch de Salas al montar
   useEffect(() => {
-    fetch('/api/rooms')
-      .then((res) => res.json())
-      .then((data) => setRooms(data))
+    api.get('/rooms')
+      .then((res) => setRooms(res.data))
       .catch((err) => console.error('Error fetching rooms:', err));
   }, []);
 
@@ -118,11 +121,10 @@ export const ChatPanel = () => {
   useEffect(() => {
     if (!activeRoomId) return;
     
-    fetch(`/api/rooms/${activeRoomId}/messages`)
-      .then((res) => res.json())
-      .then((data) => setMessages(activeRoomId, data))
+    api.get(`/rooms/${activeRoomId}/messages`)
+      .then((res) => setMessages(activeRoomId, res.data))
       .catch((err) => console.error('Error fetching messages:', err));
-  }, [activeRoomId]);
+  }, [activeRoomId, setMessages]);
 
   // Auto-scroll
   useEffect(() => {
