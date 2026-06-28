@@ -35,24 +35,33 @@ module Api
 
       # PATCH /api/sudoku/games/:game_id
       def update
-        # 1. Validación de seguridad: Comprobamos si el nuevo tablero enviado es válido
-        unless SudokuGame.valid_board?(params[:board])
-          return render json: { 
-            error: "Movimiento inválido: El tablero resultante viola las reglas del Sudoku" 
-          }, status: :unprocessable_entity
-        end
-      
-        update_params = { board: params[:board] }
-      
-        # 2. Asignamos el nuevo tablero
-        @game.board = params[:board]
+        # 1. Preparamos el hash de actualización
+        update_params = {}
 
-        # 3. Comprobamos si con este movimiento el juego ha finalizado
-        if @game.solved?
-          update_params[:status] = 'won'
+        # 2. Si el frontend envía un tablero, lo procesamos
+        if params[:board].present?
+          unless SudokuGame.valid_board?(params[:board])
+            return render json: { 
+              error: "Movimiento inválido: El tablero viola las reglas" 
+            }, status: :unprocessable_entity
+          end
+
+          update_params[:board] = params[:board]
+          # Si el tablero es nuevo, comprobamos si el juego terminó
+          update_params[:status] = 'won' if @game.solved?
         end
       
-        # 4. Guardamos los cambios
+        # 3. Si el frontend envía un estado (por ejemplo 'finished'), lo procesamos
+        # (Asumiendo que el frontend envía { game: { status: 'finished' } })
+        if params[:game].present? && params[:game][:status].present?
+          update_params[:status] = params[:game][:status]
+        end
+      
+        # 4. Guardamos los cambios (solo si hay algo que actualizar)
+        if update_params.empty?
+          return render json: { error: "No se enviaron datos para actualizar" }, status: :unprocessable_entity
+        end
+      
         if @game.update(update_params)
           render json: {
             id: @game.id,
@@ -64,7 +73,6 @@ module Api
           render json: { error: @game.errors.full_messages.join(', ') }, status: :unprocessable_entity
         end
       end
-
       private
 
       def set_game

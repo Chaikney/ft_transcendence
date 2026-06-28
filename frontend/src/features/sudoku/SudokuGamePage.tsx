@@ -8,15 +8,15 @@ import { TerminalCard } from '@/components/TerminalCard';
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { Badge } from '@/components/Badge';
 import { useMatchStore } from '@/store';
-import { createSudokuGame } from './service';
+import { createSudokuGame, finishSudokuGame } from './service';
 import type { SudokuDifficulty } from './types';
 
 const styles = {
-  page:      'min-h-screen flex flex-col items-center justify-center px-4 py-8 gap-6',
-  topBar:    'flex items-center justify-between w-full max-w-[500px]',
-  gameId:    'text-xs font-mono text-text-muted tracking-widest truncate',
+  page: 'min-h-screen flex flex-col items-center justify-center px-4 py-8 gap-6',
+  topBar: 'flex items-center justify-between w-full max-w-[500px]',
+  gameId: 'text-xs font-mono text-text-muted tracking-widest truncate',
   actionRow: 'relative flex items-center justify-center gap-3 w-full',
-  hintText:  'text-xs font-mono text-text-muted text-center',
+  hintText: 'text-xs font-mono text-text-muted text-center',
 } as const;
 
 export const SudokuGamePage = () => {
@@ -26,10 +26,11 @@ export const SudokuGamePage = () => {
 
   const [showDifficulty, setShowDifficulty] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showAbandonModal, setShowAbandonModal] = useState(false);
 
   const { sudokuGame, sendMove, connectionStatus } = useSudokuGame(gameId || '');
 
-  const error      = useMatchStore((s) => s.error);
+  const error = useMatchStore((s) => s.error);
   const resetMatch = useMatchStore((s) => s.resetMatch);
 
   const originalGridRef = useRef<number[][] | null>(null);
@@ -38,7 +39,7 @@ export const SudokuGamePage = () => {
     originalGridRef.current = sudokuGame.grid.map((row) => [...row]);
   }
 
-  const isMock   = import.meta.env.VITE_USE_MOCK === 'true';
+  const isMock = import.meta.env.VITE_USE_MOCK === 'true';
   const isLocked = !isMock && connectionStatus !== 'connected';
 
   const handleNewPuzzle = useCallback(async (difficulty: SudokuDifficulty = 'easy') => {
@@ -54,8 +55,25 @@ export const SudokuGamePage = () => {
     } catch (err) {
       console.error('Failed to create new puzzle:', err);
       setIsLoading(false);
-    } 
+    }
   }, [resetMatch, navigate]);
+
+  const handleConfirmAbandon = async () => {
+    try {
+      if (gameId) {
+        // Marcamos la partida como finalizada en la base de datos
+        await finishSudokuGame(gameId);
+      }
+    } catch (err) {
+      console.error("Error when finishing the game:", err);
+      // Opcional: Podrías mostrar un toast de error aquí
+    } finally {
+      // Siempre ejecutamos esto para limpiar el store y salir
+      setShowAbandonModal(false);
+      resetMatch();
+      navigate('/');
+    }
+  };
 
   if (!gameId) {
     return (
@@ -97,13 +115,12 @@ export const SudokuGamePage = () => {
         title={`sudoku — game_${gameId}`}
         status={sudokuGame.status.toUpperCase()}
         statusVariant={
-          sudokuGame.status === 'won'  ? 'active'  :
-          sudokuGame.status === 'lost' ? 'error'   : 'warning'
+          sudokuGame.status === 'won' ? 'active' :
+          sudokuGame.status === 'lost' ? 'error' : 'warning'
         }
         maxWidth="max-w-[540px]"
       >
         <div className="flex flex-col items-center gap-5">
-
           <Badge variant="accent" dot>
             {sudokuGame.difficulty}
           </Badge>
@@ -126,9 +143,9 @@ export const SudokuGamePage = () => {
               <Button
                 variant="danger"
                 size="sm"
-                onClick={() => navigate('/sudoku')}
+                onClick={() => setShowAbandonModal(true)}
               >
-                Abandon game
+                Leave game
               </Button>
             )}
 
@@ -160,6 +177,34 @@ export const SudokuGamePage = () => {
           </div>
         </div>
       </TerminalCard>
+
+      {/* Modal de confirmación */}
+      {showAbandonModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#1a1a1a] border border-[#333] p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
+            <h2 className="text-white text-lg font-bold mb-4">Leave Game</h2>
+            <p className="text-text-secondary text-sm mb-6">
+              Are you sure you want to leave? You will lose the progress of this game.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setShowAbandonModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                variant="danger" 
+                size="sm" 
+                onClick={handleConfirmAbandon}
+              >
+                Leave
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

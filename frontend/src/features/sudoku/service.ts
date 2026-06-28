@@ -10,3 +10,12 @@ export const createSudokuGame = (difficulty = 'easy'): Promise<ApiResponse<Sudok
 
 export const postSudokuMove = (payload: SudokuMovePayload): Promise<ApiResponse<SudokuGameState>> =>
   patch<SudokuGameState, SudokuMovePayload>(`/sudoku/games/${payload.game_id}`, payload);
+
+export const finishSudokuGame = (game_id: string): Promise<ApiResponse<SudokuGameState>> => {
+  const numericId = game_id.replace('sudoku-', ''); 
+  
+  return patch<SudokuGameState, { status: string }>(
+    `/sudoku/games/${numericId}`, 
+    { status: 'finished' }
+  );
+};

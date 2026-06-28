@@ -1,19 +1,13 @@
 module Api
   class UsersController < ApplicationController
-    # El guardia pide el Token a TODOS
-    before_action :authorize_request 
+    before_action :authorize_request
 
-    # Operación de Lectura (GET /api/profile)
+    # GET /api/profile
     def profile
-      render json: {
-        id: @current_user.id, 
-        username: @current_user.username,
-        email: @current_user.email,
-        avatar_url: @current_user.avatar_url
-      }, status: :ok
+      render json: @current_user.as_json(only: [:id, :username, :email, :avatar_url]), status: :ok
     end
 
-    # Operación de Actualización (PUT /api/profile)
+    # PUT /api/profile
     def update
       if @current_user.update(user_params)
         render json: { message: "Identidad actualizada", user: @current_user }, status: :ok
@@ -22,7 +16,7 @@ module Api
       end
     end
 
-    # Operación de Destrucción (DELETE /api/profile)
+    # DELETE /api/profile
     def destroy
       @current_user.destroy
       render json: { message: "Cuenta eliminada permanentemente del sistema" }, status: :ok
@@ -33,9 +27,8 @@ module Api
     # GET /api/profile/2fa/enable
     def enable_2fa
       @current_user.generate_otp_secret
-      uri = @current_user.mfa_provisioning_uri
       
-      qrcode = RQRCode::QRCode.new(uri)
+      qrcode = RQRCode::QRCode.new(@current_user.mfa_provisioning_uri)
       svg = qrcode.as_svg(
         color: "000000",
         shape_rendering: "crispEdges",
@@ -61,8 +54,8 @@ module Api
 
     private
 
-    # El Escudo (Strong Parameters)
     def user_params
+      # Aseguramos que solo se permitan los atributos necesarios
       params.require(:user).permit(:username, :email, :password, :avatar_url)
     end
   end
