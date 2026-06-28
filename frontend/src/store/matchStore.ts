@@ -11,19 +11,17 @@ interface Opponent {
   elo: number;
 }
 
-interface MatchState {
+export interface MatchState {
   status: MatchStatus;
   gameType: GameType;
   opponent: Opponent | null;
   chessGame: ChessGameState;
-  sudokuGame: SudokuGameState;
   error: string | null;
 
   // Actions
   startLoading: (gameType: GameType) => void;
   setLobby: (gameType: GameType, opponent: Opponent) => void;
   setChessGame: (game: ChessGameState) => void;
-  setSudokuGame: (game: SudokuGameState) => void;
   updateCell: (row: number, col: number, value: number) => void;
   setError: (message: string) => void;
   resetMatch: () => void;
