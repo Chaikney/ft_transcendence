@@ -4,6 +4,7 @@ import { useAuthStore } from '@/store';
 import { useToast } from '@/components/Toast';
 import { createSudokuGame } from '@/features/sudoku/service';
 import { useMatchmaking } from '@/hooks/useActionCable';
+import { LeaderboardTable } from '@/features/leaderboard/LeaderboardTable';
 
 const BOOT_LINES = [
   '> INITIALIZING transcendence v2.0...',
@@ -75,76 +76,48 @@ export const LandingPage = () => {
   const navigate = useNavigate();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const isMock          = import.meta.env.VITE_USE_MOCK === 'true';
-  const { info, success } = useToast();
+  const { success } = useToast();
   
   // <-- 2. INSTANCIAMOS EL MATCHMAKING
   const { joinQueue } = useMatchmaking(); 
 
   const [visibleLines, setVisibleLines] = useState(0);
-  const [booted, setBooted] = useState(false);
+  const [booted, setBooted] = useState(true);
 
-  useEffect(() => {
-    if (visibleLines < BOOT_LINES.length) {
-      const t = setTimeout(() => setVisibleLines((v) => v + 1), 120);
-      return () => clearTimeout(t);
-    } else {
-      setTimeout(() => { setBooted(true); success('System Online', 'Ready'); }, 300);
-    }
-  }, [visibleLines]);
-  
   const handleGameSelect = async (gameId: 'chess' | 'sudoku') => {
     if (!isAuthenticated && !isMock) {
       navigate('/login');
       return;
     }
 
-    // Separating logic based on the specific game requirements
     if (gameId === 'chess') {
-      // Only chess uses the matchmaking queue
       joinQueue(gameId);
-    } 
-    else if (gameId === 'sudoku') {
-      // Sudoku uses a specific game initialization flow
+    } else if (gameId === 'sudoku') {
       try {
         const res = await createSudokuGame('easy');
         const newGame = (res as any); 
-
         if (newGame?.id) {
-          const path = `/game/sudoku/sudoku-${String(newGame.id).padStart(3, '0')}`;
-          navigate(path);
-        } else {
-          console.error("Game ID not found in response:", newGame);
+          navigate(`/game/sudoku/sudoku-${String(newGame.id).padStart(3, '0')}`);
         }
       } catch (err) {
         console.error("Failed to launch sudoku:", err);
       }
-    } 
-    else {
-      // Handle unsupported game types or pending routes
-      console.warn(`Game type not supported or pending implementation: ${gameId}`);
     }
   };
 
   return (
     <div className={styles.page}>
+      {/* TARJETA TERMINAL CON RANKING */}
       <div className={styles.terminal}>
         <div className={styles.terminalHeader}>
           <span className={styles.terminalDot} style={{ background: '#ff3366' }} />
           <span className={styles.terminalDot} style={{ background: '#ffaa00' }} />
           <span className={styles.terminalDot} style={{ background: '#00ff88' }} />
-          <span className={styles.terminalTitle}>transcendence — system boot</span>
+          <span className={styles.terminalTitle}>transcendence — global rankings</span>
         </div>
-        {BOOT_LINES.slice(0, visibleLines).map((line, i) => {
-          const [prefix, ...rest] = line.split('.');
-          const suffix = rest.join('.') || '';
-          return (
-            <div key={i} className={styles.terminalLine}>
-              <span className={styles.terminalAccent}>{prefix}</span>
-              <span style={{ color: suffix.includes('OK') || suffix.includes('LOADED') || suffix.includes('READY') || suffix.includes('ONLINE') ? '#00ff88' : '#4a9eca' }}>{suffix}</span>
-            </div>
-          );
-        })}
-        {!booted && <span className={styles.terminalCursor} />}
+        
+        {/* Aquí renderizamos el ranking real */}
+        <LeaderboardTable />
       </div>
 
       {booted && (
