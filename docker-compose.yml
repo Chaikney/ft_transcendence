@@ -4,13 +4,14 @@ services:
   web:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
       # NOTE This is one bind mount and one storage volume defined on the fly
     volumes:
       - ../frontend:/app
        - /app/node_modules
+    # TODO Ideally this would be binding to 80 but that needs root
+    # TODO Also expand to 443 for HTTPS
     ports:
-      - "5173:5173"
+      - "8080:80"
     env_file:
       - frontend/.env
     networks:
@@ -54,6 +55,7 @@ services:
       - backend/.env
     volumes:
       - DB_vol:/var/lib/postgresql/data
+    # FIXME the note here makes no sense in context
     ports:
       - "5432:5432" # Expone el puerto por si quieres conectarte con DBeaver o pgAdmin
     networks:

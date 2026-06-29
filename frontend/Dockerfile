@@ -13,7 +13,12 @@ RUN npm install
 COPY . .
 
 # Exponemos el puerto por defecto de Vite
-EXPOSE 5173
-
+# RUN npm run  build
+RUN npx vite build
 # Arrancamos Vite asegurando que escuche en todas las interfaces de red (--host)
-CMD ["npm", "run", "dev", "--", "--host"]
+# CMD ["npm", "run", "dev", "--", "--host"]
+
+FROM nginx:1.27-alpine
+COPY --from=development /app/dist/ /usr/share/nginx/html/
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+CMD ["nginx", "-g", "daemon off;"]
