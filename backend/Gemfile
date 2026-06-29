@@ -55,3 +55,5 @@ gem 'jwt'
 
 gem 'rotp'
 
+gem 'chess'
+gem "rqrcode", "~> 3.2"

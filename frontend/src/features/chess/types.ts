@@ -1,9 +1,13 @@
+export type ConnectionStatusType = 'connected' | 'connecting' | 'disconnected' | 'reconnecting';
+
 export interface ChessGameState {
 	game_id: string;
 	fen: string;				//standar representation board
 	turn: 'white' | 'black';
-	status: 'active' | 'checkmate' | 'draw';
+	status: 'active' | 'checkmate' | 'draw' | 'finished';
 	last_move: ChessMove | null;
+	player2_id?: number;
+	player1_id?: number;
 }
 
 export interface ChessMove {

@@ -1,10 +1,10 @@
 import axios from 'axios';
-import { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import type { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios'; // <-- ¡AÑADIDO EL TYPE AQUÍ!
 import type { ApiResponse } from '../types';
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api/v1';
+const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api';
 
-const api: AxiosInstance = axios.create({
+const api = axios.create({
   baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
@@ -41,5 +41,8 @@ export const get = <T>(url: string): Promise<ApiResponse<T>> =>
 
 export const post = <T, B = unknown>(url: string, body: B): Promise<ApiResponse<T>> =>
   api.post<ApiResponse<T>>(url, body).then((res) => res.data);
+
+export const patch = <T, B = unknown>(url: string, body: B): Promise<ApiResponse<T>> =>
+  api.patch<ApiResponse<T>>(url, body).then((res) => res.data);
 
 export default api;

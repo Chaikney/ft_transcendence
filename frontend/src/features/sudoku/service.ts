@@ -1,9 +1,21 @@
-import { get, post } from '@services/api';
-import type { SudokuGameState, SudokuMovePayload } from '../features/sudoku/types';
-import type { ApiResponse } from '../types';
+import { get, patch, post } from '@services/api';
+import type { SudokuGameState, SudokuMovePayload } from '@/features/sudoku/types';
+import type { ApiResponse } from '@/types';
 
 export const getSudokuGame = (game_id: string): Promise<ApiResponse<SudokuGameState>> =>
   get<SudokuGameState>(`/sudoku/games/${game_id}`);
 
+export const createSudokuGame = (difficulty = 'easy'): Promise<ApiResponse<SudokuGameState>> =>
+  post<SudokuGameState, { difficulty: string }>('/sudoku/games', { difficulty });
+
 export const postSudokuMove = (payload: SudokuMovePayload): Promise<ApiResponse<SudokuGameState>> =>
-  post<SudokuGameState, SudokuMovePayload>('/sudoku/move', payload); // Corregido: payload
+  patch<SudokuGameState, SudokuMovePayload>(`/sudoku/games/${payload.game_id}`, payload);
+
+export const finishSudokuGame = (game_id: string): Promise<ApiResponse<SudokuGameState>> => {
+  const numericId = game_id.replace('sudoku-', '');
+
+  return patch<SudokuGameState, { status: string }>(
+    `/sudoku/games/${numericId}`,
+    { status: 'finished' }
+  );
+};

@@ -1,9 +1,7 @@
 export type CellValue = number | null;
 
 export type SudokuDifficulty = 'easy' | 'medium' | 'hard';
-export type SudokeStatus = 'active' | 'won' | 'lost';
-
-export type ConnectionStatusType = 'connecting' | 'connected' | 'disconnected' | 'reconnecting';
+export type SudokeStatus = 'active' | 'in_progress' | 'won' | 'lost';
 
 export interface SudokuGameState {
 	game_id: string;
@@ -17,4 +15,5 @@ export interface SudokuMovePayload {
 	row: number;
 	col: number;
 	value: number;
+  board: string;
 }

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useMatchStore } from "@/store";
 import { getChessGame, postChessMove, postChessAIMove } from "../service";
 import { useGameChannel } from "@/hooks";
-import type { ChessMovePayload } from '../types';
+import type { ChessGameState, ChessMovePayload } from '../types';
 
 // TODO: Dev flag - flip to false when the backend is ready
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
@@ -12,45 +12,54 @@ export const useChessGame = (gameId: string) => {
   const setChessGame = useMatchStore((s) => s.setChessGame);
   const startLoading = useMatchStore((s) => s.startLoading);
   const setError = useMatchStore((s) => s.setError);
-  const { connectionStatus } = useGameChannel(USE_MOCK ? null : gameId);
+  const { connectionStatus, sendReady, claimDraw} = useGameChannel(USE_MOCK ? null : gameId);
 
   // load initial game state
   useEffect(() => {
-    const load = async () => {
+    // En useChessGame.ts -> load()
+  const load = async () => {
+    if (useMatchStore.getState().status !== 'lobby') {
       startLoading('chess');
-      try {
-        if (USE_MOCK) {
-          // <- MOCK
-          const { mockChessGame } = await import('@/mocks');
-          setChessGame(mockChessGame);
-        }
-        else {
-          // REAL
-          const res = await getChessGame(gameId);
-          setChessGame(res.data);
-        }
-      } catch (err) {
-        setError('Failed to load game. Please try again');
-      }
-    };
+    }
+
+    try {
+      const res = await getChessGame(gameId);
+      // IMPORTANTE: Si tu backend devuelve el objeto directo, res es el objeto.
+      const actualData = (res as any).data || res;
+
+      console.log("DEBUG: Datos recibidos del servidor:", actualData);
+      setChessGame(actualData as ChessGameState);
+    } catch (err) {
+      setError('Failed to load game');
+    }
+  };
     load();
-  }, [gameId]);
+  }, [gameId]); // Nota: no ponemos startLoading en dependencias para evitar bucles
 
   // send a move
   const sendMove = async (payload: Omit<ChessMovePayload, 'game_id'>) => {
     if (!chessGame) return;
     try {
       if (USE_MOCK) {
-        // <- MOCK: simulate opponent response
         const { mockChessGameAfterMove } = await import('@/mocks');
         setChessGame(mockChessGameAfterMove);
       } else {
-        // <- REAL: backend will broadcast update via actioCable
-        await postChessMove({ ...payload, game_id: gameId });
-        // no need to setchessgame here = websocket handle its
+        // 1. Validamos con el servidor
+        const res = await postChessMove({ ...payload, game_id: gameId });
+        const actualData = (res as any).data || res;
+
+        // 2. Si es ilegal, volvemos atrás el estado local para que la pieza no se quede "flotando"
+        if (actualData.illegal_move) {
+          setChessGame({ ...chessGame });
+          return;
+        }
+
+        // 3. 🚀 AQUÍ ESTÁ LA MAGIA:
+        // No llamamos a setChessGame aquí.
+        // Dejamos que el servidor procese el broadcast y el useGameChannel lo reciba.
       }
     } catch (err) {
-      setError('Move failed. Please try again.');
+      setChessGame({ ...chessGame });
     }
   };
 
@@ -69,5 +78,5 @@ export const useChessGame = (gameId: string) => {
       setError('AI move failed.');
     }
   };
-  return { chessGame, sendMove, requestAIMove, connectionStatus };
+  return { chessGame, sendMove, requestAIMove, connectionStatus, sendReady, claimDraw};
 };

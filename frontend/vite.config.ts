@@ -1,12 +1,21 @@
-import { defineConfig } from 'vite';
+/// <reference types="vitest" />
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
-import tsconfigPaths from 'vite-tsconfig-paths';
+import path from 'path';
 
 export default defineConfig({
-  plugins: [react(), tsconfigPaths()],
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+      '@services': path.resolve(__dirname, './src/services'),
+      '@features': path.resolve(__dirname, './src/features'),
+      '@types': path.resolve(__dirname, './src/types'),
+    },
+  },
   test: {
-    globals: true, // Esto te permite usar 'describe', 'it', 'expect' sin importar
-    environment: 'jsdom', // Simula el navegador en el entorno de tests
-    setupFiles: './src/test/setup.ts', // Donde irán las configuraciones extra
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/setupTests.ts',
   },
 });

@@ -1,33 +1,45 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useActionCable } from "./useActionCable";
-import type { ChessGameState } from '@features/chess/types';
-import { SudokuGameState } from "@features/sudoku/types";
 import { useMatchStore } from "@/store";
+import { useSudokuStore } from "@/store/sudokuStore";
+import type { ChessGameState } from '@features/chess/types';
+import type { SudokuGameState } from "@features/sudoku/types";
 
-type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'reconecting';
+type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'reconnecting';
 
 type GameChannelEvent =
   | { type: 'move_updated'; game: ChessGameState }
   | { type: 'sudoku_updated'; game: SudokuGameState }
   | { type: 'game_over'; status: string }
-  | { type: 'opponent_disconnect' };
+  | { type: 'opponent_disconnect' }
+  | { type: 'player_ready'; user_id: number }
+  | { type: 'game_start' };
 
 interface UseGameChanelReturn {
   connectionStatus: ConnectionStatus;
   lastEvent: GameChannelEvent | null;
+  sendReady: () => void;
+  claimDraw: () => void;
 }
 
 export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
   const { cable } = useActionCable();
-  const subscriptionRef = useRef<ReturnType<typeof cable.subscriptions.create> | null>(null);
+  const navigate = useNavigate();
+  const subscriptionRef = useRef<any>(null);
+
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('connecting');
   const [lastEvent, setLastEvent] = useState<GameChannelEvent | null>(null);
 
+  // Seleccionamos las funciones de actualización de cada store
   const setChessGame = useMatchStore((s) => s.setChessGame);
-  const setSudokuGame = useMatchStore((s) => s.setSudokuGame);
+  const setSudokuGame = useSudokuStore((s) => s.setSudokuGame);
 
   useEffect(() => {
-    if (!gameId) return;
+    if (!cable || !gameId) {
+      setConnectionStatus('disconnected');
+      return;
+    }
 
     setConnectionStatus('connecting');
 
@@ -39,44 +51,56 @@ export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
         },
         disconnected() {
           setConnectionStatus('disconnected');
-          // attempt reconnect after 3 seconds
-          setTimeout(() => {
-            setConnectionStatus('reconecting');
-          }, 3000);
         },
-        rejected() {
-          setConnectionStatus('disconnected');
-          console.error(`[GameChanel] Subscription rejected for game ${gameId}`);
-        },
-        recieved(raw: unknown) {
+        received(raw: unknown) {
           if (!raw || typeof raw !== 'object') return;
           const event = raw as GameChannelEvent;
-
           setLastEvent(event);
+
+          // 🛡️ Lógica inteligente para ignorar eventos multijugador en Sudoku
+          const isSudoku = gameId.includes('sudoku');
 
           switch (event.type) {
             case 'move_updated':
-              setChessGame(event.game);
+              if (!isSudoku) setChessGame(event.game as ChessGameState);
               break;
+
             case 'sudoku_updated':
-              setSudokuGame(event.game);
+              if (isSudoku) setSudokuGame(event.game as SudokuGameState);
               break;
-            case 'game_over':
-              break;
+
             case "opponent_disconnect":
-              console.warn('[GameChannel] Opponent disconnected');
+              // Solo alertamos si es un juego de ajedrez
+              if (!isSudoku) {
+                alert("Tu rival se ha salido de la partida.");
+                useMatchStore.getState().resetMatch();
+                navigate('/');
+              } else {
+                console.log("Ignorando desconexión de oponente en Sudoku");
+              }
               break;
+
+            case 'game_over':
+              if (!isSudoku) {
+                useMatchStore.setState({ status: 'finished' });
+              }
+              break;
+
             default:
-              console.warn('[GameChannel] Unknown event:', event);
+              console.warn('[GameChannel] Evento no procesado:', event);
           }
         },
       }
     );
+
     return () => {
       subscriptionRef.current?.unsubscribe();
       subscriptionRef.current = null;
-      setConnectionStatus('disconnected');
     };
-  }, [gameId]);
-  return { connectionStatus, lastEvent };
-}
+  }, [gameId, cable, navigate, setChessGame, setSudokuGame]);
+
+  const sendReady = () => subscriptionRef.current?.perform('player_ready');
+  const claimDraw = () => subscriptionRef.current?.perform('claim_draw');
+
+  return { connectionStatus, lastEvent, sendReady, claimDraw };
+};

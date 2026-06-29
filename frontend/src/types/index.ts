@@ -4,9 +4,30 @@ export interface User {
 	id: number;
 	username: string;
 	elo: number;
+<<<<<<< HEAD
+=======
+  
+	avatar_url: string;
+}
+
+export interface GameData {
+  game_id: string;
+  fen: string;
+  turn: 'white' | 'black';
+  status: 'active' | 'checkmate' | 'draw';
+  player: {
+    player1: { name: string; avatar: string };
+    player2: { name: string; avatar: string };
+  };
+  last_move: any;
+>>>>>>> main-final
 }
 
 export interface ApiResponse<T> {
 	data: T;
 	error?: string;
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> main-final

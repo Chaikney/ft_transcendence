@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { SudokuGamePage } from '../SudokuGamePage';
 import { useMatchStore } from '@/store';
 
@@ -9,14 +10,25 @@ beforeEach(() => {
   useMatchStore.getState().resetMatch();
 });
 
+// Helper para renderizar con el contexto de la ruta
+const renderWithRouter = (gameId: string) => {
+  return render(
+    <MemoryRouter initialEntries={[`/sudoku/${gameId}`]}>
+      <Routes>
+        <Route path="/sudoku/:id" element={<SudokuGamePage />} />
+      </Routes>
+    </MemoryRouter>
+  );
+};
+
 describe('SudokuGamePage — full render', () => {
   it('shows loading state initially', () => {
-    render(<SudokuGamePage gameId="sudoku-001" />);
+    renderWithRouter('sudoku-001');
     expect(screen.getByText(/loading game/i)).toBeInTheDocument();
   });
 
   it('renders grid after game loads', async () => {
-    render(<SudokuGamePage gameId="sudoku-001" />);
+    renderWithRouter('sudoku-001');
 
     await waitFor(() => {
       expect(screen.queryByText(/loading game/i)).not.toBeInTheDocument();
@@ -27,38 +39,36 @@ describe('SudokuGamePage — full render', () => {
   });
 
   it('renders ConnectionStatus component', async () => {
-    render(<SudokuGamePage gameId="sudoku-001" />);
+    renderWithRouter('sudoku-001');
 
     await waitFor(() => {
       expect(screen.queryByText(/loading game/i)).not.toBeInTheDocument();
     });
 
-    const statuses = ['Connecting...', 'Connected', 'Disconnected', 'Reconnecting...'];
-    const found = statuses.some((s) => screen.queryByText(s));
+    const statuses = [/connecting/i, /connected/i, /disconnected/i, /reconnecting/i];
+    const found = statuses.some((regex) => screen.queryByText(regex));
     expect(found).toBe(true);
   });
 
   it('original cells are locked after load', async () => {
-    render(<SudokuGamePage gameId="sudoku-001" />);
+    renderWithRouter('sudoku-001');
 
     await waitFor(() => {
       expect(screen.queryByText(/loading game/i)).not.toBeInTheDocument();
     });
 
     const buttons = screen.getAllByRole('button').slice(0, 81);
-    // (0,0) = 5 in mock — must be disabled
     expect(buttons[0]).toBeDisabled();
   });
 
   it.skip('empty cells are interactive after load', async () => {
-    render(<SudokuGamePage gameId="sudoku-001" />);
+    renderWithRouter('sudoku-001');
 
     await waitFor(() => {
       expect(screen.queryByText(/loading game/i)).not.toBeInTheDocument();
     });
 
     const buttons = screen.getAllByRole('button').slice(0, 81);
-    // (0,2) = 0 in mock — must be enabled
     expect(buttons[2]).not.toBeDisabled();
   });
 });
