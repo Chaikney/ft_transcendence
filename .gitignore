@@ -66,3 +66,4 @@ coverage/
 /chessthing/obj/*.o
 /chessthing/chess
 /secret/
+/backend/tmp/
