@@ -4,9 +4,7 @@ export interface User {
 	id: number;
 	username: string;
 	elo: number;
-<<<<<<< HEAD
-=======
-  
+
 	avatar_url: string;
 }
 
@@ -20,14 +18,9 @@ export interface GameData {
     player2: { name: string; avatar: string };
   };
   last_move: any;
->>>>>>> main-final
 }
 
 export interface ApiResponse<T> {
 	data: T;
 	error?: string;
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> main-final

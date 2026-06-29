@@ -27,7 +27,6 @@ RUN bundle install
 COPY . .
 
 # Configuramos el script de entrada
->>>>>>> main-final
 COPY entrypoint.sh /usr/bin/
 RUN chmod +x /usr/bin/entrypoint.sh
 
