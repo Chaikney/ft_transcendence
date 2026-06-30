@@ -56,8 +56,8 @@ services:
     volumes:
       - DB_vol:/var/lib/postgresql/data
     # FIXME the note here makes no sense in context
-    ports:
-      - "5432:5432" # Expone el puerto por si quieres conectarte con DBeaver o pgAdmin
+    # ports:
+    #   - "5432:5432" # Expone el puerto por si quieres conectarte con DBeaver o pgAdmin
     networks:
       - app_int
 
