@@ -9,7 +9,6 @@ services:
       - ../frontend:/app
        - /app/node_modules
     # TODO Ideally this would be binding to 80 but that needs root
-    # TODO Also expand to 443 for HTTPS
     ports:
       - "8080:80"
       - "8443:443"
@@ -17,6 +16,11 @@ services:
       - frontend/.env
     networks:
       - app_int
+    healthcheck:
+      test: ["CMD-SHELL","nginx -t"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
   # web_complex:
   #   build:
   #     context: ./frontend
@@ -38,12 +42,7 @@ services:
   #   ports:
   #     - "8080:80"
   #     - "8443:443"
-  #   # NOTE This is an alternative way to specify healthchecks if they are not in the image
-  #   # healthcheck:
-  #   #   test: ["CMD-SHELL","nginx -t"]
-  #   #   interval: 30s
-  #   #   timeout: 5s
-  #   #   retries: 3
+     # NOTE This is an alternative way to specify healthchecks if they are not in the image
 
   db:
     image: postgres:15-alpine
@@ -56,11 +55,13 @@ services:
       - backend/.env
     volumes:
       - DB_vol:/var/lib/postgresql/data
-    # FIXME the note here makes no sense in context
-    # ports:
-    #   - "5432:5432" # Expone el puerto por si quieres conectarte con DBeaver o pgAdmin
     networks:
       - app_int
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U postgres || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   api:
     build:
@@ -73,8 +74,6 @@ services:
     # NOTE Bind mount for development
     volumes:
       - ./backend:/app  # <--- LA MAGIA: Sincroniza tu carpeta local con el contenedor
-    # ports:
-    #   - "3000:3000"
     env_file:
       - backend/.env
     secrets:
@@ -108,11 +107,6 @@ services:
   #   expose:
   #     - "5432"
   #   env_file: ".env"
-  #   # healthcheck:
-  #   #   test: ["CMD-SHELL","pg_isready -U postgres || exit 1"]
-  #   #   interval: 30s
-  #   #   timeout: 5s
-  #   #   retries: 3
 
  # TODO Do we need a location for the ruby files? Other pieces?
 volumes:
