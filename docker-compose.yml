@@ -65,19 +65,20 @@ services:
     build:
       context: backend
     environment:
-      # FIXME The copntainer does not use this
       POSTGRES_PASSWORD_FILE: /run/secrets/RB_DBPASS
+      SECRET_42: /run/secrets/42_SECRET
     # Este comando es vital: borra el PID fantasma de Rails y luego arranca el servidor
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
     # NOTE Bind mount for development
     volumes:
       - ./backend:/app  # <--- LA MAGIA: Sincroniza tu carpeta local con el contenedor
-    ports:
-      - "3000:3000"
+    # ports:
+    #   - "3000:3000"
     env_file:
       - backend/.env
     secrets:
       - RB_DBPASS
+      - 42_SECRET
     depends_on:
       - db
     networks:
@@ -128,6 +129,8 @@ secrets:
     file: ./secret/rb_dbname
   RB_DBPASS:
     file: ./secret/rb_dbpass
+  42_SECRET:
+    file: ./secret/42API_SEC
 
 # "the presence of these objects is sufficient to define them"
 networks:
