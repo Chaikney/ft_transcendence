@@ -12,6 +12,7 @@ services:
     # TODO Also expand to 443 for HTTPS
     ports:
       - "8080:80"
+      - "8443:443"
     env_file:
       - frontend/.env
     networks:
