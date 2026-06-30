@@ -13,15 +13,25 @@ CONTHOME=	$(BASEDIR)/reqs
 # NOTE Change BASECMD to docker if that is what is being used
 # TODO Ideally this would work interchangeably but I bet it doesn't
 BASECMD	=	podman
+SOCK	=	/run/podman/podman.sock
+SOCK_UNIT=	podman.socket
+
 
 all: $(NAME)
 
 $(NAME): start
 
+# Ensure that we have podman available. NOTE some of these are "nice to have" not essential
+check_host:
+	@which $(BASECMD) >/dev/null 2>&1 || { echo "container controller not found"; exit 1; }
+	@which systemctl >/dev/null 2>&1 || { echo "service manager not found"; exit 1; }
+	@systemctl is-active --quiet $(SOCK_UNIT) || { echo "$(SOCK_UNIT) not active - this might cause problems"; exit 0; }
+	@podman system connection --log-level=error >/dev/null 2>&1 || { echo "podman connection failed"; exit 0; }
+
 # Launch the cluster / pod of 3 containers
 # NOTE podman compose and podman-compose behave differently! BOOOO!
 # NOTE !! if you get a "cant get socket" error, *LAUNCH THE podman.socket SERVICE!
-start: secrets
+start: check_host secrets
 	@echo "Building and launching the containers"
 	$(BASECMD) compose -f "$(abspath $(BASEDIR)/docker-compose.yml)" up
 
