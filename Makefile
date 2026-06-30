@@ -7,8 +7,6 @@ REPO	=	team42
 # Location of the compose file
 BASEDIR	=	./
 # Location of the individual containers (in their subfolders)
-# FIXME only used for server_cert now, perhaps to be removed...
-CONTHOME=	$(BASEDIR)/reqs
 
 # NOTE Change BASECMD to docker if that is what is being used
 # TODO Ideally this would work interchangeably but I bet it doesn't
@@ -74,12 +72,11 @@ secret/trans.crt: secret/testprivate.key
 	mv trans.crt $@
 
 # TODO This "relinks"/ never says it has nothing to do, even if the keys are in place
-# FIXME Unsure if this works at the moment with new setup
 server_cert: secret/trans.crt
 	@echo "Copying web certs to build context"
-	mkdir --parents $(CONTHOME)/web/secret
-	cp --update secret/testprivate.key $(CONTHOME)/web/secret/trans.key
-	cp --update secret/trans.crt $(CONTHOME)/web/secret/trans.crt
+	mkdir --parents frontend/secret
+	cp --update secret/testprivate.key frontend/secret/trans.key
+	cp --update secret/trans.crt frontend/secret/trans.crt
 
 # Convenience / convention rules; not properly worked out or needed yet
 wipe: stop
