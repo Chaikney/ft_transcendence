@@ -25,5 +25,8 @@ RUN npx vite build
 
 FROM nginx:1.27-alpine
 COPY --from=development /app/dist/ /usr/share/nginx/html/
+# copy config and  certificates
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY secret/trans.crt /etc/nginx/ssl/server.crt
+COPY secret/trans.key /etc/nginx/ssl/server.key
 CMD ["nginx", "-g", "daemon off;"]
