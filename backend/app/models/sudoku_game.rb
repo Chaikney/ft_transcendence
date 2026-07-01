@@ -4,22 +4,47 @@ class SudokuGame < ApplicationRecord
   validates :status, presence: true
   validates :difficulty, presence: true
 
-  # ── Validación de Tablero (Nuevo) ────────────────────────────────────────
+  # ── Configuración de Puntos ──────────────────────────────────────────
+  POINTS_BY_DIFFICULTY = {
+    'easy'   => 10,
+    'medium' => 25,
+    'hard'   => 50
+  }.freeze
+
+  # ── Lógica de Finalización ──────────────────────────────────────────
+  def finalize_game!
+    # Evitar ejecutar la lógica si ya está finalizado
+    return if status == 'finished'
+
+    points = POINTS_BY_DIFFICULTY.fetch(difficulty, 10)
+
+    user.transaction do
+      user.elo += points
+      user.wins += 1
+      user.save!
+      
+      update!(status: 'finished')
+    end
+  end
 
   # Valida si el string de 81 caracteres es un Sudoku válido según las reglas
   def self.valid_board?(board_str)
-    return false unless board_str.is_a?(String) && board_str.length == 81
-    
-    # Convertimos el string a matriz 9x9
+    unless board_str.is_a?(String) && board_str.length == 81
+      Rails.logger.error "SUDOKU DEBUG: El tablero no tiene 81 caracteres o no es string. Longitud: #{board_str&.length}"
+      return false
+    end
+
     grid = Array.new(9) { |i| board_str.slice(i * 9, 9).chars.map(&:to_i) }
-    
+
     9.times do |r|
       9.times do |c|
         val = grid[r][c]
-        next if val == 0 # Saltamos celdas vacías
-        
-        # Validamos que el número no se repita en su fila, columna o caja 3x3
-        return false unless valid_placement_in_grid?(grid, r, c, val)
+        next if val == 0
+
+        unless valid_placement_in_grid?(grid, r, c, val)
+          Rails.logger.error "SUDOKU DEBUG: Error de validación en fila #{r}, columna #{c}, valor #{val}"
+          return false
+        end
       end
     end
     true
