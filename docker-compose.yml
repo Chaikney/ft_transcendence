@@ -2,6 +2,7 @@ name: ft_transcendence
 
 services:
   web:
+    # FIXME should be depends on api or similar, transient faults if not
     build:
       context: ./frontend
       # NOTE This is one bind mount and one storage volume defined on the fly
@@ -80,9 +81,18 @@ services:
       - RB_DBPASS
       - 42_SECRET
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - app_int
+    healthcheck:
+      test:
+      - "CMD-SHELL"
+      - "ruby -e 'require \"net/http\"; u=URI(\"http://localhost:3000/health\");
+r=Net::HTTP.get_response(u); exit(r.code.start_with?(\"2\") ? 0 : 1)'"
+      interval: 30s
+      timeout: 2s
+      retries: 20
 
   # db_complex:
   #   build:
