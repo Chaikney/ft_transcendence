@@ -1,5 +1,6 @@
-import { useRef, useCallback, useState } from 'react';
+import { useRef, useCallback, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import confetti from 'canvas-confetti';
 import { SudokuBoard } from './SudokuBoard';
 import { useSudokuGame } from './hooks/useSudokuGame';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
@@ -35,6 +36,18 @@ export const SudokuGamePage = () => {
 
   const originalGridRef = useRef<number[][] | null>(null);
 
+  // Lógica del confeti: se ejecuta solo cuando el estado cambia a 'won'
+  useEffect(() => {
+    if (sudokuGame?.status === 'won' || sudokuGame?.status === 'finished') {
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#f7a605', '#ffffff', '#c0392b']
+      });
+    }
+  }, [sudokuGame?.status]);
+
   if (sudokuGame && !originalGridRef.current) {
     originalGridRef.current = sudokuGame.grid.map((row) => [...row]);
   }
@@ -61,14 +74,11 @@ export const SudokuGamePage = () => {
   const handleConfirmAbandon = async () => {
     try {
       if (gameId) {
-        // Marcamos la partida como finalizada en la base de datos
         await finishSudokuGame(gameId);
       }
     } catch (err) {
       console.error("Error when finishing the game:", err);
-      // Opcional: Podrías mostrar un toast de error aquí
     } finally {
-      // Siempre ejecutamos esto para limpiar el store y salir
       setShowAbandonModal(false);
       resetMatch();
       navigate('/');
@@ -79,7 +89,7 @@ export const SudokuGamePage = () => {
     return (
       <div className={styles.page}>
         <p className="text-white">No game selected.</p>
-        <Button onClick={() => handleNewPuzzle('easy')}>Create New Game</Button>
+        <Button variant="primary" onClick={() => handleNewPuzzle('easy')}>Create New Game</Button>
       </div>
     );
   }
@@ -104,6 +114,8 @@ export const SudokuGamePage = () => {
     );
   }
 
+  const isFinished = sudokuGame.status === 'won' || sudokuGame.status === 'finished';
+
   return (
     <div className={styles.page}>
       <div className={styles.topBar}>
@@ -116,7 +128,8 @@ export const SudokuGamePage = () => {
         status={sudokuGame.status.toUpperCase()}
         statusVariant={
           sudokuGame.status === 'won' ? 'active' :
-          sudokuGame.status === 'lost' ? 'error' : 'warning'
+          sudokuGame.status === 'lost' ? 'error' :
+          sudokuGame.status === 'finished' ? 'active' : 'warning'
         }
         maxWidth="max-w-[540px]"
       >
@@ -178,7 +191,7 @@ export const SudokuGamePage = () => {
         </div>
       </TerminalCard>
 
-      {/* Modal de confirmación */}
+      {/* Modal de abandono */}
       {showAbandonModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <div className="bg-[#1a1a1a] border border-[#333] p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
@@ -187,19 +200,41 @@ export const SudokuGamePage = () => {
               Are you sure you want to leave? You will lose the progress of this game.
             </p>
             <div className="flex gap-3 justify-center">
+              <Button variant="ghost" size="sm" onClick={() => setShowAbandonModal(false)}>
+                Cancel
+              </Button>
+              <Button variant="danger" size="sm" onClick={handleConfirmAbandon}>
+                Leave
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Victoria (Sin icono de copa) */}
+      {isFinished && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+          <div className="bg-[#1a1a1a] border border-[#333] p-8 rounded-lg shadow-2xl max-w-sm w-full text-center transform animate-in zoom-in-95 duration-300">
+            <h2 className="text-white text-2xl font-bold mb-4 tracking-wider">Game Completed!</h2>
+            <p className="text-gray-400 text-sm mb-8 leading-relaxed">
+              Congratulations! You have solved Sudoku successfully. Your progress has been recorded!
+            </p>
+            <div className="flex flex-col gap-3">
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => handleNewPuzzle('easy')}
+                className="w-full"
+              >
+                New Game
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setShowAbandonModal(false)}
+                onClick={() => navigate('/')}
+                className="w-full"
               >
-                Cancel
-              </Button>
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={handleConfirmAbandon}
-              >
-                Leave
+                Go Home
               </Button>
             </div>
           </div>
