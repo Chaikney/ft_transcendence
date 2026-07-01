@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useMatchStore } from "@/store";
 import { getChessGame, postChessMove, postChessAIMove } from "../service";
-import { useGameChannel } from "@/hooks";
+import { useGameChannel } from "@/hooks/useGameChannel";
 import type { ChessGameState, ChessMovePayload } from '../types';
 
 // TODO: Dev flag - flip to false when the backend is ready
@@ -12,7 +12,7 @@ export const useChessGame = (gameId: string) => {
   const setChessGame = useMatchStore((s) => s.setChessGame);
   const startLoading = useMatchStore((s) => s.startLoading);
   const setError = useMatchStore((s) => s.setError);
-  const { connectionStatus, sendReady, claimDraw} = useGameChannel(USE_MOCK ? null : gameId);
+  const { connectionStatus, sendReady, claimDraw, resign} = useGameChannel(USE_MOCK ? null : gameId);
 
   // load initial game state
   useEffect(() => {
@@ -78,5 +78,5 @@ export const useChessGame = (gameId: string) => {
       setError('AI move failed.');
     }
   };
-  return { chessGame, sendMove, requestAIMove, connectionStatus, sendReady, claimDraw};
+  return { chessGame, sendMove, connectionStatus, sendReady, claimDraw, resign};
 };

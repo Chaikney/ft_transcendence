@@ -1,5 +1,5 @@
-import { useParams, Navigate } from 'react-router-dom';
-import { useEffect, useState } from 'react'; // 👈 IMPORTANTE: Añadimos useEffect y useState
+import { useParams, Navigate, useNavigate } from 'react-router-dom'; // 👈 Añadido useNavigate
+import { useEffect, useState } from 'react';
 import { ChessBoard } from './ChessBoard';
 import { useChessGame } from './hooks/useChessGame';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
@@ -18,8 +18,9 @@ const styles = {
 
 export const ChessGamePage = () => {
   const { id: gameId } = useParams<{ id: string }>();
+  const navigate = useNavigate(); // 👈 Inicializamos el navegador
   
-  const { chessGame, sendMove, requestAIMove, connectionStatus, sendReady, claimDraw } = useChessGame(gameId || "");
+  const { chessGame, sendMove, resign, connectionStatus, sendReady, claimDraw } = useChessGame(gameId || "");
   
   const status = useMatchStore((s) => s.status); 
   const error = useMatchStore((s) => s.error);
@@ -27,19 +28,31 @@ export const ChessGamePage = () => {
   const currentUser = useAuthStore((s) => s.user);
 
   // 🛡️ EL BLINDAJE CONTRA LA AMNESIA:
-  // Guardamos tu color en un estado fijo.
   const [localColor, setLocalColor] = useState<'w' | 'b'>('w');
+  
+  // 🏳️ CONTROL DE BOTÓN ÚNICO:
+  const [isResigning, setIsResigning] = useState(false); // 👈 Nuevo estado
 
   useEffect(() => {
-    // Solo calculamos el color si el servidor nos manda el ID del jugador 2 (al principio de la partida).
-    // Si en los siguientes turnos el servidor olvida mandar el ID, este useEffect no hará nada,
-    // ¡y tú seguirás conservando tu color correctamente!
     if (chessGame?.player2_id && currentUser?.id) {
       const p2 = String(chessGame.player2_id);
       const me = String(currentUser.id);
       setLocalColor(p2 === me ? 'b' : 'w');
     }
   }, [chessGame?.player2_id, currentUser?.id]);
+
+  // 🚪 LA PUERTA DE SALIDA
+  const handleNewGame = () => {
+    resetMatch(); 
+    navigate('/'); 
+  };
+
+  // 🏳️ MANEJADOR DE RENDICIÓN
+  const handleResignClick = () => {
+    if (isResigning) return; // Si ya se está procesando, ignoramos clics extra
+    setIsResigning(true);    // Bloqueamos instantáneamente el botón en local
+    resign();                // Enviamos la señal al backend
+  };
 
   const isLocked = connectionStatus !== 'connected';
 
@@ -57,8 +70,8 @@ export const ChessGamePage = () => {
 
       <TerminalCard
         title={`chess — game_${gameId}`}
-        status={(chessGame?.status || 'unknown').toUpperCase()} // 👈 Cambio seguro
-        statusVariant={chessGame?.status === 'active' ? 'active' : 'error'} // 👈 Cambio seguro
+        status={(chessGame?.status || 'unknown').toUpperCase()} 
+        statusVariant={chessGame?.status === 'active' ? 'active' : 'error'} 
         maxWidth="max-w-[560px]"
       >
         <div className="flex flex-col items-center gap-5">
@@ -67,15 +80,21 @@ export const ChessGamePage = () => {
             onMove={sendMove}
             onDraw={claimDraw}
             disabled={isLocked}
-            localPlayerColor={localColor} // 👈 Pasamos tu color blindado
+            localPlayerColor={localColor} 
           />
           <div className={styles.actionRow}>
-            <Button variant="primary" onClick={requestAIMove} disabled={isLocked || chessGame.status !== 'active'}>
-              Request AI move
+            <Button 
+              variant="primary" 
+              onClick={handleResignClick} 
+              disabled={isLocked || isResigning || (chessGame.status !== 'active' && chessGame.status !== 'in_progress')}
+            >
+              {isResigning ? 'Resigning...' : 'Resign'}
             </Button>
-            <Button variant="ghost" size="sm" onClick={resetMatch}>
+            
+            <Button variant="ghost" size="sm" onClick={handleNewGame}>
               New game
             </Button>
+            
           </div>
         </div>
       </TerminalCard>

@@ -42,7 +42,9 @@ module Api
         return render json: { error: "Tablero corrupto" }, status: :unprocessable_entity unless engine
 
         begin
-          engine.move("#{params[:from]}#{params[:to]}")
+          # Si hay promoción, el string será "e7e8n". Si no hay, será "e2e4" normal.
+          move_string = "#{params[:from]}#{params[:to]}#{params[:promotion]}"
+          engine.move(move_string)
         rescue StandardError
           return render json: { illegal_move: true }, status: :ok
         end
@@ -50,10 +52,24 @@ module Api
         # Actualización de estado
         new_fen = engine.board.to_fen
         base_position = new_fen.split(' ')[0..3].join(' ')
-        history = (game.fen_history || []) << base_position
+        # Usamos + en lugar de << para asegurarnos de que history es un array nuevo
+        history = (game.fen_history || []) + [base_position] 
         
-        game_status = engine.board.checkmate? ? 'checkmate' : (engine.board.stalemate? ? 'draw' : 'active')
-        game.update!(current_board: new_fen, fen_history: history, status: (game_status != 'active' ? 'finished' : 'in_progress'))
+        # 🧹 EL EXORCISMO DEL HISTORIAL:
+        # Recortamos TODAS las posiciones de la lista para que la inicial y las nuevas
+        # hablen exactamente el mismo idioma, sin números de turnos.
+        historial_limpio = history.map { |f| f.to_s.split(' ')[0..3].join(' ') }
+        
+        # Ahora sí, el backend detectará que la primera y la tercera son idénticas
+        is_threefold = historial_limpio.tally.values.any? { |count| count >= 3 }
+        
+        game_status = engine.board.checkmate? ? 'checkmate' : ((engine.board.stalemate? || is_threefold) ? 'draw' : 'active')
+        
+        game.update!(
+          current_board: new_fen, 
+          fen_history: history, 
+          status: (game_status != 'active' ? 'finished' : 'in_progress')
+        )
 
         # 🚀 BROADCAST CORREGIDO: El nombre del canal DEBE coincidir con el del Channel
         # Si en tu channel usas "game_#{game_id}", aquí debe ser lo mismo.
