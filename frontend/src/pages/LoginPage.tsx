@@ -32,13 +32,9 @@ const styles = {
   infoKey: 'text-text-muted w-28 shrink-0',
   infoVal: 'text-accent',
 
-  // Botones principales (42, Submit, etc)
   primaryBtn: 'w-full flex items-center justify-center gap-3 py-3 px-4 font-mono font-bold text-sm tracking-widest uppercase border-2 border-accent text-accent bg-accent-bg transition-all duration-base cursor-pointer hover:bg-accent hover:text-bg-base hover:shadow-[0_0_20px_rgba(0,212,255,0.4)] active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed',
-  
-  // Botones secundarios (Cancel, Switch mode)
   secondaryBtn: 'w-full flex items-center justify-center gap-2 py-2 px-4 font-mono text-xs tracking-widest uppercase border border-border-strong text-text-muted transition-all duration-base cursor-pointer hover:border-accent-border hover:text-text-secondary',
 
-  // Inputs para Guest
   input: 'w-full bg-transparent border-b border-border-strong text-text-primary font-mono py-2 focus:outline-none focus:border-accent transition-colors placeholder:text-text-muted/30 text-sm',
   
   footerNote: 'text-[10px] font-mono text-text-muted text-center leading-relaxed mt-4',
@@ -58,29 +54,29 @@ export const LoginPage = () => {
   const isMock = import.meta.env.VITE_USE_MOCK === 'true';
   const { info, success, error: showError } = useToast();
 
-  // Estados de vista y carga
   const [mode, setMode] = useState<AuthMode>('main');
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Estados de formulario
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [totpCode, setTotpCode] = useState('');
   const [otpSecret, setOtpSecret] = useState<string | null>(null);
 
-  // ── Lógica 42 ──
+  // 🇩🇪 La barrera de seguridad visual
+  const isPasswordValid = password.length >= 6;
+
   const handleOAuth = () => {
     setLoading(true);
     info('Redirecting to 42...', 'Authentication');
     window.location.href = OAUTH_URL;
   };
- 
 
-  // ── Lógica Invitados ──
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isPasswordValid) return; // Bloqueo si le dan al Enter saltándose el botón
+
     setLoading(true);
     setErrorMessage(null);
     try {
@@ -101,7 +97,6 @@ export const LoginPage = () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      // 👇 Aquí enviamos username en lugar de email
       const res = await loginGuest({ username, password, totp_code: totpCode });
       if (res.token) {
         localStorage.setItem('auth_token', res.token);
@@ -136,7 +131,6 @@ export const LoginPage = () => {
     <div className={styles.page}>
       <div className={styles.card}>
 
-        {/* ── HEADER DE LA TERMINAL ── */}
         <div className={styles.cardHeader}>
           <span className={styles.headerDot} style={{ background: '#ff3366' }} />
           <span className={styles.headerDot} style={{ background: '#ffaa00' }} />
@@ -149,14 +143,12 @@ export const LoginPage = () => {
           </span>
         </div>
 
-        {/* ── ERRORES ── */}
         {errorMessage && (
           <div className="p-3 border border-[#ff3366]/50 bg-[#ff3366]/10 text-[#ff3366] font-mono text-xs">
             &gt; {errorMessage}
           </div>
         )}
 
-        {/* ── VISTA PRINCIPAL (42 + Elección) ── */}
         {mode === 'main' && (
           <>
             <div className={styles.titleWrap}>
@@ -190,13 +182,11 @@ export const LoginPage = () => {
                     &gt; guest_register
                   </button>
                 </div>
-
               </div>
             )}
           </>
         )}
 
-        {/* ── VISTA: GUEST LOGIN ── */}
         {mode === 'guest_login' && (
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
             <div className={styles.titleWrap}>
@@ -204,7 +194,6 @@ export const LoginPage = () => {
               <h1 className={styles.title}><span className={styles.titleAccent}>&gt; </span>guest_login()</h1>
             </div>
             
-            {/* 👇 ESTE INPUT AHORA ES TEXT Y USA USERNAME */}
             <input type="text" required placeholder="USERNAME_" value={username} onChange={(e) => setUsername(e.target.value)} className={styles.input} />
             <input type="password" required placeholder="PASSWORD_" value={password} onChange={(e) => setPassword(e.target.value)} className={styles.input} />
             
@@ -219,7 +208,7 @@ export const LoginPage = () => {
           </form>
         )}
 
-        {/* ── VISTA: GUEST REGISTER ── */}
+        {/* 👇 AQUÍ ESTÁ LA MAGIA PARA EL GUEST REGISTER 👇 */}
         {mode === 'guest_register' && (
           <form onSubmit={handleRegister} className="flex flex-col gap-4">
             <div className={styles.titleWrap}>
@@ -229,10 +218,21 @@ export const LoginPage = () => {
             
             <input type="text" required placeholder="USERNAME_" value={username} onChange={(e) => setUsername(e.target.value)} className={styles.input} />
             <input type="email" required placeholder="EMAIL_" value={email} onChange={(e) => setEmail(e.target.value)} className={styles.input} />
-            <input type="password" required placeholder="PASSWORD_" value={password} onChange={(e) => setPassword(e.target.value)} className={styles.input} />
+            
+            <div className="flex flex-col gap-1">
+              <input type="password" required placeholder="PASSWORD_" value={password} onChange={(e) => setPassword(e.target.value)} className={styles.input} />
+              
+              <span className={`text-[10px] font-mono mt-1 transition-colors ${
+                password.length === 0 ? 'text-accent/50' : 
+                isPasswordValid ? 'text-green-500' : 'text-[#ff3366]'
+              }`}>
+                {password.length === 0 ? '> Mínimo 6 caracteres' : 
+                 isPasswordValid ? '> Contraseña válida ✓' : '> Faltan caracteres (Mínimo 6) ⚠️'}
+              </span>
+            </div>
             
             <div className="flex flex-col gap-2 mt-2">
-              <button type="submit" className={styles.primaryBtn} disabled={loading}>
+              <button type="submit" className={styles.primaryBtn} disabled={loading || !isPasswordValid}>
                 {loading ? 'PROCESSING...' : '> COMPILE_RECORD'}
               </button>
               <button type="button" onClick={resetForm} className={styles.secondaryBtn}>
@@ -242,7 +242,6 @@ export const LoginPage = () => {
           </form>
         )}
 
-        {/* ── VISTA: 2FA SETUP (QR) ── */}
         {mode === '2fa_setup' && (
           <div className="flex flex-col items-center gap-6">
             <div className={styles.titleWrap}>
@@ -268,7 +267,6 @@ export const LoginPage = () => {
           </div>
         )}
 
-        {/* ── VISTA: 2FA VERIFY ── */}
         {mode === '2fa_verify' && (
           <form onSubmit={handleLogin} className="flex flex-col gap-6 text-center">
             <div className={styles.titleWrap}>
@@ -293,7 +291,6 @@ export const LoginPage = () => {
           </form>
         )}
 
-        {/* Footer */}
         <p className={styles.footerNote}>
           // by authenticating you agree to the <span className={styles.footerLink}>terms_of_service</span> and <span className={styles.footerLink}>privacy_policy</span>
         </p>
