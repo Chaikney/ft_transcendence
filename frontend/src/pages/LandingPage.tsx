@@ -113,7 +113,7 @@ export const LandingPage = () => {
           <span className={styles.terminalDot} style={{ background: '#ff3366' }} />
           <span className={styles.terminalDot} style={{ background: '#ffaa00' }} />
           <span className={styles.terminalDot} style={{ background: '#00ff88' }} />
-          <span className={styles.terminalTitle}>transcendence — global rankings</span>
+          <span className={styles.terminalTitle}>transcendence — TOP 10 -- global rankings</span>
         </div>
         
         {/* Aquí renderizamos el ranking real */}

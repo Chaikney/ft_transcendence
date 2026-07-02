@@ -35,34 +35,41 @@ module Api
 
       # PATCH /api/sudoku/games/:game_id
       def update
-        # 1. Preparamos el hash de actualización
         update_params = {}
 
-        # 2. Si el frontend envía un tablero, lo procesamos
         if params[:board].present?
           unless SudokuGame.valid_board?(params[:board])
-            return render json: { 
-              error: "Movimiento inválido: El tablero viola las reglas" 
-            }, status: :unprocessable_entity
+            return render json: { error: "Movimiento inválido" }, status: :unprocessable_entity
           end
 
           update_params[:board] = params[:board]
-          # Si el tablero es nuevo, comprobamos si el juego terminó
-          update_params[:status] = 'won' if @game.solved?
+          
+          # Si el tablero está completo y bien, marcamos estado 'won'
+          if @game.solved? || @game.board.include?('0') == false # Verificación adicional
+            # Nota: Asumimos que solved? contiene la lógica de verificación
+          end
         end
       
-        # 3. Si el frontend envía un estado (por ejemplo 'finished'), lo procesamos
-        # (Asumiendo que el frontend envía { game: { status: 'finished' } })
+        # Procesar estado si viene del cliente
         if params[:game].present? && params[:game][:status].present?
           update_params[:status] = params[:game][:status]
         end
+
+        # Si el tablero se resolvió, forzamos status a 'won'
+        if update_params[:board] && @game.class.new(board: update_params[:board]).solved?
+          update_params[:status] = 'won'
+        end
       
-        # 4. Guardamos los cambios (solo si hay algo que actualizar)
         if update_params.empty?
-          return render json: { error: "No se enviaron datos para actualizar" }, status: :unprocessable_entity
+          return render json: { error: "No se enviaron datos" }, status: :unprocessable_entity
         end
       
         if @game.update(update_params)
+          # SI EL JUEGO SE GANÓ, FINALIZAMOS PARA SUMAR ELO
+          if @game.status == 'won'
+            @game.finalize_game!
+          end
+
           render json: {
             id: @game.id,
             status: @game.status,
@@ -73,17 +80,14 @@ module Api
           render json: { error: @game.errors.full_messages.join(', ') }, status: :unprocessable_entity
         end
       end
+
       private
 
       def set_game
         numeric_id = params[:game_id].to_s.gsub(/[^0-9]/, '').to_i
-
         @game = @current_user&.sudoku_games&.find_by(id: numeric_id) || SudokuGame.find_by(id: numeric_id)
 
-        if @game
-          Rails.logger.info "Juego encontrado: #{@game.id} (Usuario: #{@game.user_id})"
-        else
-          Rails.logger.warn "Game not found with ID: #{numeric_id}"
+        unless @game
           render json: { error: "Game not found" }, status: :not_found
         end
       end

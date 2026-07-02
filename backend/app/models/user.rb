@@ -2,16 +2,16 @@ class User < ApplicationRecord
     has_secure_password
 
     # 🔒 VALIDACIONES PARA EL REGISTRO MANUAL
-    validates :username, presence: true, uniqueness: { case_sensitive: false }, 
-                         length: { minimum: 3, maximum: 15 },
-                         format: { with: /\A[a-zA-Z0-9_-]+\z/, message: "only allows letters, numbers, _ and -" }
-    
-    validates :email, presence: true, uniqueness: { case_sensitive: false },
-                      format: { with: URI::MailTo::EMAIL_REGEXP, message: "must be a valid email address" }
+    validates :email, uniqueness: { case_sensitive: false }, 
+          presence: true, 
+          unless: -> { uid42.present? } # <--- ESTA ES LA CLAVE
+    validates :email, format: { with: URI::MailTo::EMAIL_REGEXP, message: "must be a valid email address" }, 
+          if: -> { email.present? }
 
     # La contraseña solo es obligatoria cuando se crea un registro nuevo 
     # o cuando el usuario la está cambiando explícitamente.
     validates :password, presence: true, length: { minimum: 6 }, if: :password_digest_changed?
+    
     # 🟢 1. DEFINICIÓN DE ROLES
     # 0 = Jugador normal, 1 = Administrador
     enum :role, { player: 0, admin: 1 }
@@ -38,6 +38,7 @@ class User < ApplicationRecord
 
     # 🟢 4. ASIGNAR SALA GLOBAL AUTOMÁTICAMENTE
     after_create :add_to_global_chat
+    
     # --- MÉTODOS PÚBLICOS ---
     def all_games
         Game.where("player1_id = ? OR player2_id = ?", self.id, self.id)
@@ -51,7 +52,7 @@ class User < ApplicationRecord
 
     def mfa_provisioning_uri
         # El 'issuer' es el nombre que saldrá en la app del móvil
-        totp = ROTP::TOTP.new(self.otp_secret, issuer: "Noctyve_Transcendence")
+        totp = ROTP::TOTP.new(self.otp_secret, issuer: "Transcendence")
         totp.provisioning_uri(self.username)
     end
     
