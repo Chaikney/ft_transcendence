@@ -67,9 +67,10 @@ export const SudokuGamePage = () => {
       navigate(`/game/sudoku/sudoku-${String(newGame.id).padStart(3, '0')}`);
     } catch (err) {
       console.error('Failed to create new puzzle:', err);
+    } finally {
       setIsLoading(false);
     }
-  }, [resetMatch, navigate]);
+  }, [resetMatch, navigate, isLoading]);
 
   const handleConfirmAbandon = async () => {
     try {

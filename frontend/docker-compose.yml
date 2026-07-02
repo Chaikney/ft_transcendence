@@ -10,3 +10,6 @@ services:
       - "5173:5173"
     environment:
       - NODE_ENV=development
+    stdin_open: true # Permite que el contenedor reciba inputs de teclado/scripts
+    tty: true        # Mantiene el contenedor vivo para que Vite funcione bien
+    
