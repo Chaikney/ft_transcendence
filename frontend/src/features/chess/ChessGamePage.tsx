@@ -18,7 +18,6 @@ const styles = {
 
 export const ChessGamePage = () => {
   const { id: gameId } = useParams<{ id: string }>();
-  const status = useMatchStore((s) => s.status);
   const navigate = useNavigate(); // 👈 Inicializamos el navegador
 
   const { chessGame, sendMove, resign, connectionStatus, sendReady, claimDraw } = useChessGame(gameId || "");
