@@ -1,5 +1,7 @@
-# Usamos una versión específica y estable
-FROM ruby:3.3-slim AS base
+ARG RUBY_VERSION
+
+FROM ruby:${RUBY_VERSION}-slim AS base
+#FROM ruby:3.3-slim AS base
 
 # Instalamos dependencias necesarias:
 # - build-essential: para compilar gemas con extensiones C

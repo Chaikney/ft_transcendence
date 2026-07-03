@@ -45,6 +45,7 @@ services:
   #     - "8443:443"
      # NOTE This is an alternative way to specify healthchecks if they are not in the image
 
+  # TODO This part is formatted different from the others, not ideal.
   db:
     image: postgres:15-alpine
     restart: always
@@ -67,9 +68,12 @@ services:
   api:
     build:
       context: backend
+      args:
+        RUBY_VERSION: ${RUBY_VERSION}
     environment:
       POSTGRES_PASSWORD_FILE: /run/secrets/RB_DBPASS
       SECRET_42: /run/secrets/42_SECRET
+
     # Este comando es vital: borra el PID fantasma de Rails y luego arranca el servidor
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
     # NOTE Bind mount for development
