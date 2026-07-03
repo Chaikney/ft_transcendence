@@ -24,7 +24,6 @@ export const ChessGamePage = () => {
   const { chessGame, sendMove, resign, connectionStatus, sendReady, claimDraw } = useChessGame(gameId || "");
 
   const status = useMatchStore((s) => s.status);
->>>>>>> main-final
   const error = useMatchStore((s) => s.error);
   const resetMatch = useMatchStore((s) => s.resetMatch);
   const currentUser = useAuthStore((s) => s.user);
