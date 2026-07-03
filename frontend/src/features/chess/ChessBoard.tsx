@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react'; // 👈 Añadido useState
 import { useChessBoard } from './hooks/useChessBoard';
 import type { ChessGameState, ChessMove } from './types';
 
@@ -32,13 +32,14 @@ const getSquareBg = (isLight: boolean, isSelected: boolean, isLastMove: boolean)
   return isLight ? 'var(--chess-light)' : 'var(--chess-dark)';
 };
 
+// 🎨 Añadidos estilos para el menú de coronación y 'relative' al boardFrame
 const styles = {
   wrapper: 'flex flex-col items-center gap-3 animate-board-reveal',
   statusBar: 'flex items-center gap-2 h-7',
   turnDot: 'w-2.5 h-2.5 rounded-full border border-black/20',
   turnLabel: 'text-xs font-mono tracking-widest uppercase text-text-secondary',
   gameOver: 'text-xs font-mono tracking-widest uppercase text-status-error',
-  boardFrame: 'flex rounded-lg overflow-hidden border border-accent-border shadow-[var(--shadow-glow)] bg-bg-surface',
+  boardFrame: 'relative flex rounded-lg overflow-hidden border border-accent-border shadow-[var(--shadow-glow)] bg-bg-surface', // 👈 Añadido relative
   rankLabels: 'flex flex-col justify-between pointer-events-none z-10 py-[calc(var(--square-size)/16)]',
   rankLabel: 'flex items-center justify-center text-[10px] font-mono text-accent font-bold select-none',
   fileLabels: 'flex',
@@ -48,6 +49,13 @@ const styles = {
   pieceWhite: 'text-[var(--chess-piece-white)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] transition-transform duration-[var(--ease-fast)]',
   pieceBlack: 'text-[var(--chess-piece-black)] drop-shadow-[0_1px_2px_rgba(56,189,248,0.2)] transition-transform duration-[var(--ease-fast)]',
   lastMoveDot: 'absolute bottom-0.5 right-0.5 w-1.5 h-1.5 rounded-none bg-accent opacity-60',
+
+  // Estilos del modal de promoción
+  promoOverlay: 'absolute inset-0 bg-black/60 z-50 flex items-center justify-center backdrop-blur-sm',
+  promoMenu: 'bg-bg-surface p-4 rounded-xl shadow-2xl border border-accent-border flex flex-col items-center gap-3',
+  promoTitle: 'text-text-primary font-bold tracking-wide text-xs uppercase',
+  promoBtnRow: 'flex gap-2',
+  promoBtn: 'w-14 h-14 flex items-center justify-center text-4xl bg-bg-surface hover:bg-accent/20 rounded border border-accent-border transition-colors cursor-pointer',
 } as const;
 
 interface ChessBoardProps {
@@ -66,14 +74,39 @@ export const ChessBoard = ({
   localPlayerColor = 'w'
 }: ChessBoardProps) => {
 
-  const { selectedSquare, selectSquare } = useChessBoard(onMove, onDraw, gameState, localPlayerColor);
+  // 🛑 ESTADO: Guarda el movimiento congelado mientras elegimos pieza
+  const [pendingPromotion, setPendingPromotion] = useState<{ from: string, to: string } | null>(null);
+
   const board = useMemo(() => parseFen(gameState.fen), [gameState.fen]);
+
+  // 🛡️ INTERCEPTOR DE MOVIMIENTOS
+  const handleMoveInterceptor = (move: Omit<ChessMove, 'piece'>) => {
+    const { from, to } = move;
+
+    // Calculamos qué pieza había en la casilla de origen leyendo el 'board'
+    const col = from.charCodeAt(0) - 97;
+    const row = 8 - parseInt(from[1], 10);
+    const piece = board[row][col];
+
+    const isPawn = piece?.toLowerCase() === 'p';
+    const isPromotionRank = to.includes('1') || to.includes('8');
+
+    if (isPawn && isPromotionRank) {
+      // Congelamos y sacamos el menú
+      setPendingPromotion({ from, to });
+    } else {
+      // Movimiento normal, lo dejamos pasar
+      onMove(move);
+    }
+  };
+
+  // 👇 Pasamos el interceptor al hook en lugar del onMove directo
+  const { selectedSquare, selectSquare } = useChessBoard(handleMoveInterceptor, onDraw, gameState, localPlayerColor);
 
   const boardSize  = 'min(80vw, 480px)';
   const squareSize = `calc(${boardSize} / 8)`;
   const isActive   = gameState.status === 'active';
 
-  // 🥷 FIX: Invertimos el renderizado si somos las negras
   const displayRows = localPlayerColor === 'b' ? [7, 6, 5, 4, 3, 2, 1, 0] : [0, 1, 2, 3, 4, 5, 6, 7];
   const displayCols = localPlayerColor === 'b' ? [7, 6, 5, 4, 3, 2, 1, 0] : [0, 1, 2, 3, 4, 5, 6, 7];
 
@@ -97,6 +130,39 @@ export const ChessBoard = ({
 
       <div className={styles.boardFrame} style={{ width: `calc(${boardSize} + 25px)`, height: boardSize }}>
 
+        {/* 👑 EL MENÚ DE CORONACIÓN */}
+        {pendingPromotion && (
+          <div className={styles.promoOverlay}>
+            <div className={styles.promoMenu}>
+              <span className={styles.promoTitle}>Promote Pawn</span>
+              <div className={styles.promoBtnRow}>
+                {['q', 'r', 'b', 'n'].map((p) => {
+                  const pieceLetter = localPlayerColor === 'w' ? p.toUpperCase() : p;
+                  return (
+                    <button
+                      key={p}
+                      className={styles.promoBtn}
+                      onClick={() => {
+                        // Enviamos el movimiento final con la pieza elegida
+                        onMove({
+                          from: pendingPromotion.from,
+                          to: pendingPromotion.to,
+                          promotion: p
+                        });
+                        setPendingPromotion(null); // Ocultamos el menú
+                      }}
+                    >
+                      <span className={pieceLetter === pieceLetter.toUpperCase() ? styles.pieceWhite : styles.pieceBlack}>
+                        {PIECE_UNICODE[pieceLetter]}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className={styles.rankLabels} style={{ width: '20px', height: boardSize }}>
           {rankLabels.map((rank) => (
             <span key={rank} className={styles.rankLabel} style={{ height: squareSize }}>
@@ -109,11 +175,11 @@ export const ChessBoard = ({
           {displayRows.map((r) =>
             displayCols.map((c) => {
               const piece = board[r][c];
-              const square = toSquare(r, c); // Calculamos la posición original
-              const isLight = (r + c) % 2 === 0; // El color de la casilla siempre es el correcto
+              const square = toSquare(r, c);
+              const isLight = (r + c) % 2 === 0;
               const isSelected = selectedSquare === square;
               const isLastMove = gameState.last_move?.from === square || gameState.last_move?.to === square;
-              const isDisabled = disabled || !isActive;
+              const isDisabled = disabled || !isActive || !!pendingPromotion; // 👈 Bloqueamos el tablero si el menú está abierto
 
             return (
               <button

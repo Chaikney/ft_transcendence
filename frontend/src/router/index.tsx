@@ -28,6 +28,10 @@ export const router = createBrowserRouter([
         element: <LoginPage />,
       },
       {
+        path: 'register',
+        element: <LoginPage />, 
+      },
+      {
         path: 'auth/callback',
         element: <CallbackPage />,
       },
@@ -68,6 +72,20 @@ export const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      
+      // 👑 LA RUTA DEL PANEL DE CONTROL (ADMIN)
+      {
+        path: 'admin',
+        element: (
+          <ProtectedRoute>
+            {/* Placeholder temporal hasta que creemos el componente AdminPanel.tsx */}
+            <div className="flex items-center justify-center min-h-[50vh] text-accent font-mono text-xl">
+              &gt; SYSTEM_ADMIN_PANEL_INITIALIZING...
+            </div>
+          </ProtectedRoute>
+        ),
+      },
+
       {
         path: '*',
         element: <NotFoundPage />,

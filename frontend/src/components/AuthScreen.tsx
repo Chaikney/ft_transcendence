@@ -20,8 +20,14 @@ export const AuthScreen = () => {
 
   const setUser = useAuthStore((s) => s.setUser); 
 
+  // 🇩🇪 Die Bedingung (La condición de seguridad)
+  const isPasswordValid = password.length >= 6;
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Bloqueo extra por si envían con el "Enter"
+    if (!isPasswordValid) return; 
+
     setIsLoading(true);
     setError(null);
     try {
@@ -57,7 +63,6 @@ export const AuthScreen = () => {
     }
   };
 
-  // Construimos la URL mágica que leen las apps de Autenticación
   const qrUri = otpSecret 
     ? `otpauth://totp/Transcendence:${username}?secret=${otpSecret}&issuer=Transcendence`
     : '';
@@ -103,22 +108,44 @@ export const AuthScreen = () => {
                 required 
               />
               
-              <input 
-                type="password" 
-                placeholder="PASSWORD_" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-transparent border-b border-accent/30 text-accent font-mono p-2 focus:outline-none focus:border-accent transition-colors placeholder:text-accent/30"
-                required 
-              />
+              <div className="flex flex-col gap-1">
+                <input 
+                  type="password" 
+                  placeholder="PASSWORD_" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full bg-transparent border-b border-accent/30 text-accent font-mono p-2 focus:outline-none focus:border-accent transition-colors placeholder:text-accent/30"
+                  required 
+                />
+                
+                {/* LA ADVERTENCIA EXACTA QUE HAS PEDIDO */}
+                {mode === 'register' && (
+                  <span className={`text-xs font-mono mt-1 transition-colors ${
+                    password.length === 0 ? 'text-accent/50' : 
+                    isPasswordValid ? 'text-green-500' : 'text-red-500'
+                  }`}>
+                    {password.length === 0 ? '> Mínimo 6 caracteres' : 
+                     isPasswordValid ? '> Contraseña válida ✓' : '> Faltan caracteres (Mínimo 6) ⚠️'}
+                  </span>
+                )}
+              </div>
 
-              <Button type="submit" variant="primary" disabled={isLoading} className="mt-4">
+              {/* Botón desactivado si es registro y la clave es corta */}
+              <Button 
+                type="submit" 
+                variant="primary" 
+                disabled={isLoading || (mode === 'register' && !isPasswordValid)} 
+                className="mt-4"
+              >
                 {isLoading ? <InlineLoader label="Processing..." /> : mode === 'login' ? '> INITIALIZE_LOGIN' : '> CREATE_RECORD'}
               </Button>
 
               <button 
                 type="button" 
-                onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
+                onClick={() => {
+                  setMode(mode === 'login' ? 'register' : 'login');
+                  setError(null); // Limpiamos errores al cambiar de modo
+                }}
                 className="text-xs font-mono text-text-muted hover:text-accent transition-colors mt-2"
               >
                 {mode === 'login' ? '[ NO ACCOUNT? REGISTER ]' : '[ ALREADY REGISTERED? LOGIN ]'}
@@ -126,6 +153,7 @@ export const AuthScreen = () => {
             </form>
           )}
 
+          {/* ... MODO 2FA SETUP y MODO 2FA VERIFY se quedan exactamente igual ... */}
           {/* 2. MODO: SETUP 2FA (Al registrarse) */}
           {mode === '2fa_setup' && (
             <div className="flex flex-col items-center gap-4 text-center">

@@ -21,6 +21,7 @@ interface UseGameChanelReturn {
   lastEvent: GameChannelEvent | null;
   sendReady: () => void;
   claimDraw: () => void;
+  resign: () => void;
 }
 
 export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
@@ -42,6 +43,9 @@ export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
     }
 
     setConnectionStatus('connecting');
+
+    // Guard: don't re-subscribe if already connected
+    if (subscriptionRef.current) return;
 
     subscriptionRef.current = cable.subscriptions.create(
       { channel: 'GameChannel', game_id: gameId },
@@ -69,6 +73,10 @@ export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
               if (isSudoku) setSudokuGame(event.game as SudokuGameState);
               break;
 
+            case 'player_ready':
+              console.log(`👍 El jugador ${event.user_id} está listo.`);
+              break;
+
             case "opponent_disconnect":
               // Solo alertamos si es un juego de ajedrez
               if (!isSudoku) {
@@ -80,9 +88,20 @@ export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
               }
               break;
 
+            case 'game_start':
+              if (!isSudoku) {
+                useMatchStore.setState({ status: 'in_progress' });
+              }
+              break;
+
             case 'game_over':
               if (!isSudoku) {
                 useMatchStore.setState({ status: 'finished' });
+                // 🛑 ACTUALIZACIÓN CLAVE: Inyectamos el estado final en el tablero
+                const currentChess = useMatchStore.getState().chessGame;
+                if (currentChess) {
+                  setChessGame({ ...currentChess, status: event.status as any });
+                }
               }
               break;
 
@@ -97,10 +116,11 @@ export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
       subscriptionRef.current?.unsubscribe();
       subscriptionRef.current = null;
     };
-  }, [gameId, cable, navigate, setChessGame, setSudokuGame]);
+  }, [gameId, cable]); // navigate, setChessGame, setSudokuGame are stable refs — omitting avoids spurious re-runs
 
   const sendReady = () => subscriptionRef.current?.perform('player_ready');
   const claimDraw = () => subscriptionRef.current?.perform('claim_draw');
+  const resign = () => subscriptionRef.current?.perform('resign');
 
-  return { connectionStatus, lastEvent, sendReady, claimDraw };
+  return { connectionStatus, lastEvent, sendReady, claimDraw, resign };
 };

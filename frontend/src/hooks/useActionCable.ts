@@ -114,8 +114,10 @@ export const useMatchmaking = () => {
       }
     );
 
-    // IMPORTANTE: Quitamos el 'return unsubscribe' para que no corte el cable
-    // cada vez que React re-renderiza la LandingPage.
+    return () => {
+      subscriptionRef.current?.unsubscribe();
+      subscriptionRef.current = null;
+    };
   }, [cable, navigate]);
 
   // Funciones que llamaremos desde la interfaz

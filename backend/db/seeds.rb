@@ -18,4 +18,7 @@ SudokuGame.find_or_create_by!(id: 1) do |game|
   game.status = "in_progress"
 end
 
+ActiveRecord::Base.connection.reset_pk_sequence!('users')
+ActiveRecord::Base.connection.reset_pk_sequence!('sudoku_games')
+
 puts "Seeds loaded successfully!"

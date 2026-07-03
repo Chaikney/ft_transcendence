@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Chess } from 'chess.js';
 import type { ChessMove, ChessGameState } from '../types';
 
@@ -17,21 +17,31 @@ export const useChessBoard = (
 ): UseChessBoardReturn => {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
   const [pendingMove, setPendingMove] = useState<ChessMove | null>(null);
+  
+  // 🔒 EL SEGURO INDESTRUCTIBLE DEL ÁRBITRO
+  // Usamos useRef en lugar de useState para que no se borre con los micro-cortes
+  const drawClaimed = useRef(false);
 
   // 🧠 Instanciamos el motor de ajedrez solo para que haga de Árbitro
   const chess = useMemo(() => new Chess(), []);
 
   // 👨‍⚖️ EL ÁRBITRO LOCAL
+  // 👨‍⚖️ EL ÁRBITRO LOCAL (Ahora en modo silencioso 🤫)
   useEffect(() => {
     if (!gameState.fen) return;
+    
+    // Si la partida ya terminó o ya hemos pitado el final, ignoramos el efecto
+    if (gameState.status === 'draw' || gameState.status === 'finished' || drawClaimed.current) return;
+
     if (chess.fen() !== gameState.fen) {
       chess.load(gameState.fen);
     }
 
     // 1. Regla de 50 movimientos, Material Insuficiente o Ahogado
     if (chess.isDraw()) {
-      console.log("🛑 ¡EMPATE DECLARADO POR CHESS.JS!");
-      onDrawReady(); // 👈 TOCA EL SILBATO
+      drawClaimed.current = true;
+      onDrawReady();
+      return;
     }
 
     // 2. Triple repetición
@@ -42,13 +52,13 @@ export const useChessBoard = (
         positionCounts[positionState] = (positionCounts[positionState] || 0) + 1;
 
         if (positionCounts[positionState] >= 3) {
-          console.log("🛑 ¡EMPATE POR TRIPLE REPETICIÓN!");
-          onDrawReady(); // 👈 TOCA EL SILBATO
+          drawClaimed.current = true;
+          onDrawReady();
           break;
         }
       }
     }
-  }, [gameState.fen, gameState.fen_history, chess, onDrawReady]);
+  }, [gameState.fen, gameState.fen_history, chess, onDrawReady, gameState.status]);
 
   const selectSquare = (square: string, pieceOnSquare?: string | null) => {
     const actualTurn = gameState.fen.split(' ')[1];

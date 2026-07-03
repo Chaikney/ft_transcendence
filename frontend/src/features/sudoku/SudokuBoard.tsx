@@ -113,6 +113,14 @@ export const SudokuBoard = ({ gameState, originalGrid, onMove, disabled = false 
   const isLocked = (row: number, col: number) => originalGrid[row]?.[col] !== 0;
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    const target = e.target as HTMLElement;
+    if (
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      target.isContentEditable
+    ) {
+      return;
+    }
     if (disabled || gameState.status !== 'active') return;
     const num = parseInt(e.key);
     if (num >= 1 && num <= 9) {
