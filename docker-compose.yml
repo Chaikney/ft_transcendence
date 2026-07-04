@@ -15,6 +15,8 @@ services:
       - "8443:443"
     env_file:
       - frontend/.env
+    depends_on:
+      - api
     networks:
       - app_int
     healthcheck:
