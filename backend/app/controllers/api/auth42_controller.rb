@@ -22,11 +22,11 @@ module Api
 
       # 4. Buscamos si el usuario ya existe en nuestra BD. Si no, lo creamos.
       user = User.find_or_initialize_by(email: user_info['email'])
-      
+
       if user.new_record?
         user.username = user_info['login']
         # Le inventamos una contraseña indescifrable porque entra por 42
-        user.password = SecureRandom.hex(16) 
+        user.password = SecureRandom.hex(16)
         user.save!
       end
 
@@ -49,10 +49,11 @@ module Api
 
     def fetch_42_token(code)
       uri = URI('https://api.intra.42.fr/oauth/token')
-      res = Net::HTTP.post_form(uri, 
+      res = Net::HTTP.post_form(uri,
         'grant_type' => 'authorization_code',
-        'client_id' => ENV['UID_42'],
-        'client_secret' => ENV['SECRET_42'],
+       'client_id' => ENV['UID_42'],
+       'client_secret' => File.read(ENV.fetch('SECRET_42')).strip,
+#        'client_secret' => ENV['SECRET_42'],
         'code' => code,
         'redirect_uri' => ENV['REDIRECT_URI_42']
       )
@@ -65,7 +66,7 @@ module Api
       uri = URI('https://api.intra.42.fr/v2/me')
       req = Net::HTTP::Get.new(uri)
       req['Authorization'] = "Bearer #{access_token}"
-      
+
       res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
         http.request(req)
       end
