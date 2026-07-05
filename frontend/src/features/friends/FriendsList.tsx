@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useChatStore } from '@/store/chatStore';
-import { useAuthStore } from '@/store/authStore'; // Asegúrate de tener esto por si necesitas el currentUser
+import { useAuthStore } from '@/store/authStore';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { Badge } from '@/components/Badge';
