@@ -1,19 +1,14 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useChatStore } from '@/store/chatStore';
-import { useAuthStore } from '@/store/authStore';
+import { useAuthStore } from '@/store/authStore'; // Asegúrate de tener esto por si necesitas el currentUser
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { Badge } from '@/components/Badge';
-import { post } from '@/services/api';
+import { get, post, patch, del } from '@/services/api';
 import type { Friend, FriendRequest } from '../chat/types';
 
-// ── Mock loader ────────────────────────────────────────────────────────────
-const loadMockFriends = async () => {
-  const { mockFriends } = await import('../../mocks/chat.mock');
-  return mockFriends;
-};
-
+// ── Status Config ────────────────────────────────────────────────────────────
 const STATUS_CONFIG: Record<Friend['status'], {
   label:    string;
   variant:  'success' | 'error' | 'warning' | 'muted' | 'info';
@@ -27,71 +22,37 @@ const STATUS_CONFIG: Record<Friend['status'], {
 
 // ── Styles ────────────────────────────────────────────────────────────────
 const s = {
-  wrapper:
-    'flex flex-col gap-0',
-
-  sectionHeader:
-    'flex items-center justify-between px-4 py-2 ' +
-    'border-b border-border-strong',
-  sectionTitle:
-    'text-[10px] font-mono tracking-widest uppercase text-text-muted',
-  sectionCount:
-    'text-[10px] font-mono text-accent',
-
-  requestsBanner:
-    'flex flex-col gap-2 px-4 py-3 border-b border-border ' +
-    'bg-accent-bg',
-  requestsTitle:
-    'text-[10px] font-mono tracking-widest uppercase text-accent',
-  requestRow:
-    'flex items-center gap-2',
-  requestName:
-    'text-xs font-mono text-text-primary flex-1',
-  requestActions:
-    'flex items-center gap-1',
-
-  friendRow:
-    'flex items-center gap-3 px-4 py-2.5 ' +
-    'border-b border-border transition-colors duration-base ' +
-    'hover:bg-bg-elevated group',
-  friendInfo:
-    'flex flex-col gap-0.5 flex-1 min-w-0',
-  friendName:
-    'text-xs font-mono text-text-primary truncate',
-  friendElo:
-    'text-[10px] font-mono text-text-muted',
-  friendActions:
-    'flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity',
-
-  addFriendRow:
-    'flex items-center gap-2 px-4 py-3 border-t border-border-strong',
-  addInput:
-    'flex-1 bg-bg-base border border-border text-text-primary ' +
-    'font-mono text-xs px-2 py-1.5 outline-none ' +
-    'focus:border-accent transition-all placeholder:text-text-muted',
-  addBtn:
-    'text-accent font-mono text-xs cursor-pointer ' +
-    'hover:text-accent-hover transition-colors px-1 flex-shrink-0 ' +
-    'disabled:opacity-30 disabled:cursor-not-allowed',
-
-  empty:
-    'flex flex-col items-center justify-center gap-2 py-8 px-4 text-center',
-  emptyText:
-    'text-[10px] font-mono text-text-muted',
-  emptyCursor:
-    'text-accent text-[10px] font-mono animate-blink',
+  wrapper: 'flex flex-col gap-0',
+  sectionHeader: 'flex items-center justify-between px-4 py-2 border-b border-border-strong',
+  sectionTitle: 'text-[10px] font-mono tracking-widest uppercase text-text-muted',
+  sectionCount: 'text-[10px] font-mono text-accent',
+  requestsBanner: 'flex flex-col gap-2 px-4 py-3 border-b border-border bg-accent-bg',
+  requestsTitle: 'text-[10px] font-mono tracking-widest uppercase text-accent',
+  requestRow: 'flex items-center gap-2',
+  requestName: 'text-xs font-mono text-text-primary flex-1',
+  requestActions: 'flex items-center gap-1',
+  friendRow: 'flex items-center gap-3 px-4 py-2.5 border-b border-border transition-colors duration-base hover:bg-bg-elevated group',
+  friendInfo: 'flex flex-col gap-0.5 flex-1 min-w-0',
+  friendName: 'text-xs font-mono text-text-primary truncate',
+  friendElo: 'text-[10px] font-mono text-text-muted',
+  friendActions: 'flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity',
+  addFriendRow: 'flex items-center gap-2 px-4 py-3 border-t border-border-strong',
+  addInput: 'flex-1 bg-bg-base border border-border text-text-primary font-mono text-xs px-2 py-1.5 outline-none focus:border-accent transition-all placeholder:text-text-muted',
+  addBtn: 'text-accent font-mono text-xs cursor-pointer hover:text-accent-hover transition-colors px-1 flex-shrink-0 disabled:opacity-30 disabled:cursor-not-allowed',
+  empty: 'flex flex-col items-center justify-center gap-2 py-8 px-4 text-center',
+  emptyText: 'text-[10px] font-mono text-text-muted',
+  emptyCursor: 'text-accent text-[10px] font-mono animate-blink',
 } as const;
 
 export const FriendsList = () => {
   const navigate    = useNavigate();
-  const currentUser = useAuthStore((s) => s.user);
-  const isMock      = import.meta.env.VITE_USE_MOCK === 'true';
+  // const currentUser = useAuthStore((s) => s.user); // Descomenta si necesitas validar algo del propio usuario
 
   const {
     friends,
     friendRequests,
     setFriends,
-    addFriend,
+    setFriendRequests, // <-- Asumo que tienes esto en tu Zustand para cargar las peticiones iniciales
     removeFriend,
     removeFriendRequest,
     openChat,
@@ -99,60 +60,80 @@ export const FriendsList = () => {
     rooms,
   } = useChatStore();
 
-  // Load mock friends
+  // 🚀 LA CONEXIÓN REAL: Cargar amigos de la base de datos al montar el componente
   useEffect(() => {
-    if (!isMock) return;
-    loadMockFriends().then(setFriends);
-  }, []);
+    const fetchFriendsData = async () => {
+      try {
+        // Hacemos un bypass de TypeScript con 'any' para evitar conflictos con tu ApiResponse
+        const response: any = await get('/friends');
+        
+        // Actualizamos Zustand con la sangre fresca de la BD
+        if (response.friends) setFriends(response.friends);
+        
+        if (response.pending_requests && setFriendRequests) {
+            const mappedRequests = response.pending_requests.map((user: any) => ({
+                id: `req_${user.id}`, 
+                from: {
+                    id: user.id,
+                    username: user.username,
+                    avatar: user.avatar,
+                    elo: user.elo || 1000
+                },
+                timestamp: new Date().toISOString()
+            }));
+            setFriendRequests(mappedRequests);
+        }
+      } catch (error) {
+        console.error('Error cargando la red de contactos:', error);
+      }
+    };
+
+    fetchFriendsData();
+  }, [setFriends, setFriendRequests]);
+
+  // ── Handlers con Fuego Real ────────────────────────────────────────────────────────────
 
   const handleAcceptRequest = async (req: FriendRequest) => {
-    if (isMock) {
-      addFriend({
-        id:       req.from.id,
-        username: req.from.username,
-        elo:      req.from.elo,
-        status:   'online',
-        since:    new Date().toISOString(),
-      });
-      removeFriendRequest(req.id);
-      return;
-    }
     try {
-      await post(`/friends/${req.id}/accept`, {});
+      await patch('/friends/accept', { username: req.from.username }); 
       removeFriendRequest(req.id);
+      
+      // Opcional: Podrías hacer un fetchFriendsData() aquí de nuevo para refrescar la lista,
+      // o añadirlo manualmente a Zustand si no quieres hacer otra petición.
+      // fetchFriendsData(); 
     } catch {
       console.error('Failed to accept friend request');
     }
   };
 
   const handleDeclineRequest = async (req: FriendRequest) => {
-    if (isMock) {
-      removeFriendRequest(req.id);
-      return;
-    }
     try {
-      await post(`/friends/${req.id}/decline`, {});
+      await del('/friends/reject', { data: { username: req.from.username } }); 
       removeFriendRequest(req.id);
     } catch {
       console.error('Failed to decline friend request');
     }
   };
 
-  const handleRemoveFriend = async (userId: number) => {
-    if (isMock) {
-      removeFriend(userId);
-      return;
-    }
+  const handleRemoveFriend = async (friendUsername: string, friendId: number) => { 
     try {
-      await post(`/friends/${userId}/remove`, {});
-      removeFriend(userId);
+      await del('/friends/reject', { data: { username: friendUsername } }); 
+      removeFriend(friendId);
     } catch {
       console.error('Failed to remove friend');
     }
   };
 
+  const handleBlockFriend = async (friendUsername: string, friendId: number) => {
+    try {
+        await post('/friends/block', { username: friendUsername });
+        removeFriend(friendId);
+    } catch {
+        console.error('Failed to block user');
+    }
+  };
+
   const handleOpenChat = (friend: Friend) => {
-    // Find or create DM room with this friend
     const existing = rooms.find(
       (r) =>
         r.type === 'direct' &&
@@ -166,18 +147,16 @@ export const FriendsList = () => {
 
   const handleAddFriend = async (username: string) => {
     if (!username.trim()) return;
-    if (isMock) {
-      console.log('[MOCK] Friend request sent to', username);
-      return;
-    }
     try {
       await post('/friends/request', { username });
+      // Aquí podrías mostrar un Toast de éxito (ej: `success("Petición enviada a ${username}")`)
     } catch {
       console.error('Failed to send friend request');
+      // Podrías mostrar un Toast de error aquí
     }
   };
 
-  const onlineCount  = friends.filter((f) => f.status !== 'offline').length;
+  const onlineCount = friends.filter((f) => f.status !== 'offline').length;
 
   return (
     <div className={s.wrapper}>
@@ -227,7 +206,7 @@ export const FriendsList = () => {
         </div>
       ) : (
         friends.map((friend) => {
-          const cfg = STATUS_CONFIG[friend.status];
+          const cfg = STATUS_CONFIG[friend.status] || STATUS_CONFIG['offline']; // Fallback por si acaso
           return (
             <div key={friend.id} className={s.friendRow}>
 
@@ -288,12 +267,22 @@ export const FriendsList = () => {
 
                 {/* Remove friend */}
                 <button
-                  onClick={() => handleRemoveFriend(friend.id)}
+                  onClick={() => handleRemoveFriend(friend.username, friend.id)}
                   className="text-text-muted hover:text-status-error font-mono text-xs px-1 transition-colors"
                   title="Remove friend"
                   aria-label={`Remove ${friend.username} from friends`}
                 >
                   ✕
+                </button>
+
+                {/* Block friend */}
+                <button
+                  onClick={() => handleBlockFriend(friend.username, friend.id)}
+                  className="text-text-muted hover:text-[#ff3366] font-mono text-xs px-1 transition-colors"
+                  title="Block User"
+                  aria-label={`Block ${friend.username}`}
+                >
+                  🚫
                 </button>
               </div>
 
