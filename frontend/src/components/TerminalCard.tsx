@@ -13,6 +13,7 @@ interface TerminalCardProps {
   noBrackets?:  boolean;
   noGlow?:      boolean;
   onClick?:     () => void;
+  onBack?:      () => void; // Nueva propiedad añadida
 }
 
 const STATUS_COLORS: Record<StatusVariant, string> = {
@@ -51,6 +52,8 @@ const styles = {
     'truncate',
   headerStatus:
     'text-[10px] font-mono tracking-widest flex-shrink-0',
+  backButton:
+    'text-[10px] font-mono tracking-widest text-text-muted hover:text-accent cursor-pointer px-2 transition-colors',
 } as const;
 
 const DOTS = ['#ff3366', '#ffaa00', '#00ff88'] as const;
@@ -66,8 +69,9 @@ export const TerminalCard = ({
   noBrackets    = false,
   noGlow        = false,
   onClick,
+  onBack,
 }: TerminalCardProps) => {
-  const showHeader = title !== undefined || status !== undefined;
+  const showHeader = title !== undefined || status !== undefined || onBack !== undefined;
 
   const wrapperClasses = [
     styles.base,
@@ -107,6 +111,12 @@ export const TerminalCard = ({
               style={{ background: color }}
             />
           ))}
+
+          {onBack && (
+             <button onClick={onBack} className={styles.backButton}>
+               [GO BACK]
+             </button>
+          )}
 
           {title && (
             <span className={styles.headerTitle}>{title}</span>
