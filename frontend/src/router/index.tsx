@@ -13,6 +13,7 @@ import { PrivacyPolicyPage } from '@/pages/PrivacyPolicyPage';
 import { TermsOfServicePage } from '@/pages/TermsOfServicePage';
 import { SpectatorPage } from '@/pages/SpectatorPage';
 import { ActiveGamesPage } from '@/pages/ActiveGamesPage';
+import { AdminPanel } from '@/pages/AdminPanel';
 
 export const router = createBrowserRouter([
   {
@@ -72,16 +73,11 @@ export const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      
-      // 👑 LA RUTA DEL PANEL DE CONTROL (ADMIN)
       {
         path: 'admin',
         element: (
           <ProtectedRoute>
-            {/* Placeholder temporal hasta que creemos el componente AdminPanel.tsx */}
-            <div className="flex items-center justify-center min-h-[50vh] text-accent font-mono text-xl">
-              &gt; SYSTEM_ADMIN_PANEL_INITIALIZING...
-            </div>
+            <AdminPanel />
           </ProtectedRoute>
         ),
       },

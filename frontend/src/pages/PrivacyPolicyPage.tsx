@@ -1,9 +1,15 @@
+import { useNavigate } from 'react-router-dom';
 import { TerminalCard } from '@/components/TerminalCard';
 
 export const PrivacyPolicyPage = () => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen p-8 flex justify-center">
-      <TerminalCard title="privacy_policy.txt" maxWidth="max-w-3xl">
+      <TerminalCard 
+        title="terms_of_service.txt" 
+        maxWidth="max-w-3xl"
+        onBack={() => navigate(-1)} 
+      >
         <div className="text-text-secondary font-mono text-sm leading-relaxed space-y-4">
           <p className="text-text-muted">Last updated: June 2026</p>
           

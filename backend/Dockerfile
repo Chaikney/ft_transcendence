@@ -34,4 +34,6 @@ ENTRYPOINT ["entrypoint.sh"]
 EXPOSE 3000
 
 # Arrancamos el servidor
-CMD ["rails", "server", "-b", "0.0.0.0"]
+# TODO Confirm why bundle exec is used / needed
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
+# CMD ["rails", "server", "-b", "0.0.0.0"]

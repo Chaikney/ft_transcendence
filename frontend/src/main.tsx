@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { RouterProvider } from 'react-router-dom';
-import { router } from './router';
+// 1. Importamos tu búnker de seguridad principal
+import App from './App'; 
 import './index.css';
 
 if (import.meta.env.DEV) {
@@ -10,6 +10,9 @@ if (import.meta.env.DEV) {
   });
 }
 
+// 2. Conectamos App.tsx a la toma de corriente principal de React
 createRoot(document.getElementById('root')!).render(
-  <RouterProvider router={router} />
+  <StrictMode>
+    <App />
+  </StrictMode>
 );

@@ -11,10 +11,9 @@ services:
 
   api:
     build: .
-    # Este comando es vital: borra el PID fantasma de Rails y luego arranca el servidor
-    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    command: bundle exec rails s -p 3000 -b '0.0.0.0'
     volumes:
-      - .:/app  # <--- LA MAGIA: Sincroniza tu carpeta local con el contenedor
+      - .:/app 
     ports:
       - "3000:3000"
     env_file:

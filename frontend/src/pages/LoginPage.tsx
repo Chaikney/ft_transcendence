@@ -129,6 +129,12 @@ export const LoginPage = () => {
 
   return (
     <div className={styles.page}>
+      
+      {/* 👇 AQUÍ ESTÁ LA PRUEBA DE FUEGO 👇 */}
+      <h1 className="text-2xl font-mono text-[#000] font-bold bg-[#00ff88] p-4 border-2 border-[#00ff88] shadow-[0_0_30px_rgba(0,255,136,0.8)] z-50 mb-4 animate-pulse uppercase tracking-widest">
+        &gt; SYSTEM_ONLINE: VITE HMR ACTIVE
+      </h1>
+
       <div className={styles.card}>
 
         <div className={styles.cardHeader}>

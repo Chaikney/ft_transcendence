@@ -23,10 +23,10 @@
     --text-inverse: #020408; */
 
     /* ── Text ── */
-    --text-primary: #e5eaec !important;
-    --text-secondary: #ffff00 !important;
-    --text-muted: #ff0000 !important;
-    --text-inverse: #00ff00 !important;
+    --text-primary: #d1e5f0;
+    --text-secondary: #8fbcd9;
+    --text-muted: #4a758e;
+    --text-inverse: #020408;
 
     /* ── Accent — electric cyan/blue ── */
     --accent: #00d4ff;
@@ -73,7 +73,7 @@
     --sudoku-border-box: #b8a994;      /* Borde de caja más marcado */
 
     /* ── Terminal effects ── */
-    --scanline-color: rgba(0, 212, 255, 0.015);
+    --scanline-color: rgba(0, 212, 255, 0.008);
     --glow-text: 0 0 10px rgba(0, 212, 255, 0.8);
     --glow-border: 0 0 8px rgba(0, 212, 255, 0.4);
     --glow-strong: 0 0 20px rgba(0, 212, 255, 0.6), 0 0 40px rgba(0, 212, 255, 0.2);

@@ -5,7 +5,11 @@ module Api
     # GET /api/friends
     def index
       pending = @current_user.inverse_friendships.where(status: 'pending').map(&:user)
-      accepted = @current_user.friends
+      
+      # 🛠️ FIX: Unimos a los que tú invitaste + los que te invitaron a ti
+      friends_i_invited = @current_user.friendships.where(status: 'accepted').map(&:friend)
+      friends_who_invited_me = @current_user.inverse_friendships.where(status: 'accepted').map(&:user)
+      accepted = (friends_i_invited + friends_who_invited_me).uniq
 
       render json: {
         friends: accepted,
@@ -24,6 +28,15 @@ module Api
 
       if target_friend == @current_user
         render json: { error: "No puedes añadirte a ti mismo" }, status: :unprocessable_entity
+        return
+      end
+
+      # 🛡️ Comprobar que no haya una relación previa
+      existing = Friendship.where(user: @current_user, friend: target_friend)
+                           .or(Friendship.where(user: target_friend, friend: @current_user)).first
+
+      if existing
+        render json: { error: "Ya existe una relación o petición con este usuario" }, status: :unprocessable_entity
         return
       end
 
@@ -58,6 +71,22 @@ module Api
       else
         render json: { error: "No hay solicitud pendiente de ese jugador" }, status: :not_found
       end
+    end
+
+    # 🔨 POST /api/friends/block (NUEVO)
+    def block
+      target = User.find_by(username: params[:username])
+      
+      return render json: { error: "Usuario no encontrado" }, status: :not_found unless target
+
+      # Destruimos cualquier rastro de amistad o petición previa
+      Friendship.where(user: @current_user, friend: target)
+                .or(Friendship.where(user: target, friend: @current_user)).destroy_all
+
+      # Creamos el muro
+      @current_user.friendships.create(friend: target, status: 'blocked')
+      
+      render json: { message: "Has bloqueado a #{target.username}. No podrá interactuar contigo." }, status: :ok
     end
   end
 end
