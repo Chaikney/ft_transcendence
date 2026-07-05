@@ -23,12 +23,8 @@ export const getConsumer = (): Consumer | null => {
 // --- HOOKS ---
 
 export const useActionCable = () => {
-<<<<<<< HEAD
   // useMemo asegura que NUNCA evaluemos getConsumer() más de una vez por ciclo de vida
   const cable = useMemo(() => getConsumer(), []);
-=======
-  const cable = getConsumer();
->>>>>>> 1b533fd3ef09f21503652a6349c582b5cf0b576d
   
   useEffect(() => {
     if (!cable) return;
@@ -59,11 +55,7 @@ export const useAppearanceRadar = () => {
       { channel: "AppearanceChannel" },
       {
         connected() {
-<<<<<<< HEAD
           console.log("📡 RADAR ONLINE: Conectado a la red de Transcendence.");
-=======
-          console.log("📡 RADAR ONLINE: Conectado.");
->>>>>>> 1b533fd3ef09f21503652a6349c582b5cf0b576d
           useRadarStore.getState().setStatus('connected'); 
         },
         disconnected() {
@@ -93,10 +85,6 @@ export const useMatchmaking = () => {
 
   useEffect(() => {
     if (!cable) return;
-<<<<<<< HEAD
-
-=======
->>>>>>> 1b533fd3ef09f21503652a6349c582b5cf0b576d
     if (subscriptionRef.current) return;
 
     subscriptionRef.current = cable.subscriptions.create(
@@ -110,7 +98,6 @@ export const useMatchmaking = () => {
             const gameType = data.room_id.split('-')[0];
             useMatchStore.getState().setLobby(gameType, data.opponent);
             
-<<<<<<< HEAD
             try {
               const gameType = data.room_id.split('-')[0];
               useMatchStore.getState().setLobby(gameType, data.opponent);
@@ -123,11 +110,6 @@ export const useMatchmaking = () => {
             } catch (err) {
               console.error("🚨 Error crítico al intentar entrar a la sala:", err);
             }
-=======
-            setTimeout(() => {
-              navigate(`/game/${gameType}/${data.room_id}`);
-            }, 100);
->>>>>>> 1b533fd3ef09f21503652a6349c582b5cf0b576d
           }
         }
       }
