@@ -23,12 +23,8 @@ export const getConsumer = (): Consumer | null => {
 // --- HOOKS ---
 
 export const useActionCable = () => {
-<<<<<<< HEAD
   // useMemo asegura que NUNCA evaluemos getConsumer() más de una vez por ciclo de vida
   const cable = useMemo(() => getConsumer(), []);
-=======
-  const cable = getConsumer();
->>>>>>> 1b533fd3ef09f21503652a6349c582b5cf0b576d
   
   useEffect(() => {
     if (!cable) return;
