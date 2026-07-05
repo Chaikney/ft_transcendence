@@ -18,5 +18,11 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
   },
-  server: { allowedHosts: true }
+  server: {
+    host: true, // 👈 Obliga a Vite a escuchar en la red de Docker
+    allowedHosts: true, // Mantenemos tu configuración actual
+    watch: {
+      usePolling: true, // 👈 EL REMEDIO: Forzar a Vite a rastrear cambios en Windows/Docker
+    },
+  }
 });

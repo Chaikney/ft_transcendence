@@ -4,8 +4,9 @@ export interface User {
 	id: number;
 	username: string;
 	elo: number;
-  
 	avatar_url: string;
+  role?: number | string;
+  banned?: boolean;
 }
 
 export interface GameData {
