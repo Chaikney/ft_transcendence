@@ -4,7 +4,8 @@ module Api
 
     # GET /api/profile
     def profile
-      render json: @current_user.as_json(only: [:id, :username, :email, :avatar_url]), status: :ok
+      # 🚀 FIX: Añadimos :elo y los demás datos necesarios para el frontend
+      render json: @current_user.as_json(only: [:id, :username, :email, :avatar_url, :elo, :status, :wins, :losses]), status: :ok
     end
 
     # PUT /api/profile

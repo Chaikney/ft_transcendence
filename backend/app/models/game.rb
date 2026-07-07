@@ -28,4 +28,29 @@ class Game < ApplicationRecord
       self.save!
     end
   end
+
+  def finalize_draw
+    # Evitamos ejecutar esto dos veces si la partida ya había terminado
+    return if self.status == 'finished'
+
+    p1 = self.player1
+    p2 = self.player2
+
+    # Matemáticas de Elo (Factor K = 32)
+    expected_p1 = 1.0 / (1.0 + 10.0**((p2.elo - p1.elo) / 400.0))
+    expected_p2 = 1.0 / (1.0 + 10.0**((p1.elo - p2.elo) / 400.0))
+
+    # En caso de empate, la "puntuación real" es 0.5 para ambos
+    p1.elo += (32 * (0.5 - expected_p1)).round
+    p2.elo += (32 * (0.5 - expected_p2)).round
+
+    self.status = 'finished'
+
+    # Guardamos todo de golpe
+    User.transaction do
+      p1.save!
+      p2.save!
+      self.save!
+    end
+  end
 end

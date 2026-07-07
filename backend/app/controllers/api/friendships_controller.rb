@@ -88,5 +88,21 @@ module Api
       
       render json: { message: "Has bloqueado a #{target.username}. No podrá interactuar contigo." }, status: :ok
     end
+
+    def remove
+      target = User.find_by(username: params[:username])
+      return render json: { error: 'Usuario no encontrado' }, status: :not_found unless target
+
+      # Buscamos la relación de amistad (ya sea que tú le agregaste o él a ti)
+      friendship = Friendship.find_by(user: @current_user, friend: target) || 
+                   Friendship.find_by(user: target, friend: @current_user)
+
+      if friendship
+        friendship.destroy
+        render json: { message: 'Amistad fulminada con éxito' }, status: :ok
+      else
+        render json: { error: 'No sois amigos' }, status: :not_found
+      end
+    end
   end
 end

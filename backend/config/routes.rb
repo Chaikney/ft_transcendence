@@ -29,15 +29,17 @@ Rails.application.routes.draw do
     post 'register', to: 'auth#register'
     post 'login', to: 'auth#login'
     post '42/callback', to: 'oauth#callback_42'
+    post 'verify-email', to: 'auth#verify_email' # 🚀 NUEVA RUTA
     
+    # --- USUARIO Y PERFIL --- 
+
     # --- USUARIO Y PERFIL ---
+    get    '/users', to: 'users#index'    # 🛠️ CORRECCIÓN: 'users' en plural
     get    '/profile', to: 'users#profile'
     put    '/profile', to: 'users#update'
     delete '/profile', to: 'users#destroy'
-    
-    # 2FA
-    get  'profile/2fa/enable', to: 'users#enable_2fa'
-    post 'profile/2fa/verify', to: 'users#verify_2fa'
+
+    # ... [código intermedio] ...
 
     # --- SOCIAL Y AMIGOS ---
     resources :rooms, only: [:index] do
@@ -48,6 +50,7 @@ Rails.application.routes.draw do
     post   '/friends/request',   to: 'friendships#create'
     patch  '/friends/accept',    to: 'friendships#accept'
     delete '/friends/reject',    to: 'friendships#reject'
+    delete '/friends/remove',    to: 'friendships#remove' # 🚀 NUEVO: La guillotina
 
     # --- ADMIN Y SISTEMA ---
     scope '/admin' do
