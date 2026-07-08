@@ -11,6 +11,12 @@ class ApplicationController < ActionController::API
       
       # 3. Buscamos al usuario en la base de datos usando el ID que venía escondido en el token
       @current_user = User.find(decoded['user_id'])
+
+      # 🛑 EL MURO: Si está baneado, bloqueamos cualquier petición al instante
+      if @current_user.banned?
+        render json: { error: 'You are banned' }, status: :forbidden
+        return
+      end
       
     rescue ActiveRecord::RecordNotFound, JWT::DecodeError
       # Si el token es falso, ha caducado o está mal escrito, le damos un portazo

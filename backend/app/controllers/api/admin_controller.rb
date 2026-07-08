@@ -23,6 +23,9 @@ module Api
       end
 
       if user.destroy
+        # 🚀 MISIL EN TIEMPO REAL: Expulsión definitiva de la pantalla
+        ActionCable.server.broadcast("appearance_global", { type: 'banned', user_id: user.id })
+        
         render json: { message: "Usuario #{user.username} eliminado del sistema" }, status: :ok
       else
         render json: { error: "Error al intentar borrar el usuario" }, status: :unprocessable_entity
@@ -46,6 +49,16 @@ module Api
 
       if user.update(banned: new_status)
         estado = new_status ? "BANEADO" : "DESBANEADO"
+        
+        # 🚀 MISIL EN TIEMPO REAL: Avisamos al frontend
+        if new_status
+          # Si lo baneamos, lanzamos la pantalla roja
+          ActionCable.server.broadcast("appearance_global", { type: 'banned', user_id: user.id })
+        else
+          # Si lo desbaneamos, le quitamos la pantalla roja para que siga navegando
+          ActionCable.server.broadcast("appearance_global", { type: 'unbanned', user_id: user.id })
+        end
+
         render json: { message: "El usuario #{user.username} ahora está #{estado}" }, status: :ok
       else
         render json: { error: "Error al actualizar estado" }, status: :unprocessable_entity

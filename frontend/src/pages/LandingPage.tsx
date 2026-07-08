@@ -22,10 +22,10 @@ const GAMES = [
     label:    'CHESS',
     path:     '/game/chess/chess-001', // Esto ahora solo sirve como referencia visual o de reserva
     icon:     '♟',
-    desc:     'Two-player chess or play VS IA. Real-time via WebSocket.',
-    tag:      'MULTIPLAYER / AI',
+    desc:     'Two-player chess. Real-time via WebSocket.',
+    tag:      'MULTIPLAYER',
     status:   'ONLINE',
-    lines:    ['> board: 8x8', '> engine: rails/core', '> mode: pvp | pve'],
+    lines:    ['> board: 8x8', '> engine: rails/core', '> mode: pvp'],
   },
   {
     id: 'sudoku',
