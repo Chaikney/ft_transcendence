@@ -14,6 +14,7 @@ import { TermsOfServicePage } from '@/pages/TermsOfServicePage';
 import { SpectatorPage } from '@/pages/SpectatorPage';
 import { ActiveGamesPage } from '@/pages/ActiveGamesPage';
 import { AdminPanel } from '@/pages/AdminPanel';
+import { VerifyEmail } from '@/pages/VerifyEmail'; // <-- AÑADE ESTO
 
 export const router = createBrowserRouter([
   {
@@ -31,6 +32,10 @@ export const router = createBrowserRouter([
       {
         path: 'register',
         element: <LoginPage />, 
+      },
+      {
+        path: 'verify-email',
+        element: <VerifyEmail />,
       },
       {
         path: 'auth/callback',

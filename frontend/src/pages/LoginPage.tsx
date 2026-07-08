@@ -45,8 +45,7 @@ const styles = {
   loadingText: 'text-xs font-mono text-text-muted tracking-widest animate-pulse',
 } as const;
 
-type AuthMode = 'main' | 'guest_login' | 'guest_register' | '2fa_setup' | '2fa_verify';
-
+type AuthMode = 'main' | 'guest_login' | 'guest_register' | '2fa_setup' | '2fa_verify' | 'email_verify';
 // ── Component ──────────────────────────────────────────────────────────────
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -80,10 +79,11 @@ export const LoginPage = () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const res = await registerGuest({ username, email, password });
-      setOtpSecret(res.otp_secret);
-      setMode('2fa_setup');
-      success('Usuario registrado. Configura tu 2FA.', 'Registro Exitoso');
+      await registerGuest({ username, email, password });
+      
+      // 🚀 EL CAMBIO: Ya no buscamos el OTP Secret, pasamos a la pantalla de email.
+      setMode('email_verify');
+      success('Identity compiled. Check your inbox.', 'Verification Required');
     } catch (err: any) {
       setErrorMessage(err.message || 'Error en el registro');
       showError(err.message || 'Error en el registro', 'System Error');
@@ -265,6 +265,28 @@ export const LoginPage = () => {
             
             <div className="font-mono text-xs text-text-muted bg-bg-elevated p-2 border border-border-strong w-full text-center">
               Secret: <span className="text-accent">{otpSecret}</span>
+            </div>
+
+            <button onClick={() => setMode('guest_login')} className={styles.primaryBtn}>
+              &gt; PROCEED_TO_LOGIN
+            </button>
+          </div>
+        )}
+
+        {/* 👇 NUEVA PANTALLA: ESPERANDO VERIFICACIÓN POR EMAIL 👇 */}
+        {mode === 'email_verify' && (
+          <div className="flex flex-col items-center gap-6 text-center">
+            <div className={styles.titleWrap}>
+              <span className={styles.titleEye}>// security enhancement required</span>
+              <h1 className={styles.title}><span className={styles.titleAccent}>&gt; </span>awaiting_email()</h1>
+            </div>
+            
+            <div className="p-6 border border-accent bg-accent/5 font-mono animate-pulse w-full">
+              <p className="text-sm font-bold text-accent mb-2">IDENTITY LOGGED.</p>
+              <p className="text-xs text-text-muted leading-relaxed">
+                An encrypted link has been dispatched to your inbox. <br/>
+                Awaiting neural sync to activate your account.
+              </p>
             </div>
 
             <button onClick={() => setMode('guest_login')} className={styles.primaryBtn}>

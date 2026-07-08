@@ -26,7 +26,9 @@ export const useChessGame = (gameId: string) => {
       const res = await getChessGame(gameId);
       // IMPORTANTE: Si tu backend devuelve el objeto directo, res es el objeto.
       const actualData = (res as any).data || res;
-      
+      if (actualData.status === 'active') {
+        actualData.status = 'in_progress';
+      }
       console.log("DEBUG: Datos recibidos del servidor:", actualData);
       setChessGame(actualData as ChessGameState);
     } catch (err) {

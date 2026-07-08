@@ -82,54 +82,64 @@ export const useAppearanceRadar = () => {
 export const useMatchmaking = () => {
   const { cable } = useActionCable();
   const navigate = useNavigate();
-  const subscriptionRef = useRef<any>(null);
 
   useEffect(() => {
     if (!cable) return;
-    if (subscriptionRef.current) return;
 
-    subscriptionRef.current = cable.subscriptions.create(
-      { channel: "MatchmakingChannel" },
-      {
-        connected() {
-          console.log("⚔️ MATCHMAKING: Conectado.");
-        },
-        // FIX: Añadido ': any' a data
-        received(data: any) {
-          if (data.action === 'match_found') {
-            const gameType = data.room_id.split('-')[0];
-            useMatchStore.getState().setLobby(gameType, data.opponent);
-            
-            setTimeout(() => {
+    // 🛡️ 1. Buscamos si el canal ya existe para no duplicarlo (por el Strict Mode de React)
+    const channelIdentifier = JSON.stringify({ channel: "MatchmakingChannel" });
+    const existingSub = cable.subscriptions.findAll(channelIdentifier)[0];
+
+    if (!existingSub) {
+      cable.subscriptions.create(
+        { channel: "MatchmakingChannel" },
+        {
+          connected() {
+            console.log("⚔️ MATCHMAKING: Canal de Rails conectado y escuchando.");
+          },
+          // FIX: Añadido ': any' a data
+          received(data: any) {
+            if (data.action === 'match_found') {
+              const gameType = data.room_id.split('-')[0];
+              useMatchStore.getState().setLobby(gameType, data.opponent);
               navigate(`/game/${gameType}/${data.room_id}`);
-            }, 100);
+            }
           }
         }
-      }
-    );
+      );
+    }
 
-    return () => {
-      if (subscriptionRef.current) {
-          subscriptionRef.current.unsubscribe();
-          subscriptionRef.current = null;
-      }
-    };
+    // 🗑️ IMPORTANTE: No devolvemos la función con el `unsubscribe()`. 
+    // Así, cuando cambies a la pantalla de carga, el cable seguirá vivo.
   }, [cable, navigate]);
 
   const joinQueue = (gameType: 'chess' | 'sudoku') => {
-    if (subscriptionRef.current) {
+    if (!cable) return;
+    
+    // Rescatamos el canal global
+    const channelIdentifier = JSON.stringify({ channel: "MatchmakingChannel" });
+    const sub = cable.subscriptions.findAll(channelIdentifier)[0];
+    
+    if (sub) {
       useMatchStore.getState().startLoading(gameType);
-      setTimeout(() => {
-        subscriptionRef.current.perform('join_queue', { game_type: gameType });
-      }, 100);
+      // Sin setTimeouts raros, disparamos directo
+      sub.perform('join_queue', { game_type: gameType });
     }
   };
 
   const leaveQueue = () => {
+    if (!cable) return;
+    
     const currentType = useMatchStore.getState().gameType;
-    if (subscriptionRef.current && currentType) {
-      subscriptionRef.current.perform('leave_queue', { game_type: currentType });
+    const channelIdentifier = JSON.stringify({ channel: "MatchmakingChannel" });
+    const sub = cable.subscriptions.findAll(channelIdentifier)[0];
+    
+    if (sub && currentType) {
+      sub.perform('leave_queue', { game_type: currentType });
       useMatchStore.getState().resetMatch();
+      
+      // Aquí SÍ cortamos el cable porque el usuario ha cancelado la búsqueda manualmente
+      sub.unsubscribe();
     }
   };
 

@@ -2,20 +2,16 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store';
 import { createSudokuGame } from '@/features/sudoku/service';
-
-// ── Mock match history ──────────
-const MOCK_HISTORY = [
-  { id: '001', game: 'chess',  result: 'win',  opponent: 'jlopez',   elo_delta: +18, date: '2024-01-15' },
-  { id: '002', game: 'sudoku', result: 'win',  opponent: 'CPU',      elo_delta: +12, date: '2024-01-14' },
-  { id: '003', game: 'chess',  result: 'loss', opponent: 'agarcia',  elo_delta: -15, date: '2024-01-13' },
-  { id: '004', game: 'chess',  result: 'draw', opponent: 'msmith',   elo_delta: +2,  date: '2024-01-12' },
-];
+import { FriendsList } from '@/features/friends/FriendsList';
+import { AvatarPicker } from '@/components/AvatarPicker';
 
 // ── Styles ────────────────────────────────────────────────────────────────
 const styles = {
-  page: 'min-h-screen flex flex-col items-center px-6 py-12 gap-8',
-  sectionLabel: 'w-full max-w-2xl text-[10px] font-mono tracking-[0.2em] uppercase text-text-muted mb-1',
-  card: 'w-full max-w-2xl terminal-card bracket-corners',
+  page: 'min-h-screen flex flex-col lg:flex-row justify-center items-start px-6 py-12 gap-8 w-full max-w-[1400px] mx-auto',
+  leftColumn: 'flex flex-col items-center gap-8 w-full max-w-2xl',
+  rightColumn: 'w-full lg:w-[400px] flex flex-col gap-1 h-[750px]',
+  sectionLabel: 'w-full text-[10px] font-mono tracking-[0.2em] uppercase text-text-muted mb-1',
+  card: 'w-full terminal-card bracket-corners',
   cardHeader: 'flex items-center gap-2 px-4 py-2 border-b border-border-strong',
   headerDot: 'w-2 h-2 rounded-full',
   headerTitle: 'text-[10px] font-mono tracking-[0.2em] uppercase text-text-muted flex-1',
@@ -29,7 +25,6 @@ const styles = {
   userRight: 'flex flex-col items-end gap-1',
   eloValue: 'text-3xl font-mono font-bold text-accent drop-shadow-[0_0_8px_rgba(0,212,255,0.6)]',
   eloLabel: 'text-[10px] font-mono text-text-muted tracking-widest uppercase',
-  avatar: 'w-20 h-20 border-2 border-accent rounded-sm object-cover shadow-[0_0_12px_rgba(0,212,255,0.3)]',
   statsGrid: 'grid grid-cols-3 gap-3 mb-5',
   statCard: 'flex flex-col gap-1 p-3 border border-border bg-bg-elevated',
   statValue: 'text-lg font-mono font-bold text-text-primary',
@@ -57,40 +52,22 @@ export const ProfilePage = () => {
   const setUser      = useAuthStore((s) => s.setUser);
   const clearUser    = useAuthStore((s) => s.clearUser);
 
-  const [editUrl, setEditUrl] = useState('');
+  // Estados para UI
+  const [showPicker, setShowPicker] = useState(false);
   
   // Estados para el 2FA
   const [qrCodeSvg, setQrCodeSvg] = useState<string | null>(null);
   const [twoFaCode, setTwoFaCode] = useState('');
   const [mfaMessage, setMfaMessage] = useState('');
 
-  useEffect(() => {
-    if (currentUser?.avatar_url) setEditUrl(currentUser.avatar_url);
-  }, [currentUser]);
-
-  const wins    = MOCK_HISTORY.filter((m) => m.result === 'win').length;
-  const losses  = MOCK_HISTORY.filter((m) => m.result === 'loss').length;
-  const total   = MOCK_HISTORY.length;
-
   const isOwnProfile = currentUser?.username === username;
 
-  // 1. Guardar el Avatar
-  const handleUpdate = async () => {
-    try {
-      const response = await fetch('http://localhost:3000/api/profile', {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        },
-        body: JSON.stringify({ user: { avatar_url: editUrl } })
-      });
-      if (response.ok) {
-        const { user: updatedUser } = await response.json();
-        setUser(updatedUser);
-      }
-    } catch (e) { console.error("Error updating profile", e); }
-  };
+  // 🚀 VARIABLES REALES (Sustituyen a los mockups)
+  // NOTA: Cuando tu backend devuelva el historial de partidas y stats en el /profile, se llenarán solos.
+  const matchHistory = currentUser?.match_history || []; 
+  const wins         = currentUser?.wins || 0;
+  const losses       = currentUser?.losses || 0;
+  const total        = wins + losses;
 
   // 2. Pedir el QR para el 2FA
   const handleGenerate2FA = async () => {
@@ -100,7 +77,7 @@ export const ProfilePage = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        setQrCodeSvg(data.qr_svg); // Guardamos el SVG en el estado
+        setQrCodeSvg(data.qr_svg);
         setMfaMessage('');
       }
     } catch (e) { console.error("Error fetching QR", e); }
@@ -120,7 +97,7 @@ export const ProfilePage = () => {
       
       if (response.ok) {
         setMfaMessage('✔️ SYSTEM SECURED: 2FA ENABLED');
-        setQrCodeSvg(null); // Ocultamos el QR al terminar
+        setQrCodeSvg(null);
         setTwoFaCode('');
       } else {
         setMfaMessage('❌ ERROR: INVALID CODE');
@@ -136,175 +113,189 @@ export const ProfilePage = () => {
 
   return (
     <div className={styles.page}>
-      {/* ── User Card Section ── */}
-      <span className={styles.sectionLabel}>// user_profile.ts</span>
-      <div className={styles.card}>
-        <div className={styles.cardHeader}>
-          <span className={styles.headerDot} style={{ background: '#ff3366' }} />
-          <span className={styles.headerDot} style={{ background: '#ffaa00' }} />
-          <span className={styles.headerDot} style={{ background: '#00ff88' }} />
-          <span className={styles.headerTitle}>profile — {username}</span>
-          <span className={styles.headerPing}>● ACTIVE</span>
-        </div>
-
-        <div className={styles.cardBody}>
-          <div className={styles.userRow}>
-            <div className="flex items-center gap-4">
-              <img src={currentUser?.avatar_url || '/default-avatar.png'} className={styles.avatar} alt="Profile" />
-              <div className={styles.userLeft}>
-                <h1 className={styles.userHandle}>
-                  <span className={styles.userHandleAccent}>&gt; </span>
-                  {username}
-                </h1>
-                <span className={styles.userSince}>// member since 2026</span>
-              </div>
+      
+      {/* ── COLUMNA IZQUIERDA: Perfil e Historial ── */}
+      <div className={styles.leftColumn}>
+        {/* User Card Section */}
+        <div className="w-full">
+          <span className={styles.sectionLabel}>// user_profile.ts</span>
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <span className={styles.headerDot} style={{ background: '#ff3366' }} />
+              <span className={styles.headerDot} style={{ background: '#ffaa00' }} />
+              <span className={styles.headerDot} style={{ background: '#00ff88' }} />
+              <span className={styles.headerTitle}>profile — {username}</span>
+              <span className={styles.headerPing}>● ACTIVE</span>
             </div>
-            <div className={styles.userRight}>
-              <span className={styles.eloValue}>{currentUser?.elo ?? 1200}</span>
-              <span className={styles.eloLabel}>ELO rating</span>
-            </div>
-          </div>
 
-          {/* ── Avatar Edit ── */}
-          {isOwnProfile && (
-            <div className={styles.inputGroup}>
-              <span className={styles.sectionLabel}>// edit_avatar_url</span>
-              <div className="flex gap-2">
-                <input className={styles.input} value={editUrl} onChange={(e) => setEditUrl(e.target.value)} placeholder="https://..." />
-                <button className={[styles.actionBtn, styles.actionBtnPrimary].join(' ')} onClick={handleUpdate}>
-                  save
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* ── 2FA Security Section (Solo para tu propio perfil) ── */}
-          {isOwnProfile && (
-            <div className={styles.inputGroup}>
-              <span className={styles.sectionLabel}>// security_2fa</span>
-              
-              {!qrCodeSvg && !mfaMessage && (
-                <button className={[styles.actionBtn, styles.actionBtnSecondary].join(' ')} onClick={handleGenerate2FA} style={{ width: 'fit-content' }}>
-                  &gt; init_2fa()
-                </button>
-              )}
-
-              {/* Pantalla del QR */}
-              {qrCodeSvg && (
-                <div className="flex flex-col gap-3 mt-2">
-                  <p className="text-[10px] text-text-muted uppercase font-mono">Scan this with Google Authenticator:</p>
-                  
-                  {/* Aquí inyectamos el SVG que manda Rails */}
-                  <div className={styles.qrContainer} dangerouslySetInnerHTML={{ __html: qrCodeSvg }} />
-                  
-                  <div className="flex gap-2 mt-2">
-                    <input 
-                      className={styles.input} 
-                      value={twoFaCode} 
-                      onChange={(e) => setTwoFaCode(e.target.value)} 
-                      placeholder="Enter 6-digit code..." 
-                      maxLength={6}
-                    />
-                    <button className={[styles.actionBtn, styles.actionBtnPrimary].join(' ')} onClick={handleVerify2FA}>
-                      verify
+            <div className={styles.cardBody}>
+              <div className={styles.userRow}>
+                <div className="flex items-center gap-4">
+                  {/* Aquí va el componente del Avatar que arreglamos antes (simplificado para lectura) */}
+                  <div className="relative w-fit">
+                    <button
+                      onClick={() => isOwnProfile && setShowPicker(!showPicker)}
+                      className={`relative group block rounded-sm border border-accent overflow-hidden ${isOwnProfile ? 'cursor-pointer' : 'cursor-default'}`}
+                    >
+                      <img
+                        src={currentUser?.avatar_url || '/avatars/void.webp'} // 🚀 Avatar local por defecto
+                        className={`w-20 h-20 object-cover transition-opacity ${isOwnProfile ? 'group-hover:opacity-30' : ''}`}
+                        alt="Profile"
+                      />
+                      {isOwnProfile && (
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <span className="text-[10px] font-mono text-white bg-black/60 px-2 py-1 rounded">EDIT</span>
+                        </div>
+                      )}
                     </button>
+
+                    {showPicker && isOwnProfile && (
+                      <div className="absolute top-full mt-2 left-0 z-50">
+                        <AvatarPicker
+                          currentAvatar={currentUser?.avatar_url || ''}
+                          onSelect={async (newAvatarPath) => {
+                            try {
+                              const response = await fetch('http://localhost:3000/api/profile', {
+                                method: 'PUT',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                  'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                                },
+                                body: JSON.stringify({ user: { avatar_url: newAvatarPath } })
+                              });
+                              if (response.ok) {
+                                const { user: updatedUser } = await response.json();
+                                setUser(updatedUser);
+                              }
+                            } catch (e) { console.error("Error updating profile", e); }
+                          }}
+                          onClose={() => setShowPicker(false)}
+                        />
+                      </div>
+                    )}
                   </div>
+                  <div className={styles.userLeft}>
+                    <h1 className={styles.userHandle}>
+                      <span className={styles.userHandleAccent}>&gt; </span>
+                      {username}
+                    </h1>
+                    <span className={styles.userSince}>// verified identity</span>
+                  </div>
+                </div>
+                <div className={styles.userRight}>
+                  {/* 🚀 ELO REAL: Si no tiene, por defecto es 100 (como mandamos en el backend) */}
+                  <span className={styles.eloValue}>{currentUser?.elo ?? 100}</span>
+                  <span className={styles.eloLabel}>ELO rating</span>
+                </div>
+              </div>
+
+              {/* 2FA Security Section */}
+              {isOwnProfile && (
+                <div className={styles.inputGroup}>
+                  <span className={styles.sectionLabel}>// security_2fa</span>
+                  {!qrCodeSvg && !mfaMessage && (
+                    <button className={[styles.actionBtn, styles.actionBtnSecondary].join(' ')} onClick={handleGenerate2FA} style={{ width: 'fit-content' }}>
+                      &gt; init_2fa()
+                    </button>
+                  )}
+                  {qrCodeSvg && (
+                    <div className="flex flex-col gap-3 mt-2">
+                      <p className="text-[10px] text-text-muted uppercase font-mono">Scan this with Google Authenticator:</p>
+                      <div className={styles.qrContainer} dangerouslySetInnerHTML={{ __html: qrCodeSvg }} />
+                      <div className="flex gap-2 mt-2">
+                        <input className={styles.input} value={twoFaCode} onChange={(e) => setTwoFaCode(e.target.value)} placeholder="Enter 6-digit code..." maxLength={6} />
+                        <button className={[styles.actionBtn, styles.actionBtnPrimary].join(' ')} onClick={handleVerify2FA}>verify</button>
+                      </div>
+                    </div>
+                  )}
+                  {mfaMessage && (
+                    <p className="text-xs font-mono mt-2" style={{ color: mfaMessage.includes('ERROR') ? '#ff3366' : '#00ff88' }}>{mfaMessage}</p>
+                  )}
                 </div>
               )}
 
-              {/* Mensaje de Feedback */}
-              {mfaMessage && (
-                <p className="text-xs font-mono mt-2" style={{ color: mfaMessage.includes('ERROR') ? '#ff3366' : '#00ff88' }}>
-                  {mfaMessage}
-                </p>
+              {/* Stats - Ahora leen las variables reales */}
+              <div className={styles.statsGrid} style={{ marginTop: '1.5rem' }}>
+                {[{ label: 'total', value: total }, { label: 'wins', value: wins, color: '#00ff88' }, { label: 'losses', value: losses, color: '#ff3366' }].map(({ label, value, color }) => (
+                  <div key={label} className={styles.statCard}>
+                    <span className={styles.statValue} style={{ color: color ?? 'var(--text-primary)' }}>{value}</span>
+                    <span className={styles.statLabel}>{label}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Actions */}
+              {isOwnProfile && (
+                <div className={styles.actionRow}>
+                  <button className={[styles.actionBtn, styles.actionBtnPrimary].join(' ')} onClick={() => navigate('/game/chess/chess-new')}>&gt; play_chess()</button>
+                  <button className={[styles.actionBtn, styles.actionBtnPrimary].join(' ')} onClick={async () => {
+                      try {
+                        const res = await createSudokuGame('easy');
+                        if (res && typeof res === 'object' && 'id' in res) {
+                          const newGame = res as { id: number };
+                          navigate(`/game/sudoku/sudoku-${String(newGame.id).padStart(3, '0')}`);
+                        }
+                      } catch (err) { console.error("Error al crear juego:", err); }
+                    }}>&gt; play_sudoku()</button>
+                  <button className={[styles.actionBtn, styles.actionBtnSecondary].join(' ')} onClick={handleLogout}>&gt; logout()</button>
+                </div>
               )}
             </div>
-          )}
-
-          {/* ── Stats ── */}
-          <div className={styles.statsGrid} style={{ marginTop: '1.5rem' }}>
-            {[{ label: 'total', value: total }, { label: 'wins', value: wins, color: '#00ff88' }, { label: 'losses', value: losses, color: '#ff3366' }].map(({ label, value, color }) => (
-              <div key={label} className={styles.statCard}>
-                <span className={styles.statValue} style={{ color: color ?? 'var(--text-primary)' }}>{value}</span>
-                <span className={styles.statLabel}>{label}</span>
-              </div>
-            ))}
           </div>
+        </div>
 
-          {/* ── Actions ── */}
-          {isOwnProfile && (
-            <div className={styles.actionRow}>
-              <button
-                className={[styles.actionBtn, styles.actionBtnPrimary].join(' ')}
-                onClick={() => navigate('/game/chess/chess-new')}
-              >
-                &gt; play_chess()
-              </button>
-              <button
-                className={[styles.actionBtn, styles.actionBtnPrimary].join(' ')}
-                onClick={async () => {
-                  try {
-                    const res = await createSudokuGame('easy');
-
-                    // Verificamos si res es un objeto y tiene la propiedad 'id'
-                    if (res && typeof res === 'object' && 'id' in res) {
-                      const newGame = res as { id: number }; // Ahora es seguro
-                      navigate(`/game/sudoku/sudoku-${String(newGame.id).padStart(3, '0')}`);
-                    } else {
-                      console.error("Invalid game response:", res);
-                    }
-                  } catch (err) {
-                    console.error("Error al crear juego:", err);
-                  }
-              }}
-              >
-                &gt; play_sudoku()
-              </button>
-              <button
-                className={[styles.actionBtn, styles.actionBtnSecondary].join(' ')}
-                onClick={handleLogout}
-              >
-                &gt; logout()
-              </button>
+        {/* Match History Section */}
+        <div className="w-full">
+          <span className={styles.sectionLabel}>// match_history[]</span>
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <span className={styles.headerDot} style={{ background: '#ff3366' }} />
+              <span className={styles.headerDot} style={{ background: '#ffaa00' }} />
+              <span className={styles.headerDot} style={{ background: '#00ff88' }} />
+              <span className={styles.headerTitle}>match_history — real database records</span>
             </div>
-          )}
+            
+            <div className={styles.tableWrap}>
+              {/* 🚀 TABLA REAL: Si no hay partidas, muestra un mensaje. Si las hay, las renderiza. */}
+              {matchHistory.length === 0 ? (
+                <div className="p-8 text-center flex flex-col items-center justify-center border-t border-border-strong">
+                  <span className="text-xs font-mono text-text-muted">// no match records found in database</span>
+                </div>
+              ) : (
+                <>
+                  <div className={styles.tableHead}>
+                    <span>#</span><span>game</span><span>opponent</span><span>result</span><span>elo Δ</span>
+                  </div>
+                  {matchHistory.map((match: any) => (
+                    <div key={match.id} className={styles.tableRow}>
+                      <span style={{ color: 'var(--text-muted)' }}>{match.date}</span>
+                      <span style={{ color: 'var(--accent)' }}>{match.game}</span>
+                      <span>{match.opponent}</span>
+                      <span className={match.result === 'win' ? styles.resultWin : match.result === 'loss' ? styles.resultLoss : styles.resultDraw}>
+                        {match.result.toUpperCase()}
+                      </span>
+                      <span style={{ color: match.elo_delta > 0 ? '#00ff88' : match.elo_delta < 0 ? '#ff3366' : 'var(--text-muted)' }}>
+                        {match.elo_delta > 0 ? `+${match.elo_delta}` : match.elo_delta}
+                      </span>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* ── Match History Section ── */}
-      <span className={styles.sectionLabel}>// match_history[]</span>
-      <div className={styles.card}>
-        <div className={styles.cardHeader}>
-          <span className={styles.headerDot} style={{ background: '#ff3366' }} />
-          <span className={styles.headerDot} style={{ background: '#ffaa00' }} />
-          <span className={styles.headerDot} style={{ background: '#00ff88' }} />
-          <span className={styles.headerTitle}>match_history — last {MOCK_HISTORY.length} games</span>
-        </div>
-
-        <div className={styles.tableWrap}>
-          <div className={styles.tableHead}>
-            <span>#</span>
-            <span>game</span>
-            <span>opponent</span>
-            <span>result</span>
-            <span>elo Δ</span>
+      {/* ── COLUMNA DERECHA: El Radar de Amigos ── */}
+      {isOwnProfile && (
+        <div className={styles.rightColumn}>
+          <span className={styles.sectionLabel}>// network_connections</span>
+          <div className="flex-1 terminal-card bracket-corners overflow-hidden border border-border-strong shadow-[0_0_15px_rgba(255,51,102,0.05)]">
+            <FriendsList />
           </div>
-
-          {MOCK_HISTORY.map((match) => (
-            <div key={match.id} className={styles.tableRow}>
-              <span style={{ color: 'var(--text-muted)' }}>{match.date}</span>
-              <span style={{ color: 'var(--accent)' }}>{match.game}</span>
-              <span>{match.opponent}</span>
-              <span className={match.result === 'win' ? styles.resultWin : match.result === 'loss' ? styles.resultLoss : styles.resultDraw}>
-                {match.result.toUpperCase()}
-              </span>
-              <span style={{ color: match.elo_delta > 0 ? '#00ff88' : match.elo_delta < 0 ? '#ff3366' : 'var(--text-muted)' }}>
-                {match.elo_delta > 0 ? `+${match.elo_delta}` : match.elo_delta}
-              </span>
-            </div>
-          ))}
         </div>
-      </div>
+      )}
+
     </div>
   );
 };
