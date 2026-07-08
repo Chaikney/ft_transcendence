@@ -45,4 +45,7 @@ export const post = <T, B = unknown>(url: string, body: B): Promise<ApiResponse<
 export const patch = <T, B = unknown>(url: string, body: B): Promise<ApiResponse<T>> =>
   api.patch<ApiResponse<T>>(url, body).then((res) => res.data);
 
+export const del = <T, B = unknown>(url: string, config?: { data?: B }): Promise<ApiResponse<T>> =>
+  api.delete<ApiResponse<T>>(url, config).then((res) => res.data);
+
 export default api;

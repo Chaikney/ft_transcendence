@@ -1,5 +1,7 @@
 import { useEffect, useRef, useMemo } from "react";
+// @ts-ignore
 import { createConsumer } from "@rails/actioncable";
+// @ts-ignore
 import type { Consumer } from "@rails/actioncable";
 import { useNavigate } from "react-router-dom";
 import { useMatchStore, useRadarStore } from "@/store";
@@ -23,13 +25,13 @@ export const getConsumer = (): Consumer | null => {
 // --- HOOKS ---
 
 export const useActionCable = () => {
-  // Usamos un ref para mantener la instancia del cable
-  const cable = getConsumer();
+  const cable = useMemo(() => getConsumer(), []);
 
   useEffect(() => {
     if (!cable) return;
 
-    cable.connection.events.error = (err) => console.error("WebSocket Error:", err);
+    // FIX: Añadido ': any' a err para silenciar TypeScript
+    cable.connection.events.error = (err: any) => console.error("WebSocket Error:", err);
     cable.connection.events.open = () => console.log("✅ WebSocket Connected!");
 
   }, [cable]);
@@ -40,12 +42,11 @@ export const useActionCable = () => {
 // 📡 EL RADAR
 export const useAppearanceRadar = () => {
   const { cable } = useActionCable();
-  const radarRef = useRef<any>(null); // Guardamos la suscripción aquí
+  const radarRef = useRef<any>(null);
 
   useEffect(() => {
     if (!cable) return;
 
-    // Si ya existe la suscripción, la matamos antes de crear otra
     if (radarRef.current) {
         radarRef.current.unsubscribe();
     }
@@ -54,15 +55,15 @@ export const useAppearanceRadar = () => {
       { channel: "AppearanceChannel" },
       {
         connected() {
-          console.log("📡 RADAR ONLINE: Conectado a la red de Transcendence.");
-          // 👇 ESTO PONE EL PUNTITO VERDE
+          console.log("📡 RADAR ONLINE: Conectado.");
           useRadarStore.getState().setStatus('connected');
         },
         disconnected() {
           console.log("📡 RADAR OFFLINE: Conexión perdida.");
           useRadarStore.getState().setStatus('disconnected');
         },
-        received(data) {
+        // FIX: Añadido ': any' a data
+        received(data: any) {
           useRadarStore.getState().updateUserStatus(data.user_id, data.status === 'online');
         }
       }
@@ -93,23 +94,15 @@ export const useMatchmaking = () => {
         connected() {
           console.log("⚔️ MATCHMAKING: Conectado.");
         },
-        received(data) {
+        // FIX: Añadido ': any' a data
+        received(data: any) {
           if (data.action === 'match_found') {
             const gameType = data.room_id.split('-')[0];
             useMatchStore.getState().setLobby(gameType, data.opponent);
 
-            try {
-              const gameType = data.room_id.split('-')[0];
-              useMatchStore.getState().setLobby(gameType, data.opponent);
-              // 2. Le damos 100ms a React para que asimile el estado antes de teletransportar
               setTimeout(() => {
-                console.log(`🚀 Teletransportando a: /game/${gameType}/${data.room_id}`);
                 navigate(`/game/${gameType}/${data.room_id}`);
               }, 100);
-
-            } catch (err) {
-              console.error("🚨 Error crítico al intentar entrar a la sala:", err);
-            }
           }
         }
       }

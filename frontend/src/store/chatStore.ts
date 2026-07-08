@@ -22,6 +22,7 @@ interface ChatState {
   setMessages:         (roomId: string, msgs: ChatMessage[]) => void;
   markRoomRead:        (roomId: string) => void;
   setFriends:          (friends: Friend[]) => void;
+  setFriendRequests:   (requests: FriendRequest[]) => void;
   setFriendOnline:     (userId: number, online: boolean) => void;
   setFriendInGame:     (userId: number) => void;
   addFriendRequest:    (req: FriendRequest) => void;
@@ -44,20 +45,17 @@ export const useChatStore = create<ChatState>((set, get) => ({
   isOpen:         false,
   unreadTotal:    0,
 
-  // Updates the list of chat rooms and recalculates the total unread message count.
   setRooms: (rooms) =>
     set({
       rooms,
       unreadTotal: rooms.reduce((acc, r) => acc + r.unread_count, 0),
     }),
 
-  // Sets the currently active conversation and marks its unread messages as read.
   setActiveRoom: (roomId) => {
     set({ activeRoomId: roomId });
     if (roomId) get().markRoomRead(roomId);
   },
 
-  // Appends a new message to a specific room and updates its last message and unread count.
   addMessage: (roomId, msg) =>
     set((state) => {
       const existing = state.messages[roomId] ?? [];
@@ -79,13 +77,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
       };
     }),
 
-  // Overwrites the message history for a specific room.
   setMessages: (roomId, msgs) =>
     set((state) => ({
       messages: { ...state.messages, [roomId]: msgs },
     })),
 
-  // Resets the unread count for a specific room to zero.
   markRoomRead: (roomId) =>
     set((state) => {
       const rooms = state.rooms.map((r) =>
@@ -97,10 +93,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
       };
     }),
 
-  // Replaces the entire list of friends.
   setFriends: (friends) => set({ friends }),
+  
+  setFriendRequests: (requests) => set({ friendRequests: requests }),
 
-  // Updates the online/offline status of a specific friend.
   setFriendOnline: (userId, online) =>
     set((state) => ({
       friends: state.friends.map((f) =>
@@ -110,7 +106,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
       ),
     })),
 
-  // Sets a friend's status to in-game.
   setFriendInGame: (userId) =>
     set((state) => ({
       friends: state.friends.map((f) =>
@@ -118,31 +113,26 @@ export const useChatStore = create<ChatState>((set, get) => ({
       ),
     })),
 
-  // Adds a new pending friend request.
   addFriendRequest: (req) =>
     set((state) => ({
       friendRequests: [...state.friendRequests, req],
     })),
 
-  // Removes a friend request by ID.
   removeFriendRequest: (id) =>
     set((state) => ({
       friendRequests: state.friendRequests.filter((r) => r.id !== id),
     })),
 
-  // Adds a friend to the friends list.
   addFriend: (friend) =>
     set((state) => ({
       friends: [...state.friends, friend],
     })),
 
-  // Removes a friend from the friends list by user ID.
   removeFriend: (userId) =>
     set((state) => ({
       friends: state.friends.filter((f) => f.id !== userId),
     })),
 
-  // Adds or removes a username from the typing indicators of a room.
   setTyping: (roomId, username, typing) =>
     set((state) => {
       const current = state.typingUsers[roomId] ?? [];
@@ -154,10 +144,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       };
     }),
 
-  // Switches the chat window open/closed state.
   toggleChat: () => set((state) => ({ isOpen: !state.isOpen })),
-  // Explicitly opens the chat window.
   openChat:   () => set({ isOpen: true }),
-  // Explicitly closes the chat window.
   closeChat:  () => set({ isOpen: false }),
 }));

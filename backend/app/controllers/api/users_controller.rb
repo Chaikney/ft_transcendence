@@ -4,7 +4,8 @@ module Api
 
     # GET /api/profile
     def profile
-      render json: @current_user.as_json(only: [:id, :username, :email, :avatar_url]), status: :ok
+      # 🚀 FIX: Añadimos :elo y los demás datos necesarios para el frontend
+      render json: @current_user.as_json(only: [:id, :username, :email, :avatar_url, :elo, :status, :wins, :losses]), status: :ok
     end
 
     # PUT /api/profile
@@ -27,7 +28,7 @@ module Api
     # GET /api/profile/2fa/enable
     def enable_2fa
       @current_user.generate_otp_secret
-
+      
       qrcode = RQRCode::QRCode.new(@current_user.mfa_provisioning_uri)
       svg = qrcode.as_svg(
         color: "000000",
@@ -36,14 +37,14 @@ module Api
         standalone: true,
         use_path: true
       )
-
+      
       render json: { qr_svg: svg, secret: @current_user.otp_secret }, status: :ok
     end
 
     # POST /api/profile/2fa/verify
     def verify_2fa
       totp = ROTP::TOTP.new(@current_user.otp_secret, issuer: "Noctyve_Transcendence")
-
+      
       if totp.verify(params[:code])
         @current_user.update(mfa_enabled: true)
         render json: { message: "2FA Activado correctamente" }, status: :ok

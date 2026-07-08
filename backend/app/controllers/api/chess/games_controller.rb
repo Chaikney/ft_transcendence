@@ -61,15 +61,28 @@ module Api
         historial_limpio = history.map { |f| f.to_s.split(' ')[0..3].join(' ') }
         
         # Ahora sí, el backend detectará que la primera y la tercera son idénticas
+        # ...código de arriba intacto...
         is_threefold = historial_limpio.tally.values.any? { |count| count >= 3 }
-        
         game_status = engine.board.checkmate? ? 'checkmate' : ((engine.board.stalemate? || is_threefold) ? 'draw' : 'active')
         
+        # 1. ACTUALIZACIÓN CORREGIDA: Solo guardamos el movimiento, NO tocamos el status aún.
         game.update!(
           current_board: new_fen, 
-          fen_history: history, 
-          status: (game_status != 'active' ? 'finished' : 'in_progress')
+          fen_history: history
         )
+
+        # 2. Ahora evaluamos el fin de la partida. 
+        # finalize_match y finalize_draw ya se encargan ellos solos de cambiar el status a 'finished'
+        if game_status == 'checkmate'
+          game.finalize_match(@current_user.id)
+        elsif game_status == 'draw'
+          game.finalize_draw
+        else
+          game.update!(status: 'in_progress')
+        end
+
+        # 🚀 BROADCAST CORREGIDO (esto se queda igual):
+        channel_name = "game_#{params[:game_id]}"
 
         # 🚀 BROADCAST CORREGIDO: El nombre del canal DEBE coincidir con el del Channel
         # Si en tu channel usas "game_#{game_id}", aquí debe ser lo mismo.

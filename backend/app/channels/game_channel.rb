@@ -10,7 +10,7 @@ class GameChannel < ApplicationCable::Channel
   def player_ready
     room = params[:game_id]
     user_id = current_user.id
-
+    
     Rails.logger.info "✅ [GAME] Usuario #{user_id} envió READY a #{room}"
     @@ready_players[room] << user_id unless @@ready_players[room].include?(user_id)
     Rails.logger.info "✅ [GAME] Usuario #{user_id} está READY en #{room}"
@@ -40,7 +40,7 @@ class GameChannel < ApplicationCable::Channel
     # 🧠 EL ÁRBITRO SUPREMO DEL BACKEND
     # Limpiamos el historial para comparar solo la posición (piezas, turno, enroque)
     historial_limpio = nuevo_historial.map { |f| f.to_s.split(' ')[0..3].join(' ') }
-
+    
     # Comprobamos si alguna posición ha salido 3 o más veces
     is_threefold = historial_limpio.tally.values.any? { |count| count >= 3 }
 
@@ -90,23 +90,23 @@ class GameChannel < ApplicationCable::Channel
 
   def resign
     room = params[:game_id]
-    game_id = room.to_s.split('-').last
+    game_type, game_id = room.to_s.split('-') # 👈 Separamos "chess" de "77"
     partida = Game.find(game_id)
 
-    # Si la partida ya ha terminado por otra cosa, lo ignoramos
     return if partida.status != 'in_progress'
 
-    # ¿Quién ha pulsado el botón y quién se lleva la victoria?
     winner = (current_user == partida.player1) ? partida.player2 : partida.player1
 
-    # 🏆 ¡AQUÍ BRILLA VUESTRO CÓDIGO!
-    # Llamamos a vuestro motor de torneo para recalcular el Elo y cerrar la partida
-    partida.finalize_match(winner.id)
+    # 🛡️ ESCUDO ANTI-SUDOKU: Solo repartimos ELO si es Ajedrez
+    if game_type == 'chess'
+      partida.finalize_match(winner.id)
+    else
+      partida.update!(status: 'finished')
+    end
 
-    # Gritamos a los cuatro vientos que la partida ha terminado
     ActionCable.server.broadcast("game_#{room}", {
       type:   'game_over',
-      status: 'resigned' # El frontend leerá esto y mostrará que alguien se rindió
+      status: 'resigned'
     })
   end
 
@@ -114,18 +114,27 @@ class GameChannel < ApplicationCable::Channel
     room = params[:game_id]
     @@ready_players[room]&.delete(current_user.id)
 
-    # ─── Solo notificamos si la partida está realmente ACTIVA ────────────────
-    # Esto evita que el handshake inicial del lobby dispare "rival desconectado"
     return unless room.present?
 
-    game_id = room.to_s.split('-').last
+    game_type, game_id = room.to_s.split('-')
     partida = Game.find_by(id: game_id)
 
+    # Si alguien corta el cable en mitad de la batalla...
     if partida&.status == 'in_progress'
-      Rails.logger.info "💀 [GAME] Usuario #{current_user.id} abandonó #{room} (partida activa)"
+      Rails.logger.info "💀 [GAME] Usuario #{current_user.id} abandonó #{room}"
+      
+      # 🏆 El jugador que se queda, gana por abandono.
+      winner = (current_user == partida.player1) ? partida.player2 : partida.player1
+      
+      if game_type == 'chess'
+        partida.finalize_match(winner.id)
+      else
+        partida.update!(status: 'finished')
+      end
+
       ActionCable.server.broadcast("game_#{room}", { type: 'opponent_disconnect' })
     else
-      Rails.logger.info "👋 [GAME] Usuario #{current_user.id} salió de #{room} (estado: #{partida&.status || 'no encontrada'}) — sin broadcast"
+      Rails.logger.info "👋 [GAME] Usuario #{current_user.id} salió de #{room} — sin broadcast"
     end
   end
 end
