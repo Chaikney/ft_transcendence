@@ -4,22 +4,18 @@ class User < ApplicationRecord
   # 🔒 VALIDACIONES PARA EL REGISTRO MANUAL
   validates :email, uniqueness: { case_sensitive: false }, 
             presence: true, 
-            unless: -> { uid42.present? } # <--- ESTA ES LA CLAVE
+            unless: -> { uid42.present? }
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP, message: "must be a valid email address" }, 
             if: -> { email.present? }
 
-  # La contraseña solo es obligatoria cuando se crea un registro nuevo 
-  # o cuando el usuario la está cambiando explícitamente.
   validates :password, presence: true, length: { minimum: 6 }, if: :password_digest_changed?
   
   # 🟢 1. DEFINICIÓN DE ROLES
-  # 0 = Jugador normal, 1 = Administrador
   enum :role, { player: 0, admin: 1 }
 
   # --- ASOCIACIONES DE JUEGOS ---
   has_many :games_as_player1, class_name: 'Game', foreign_key: 'player1_id', dependent: :destroy
   has_many :games_as_player2, class_name: 'Game', foreign_key: 'player2_id', dependent: :destroy
-  
   has_many :sudoku_games, dependent: :destroy
 
   # --- ASOCIACIONES DE AMIGOS ---
@@ -34,18 +30,10 @@ class User < ApplicationRecord
   has_many :messages
 
   # --- CALLBACKS ---
-  # 🟢 2. ASIGNAR ROL POR DEFECTO A LOS NUEVOS
   after_initialize :set_default_role, if: :new_record?
-
-  # 🟢 4. ASIGNAR SALA GLOBAL AUTOMÁTICAMENTE
   after_create :add_to_global_chat
-
-  # 🛡️ 5. REGLA DE ELO: Nunca menor a 100
   before_save :enforce_minimum_elo
-
-  # 📧 GENERAR TOKEN DE EMAIL ANTES DE CREAR LA CUENTA
   before_create :generate_confirmation_token
-
   before_create :set_starting_elo
   
   # --- MÉTODOS PÚBLICOS ---
@@ -60,9 +48,19 @@ class User < ApplicationRecord
   end
 
   def mfa_provisioning_uri
-    # El 'issuer' es el nombre que saldrá en la app del móvil
     totp = ROTP::TOTP.new(self.otp_secret, issuer: "Transcendence")
     totp.provisioning_uri(self.username)
+  end
+
+  # 🚀 NUEVO: MÉTODOS DE RECUPERACIÓN DE CONTRASEÑA
+  def generate_password_reset_token
+    self.reset_password_token = SecureRandom.urlsafe_base64
+    self.reset_password_sent_at = Time.current
+    save!(validate: false)
+  end
+
+  def password_reset_valid?
+    reset_password_sent_at.present? && (reset_password_sent_at + 1.hour) > Time.current
   end
   
   private
@@ -97,7 +95,6 @@ class User < ApplicationRecord
 
   def generate_confirmation_token
     if self.confirmation_token.blank?
-      # Genera un churro de letras y números aleatorios
       self.confirmation_token = SecureRandom.hex(20) 
     end
   end

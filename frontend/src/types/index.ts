@@ -1,12 +1,17 @@
 export type ConnectionStatusType = 'connecting' | 'connected' | 'disconnected' | 'reconnecting';
 
 export interface User {
-	id: number;
-	username: string;
-	elo: number;
-	avatar_url: string;
+  id: number;
+  username: string;
+  elo: number;
+  avatar_url: string;
   role?: number | string;
   banned?: boolean;
+  
+  // 🚀 TUS 3 LÍNEAS NUEVAS AQUÍ:
+  wins?: number;
+  losses?: number;
+  match_history?: any[];
 }
 
 export interface GameData {
@@ -22,7 +27,6 @@ export interface GameData {
 }
 
 export interface ApiResponse<T> {
-	data: T;
-	error?: string;
+  data: T;
+  error?: string;
 }
-

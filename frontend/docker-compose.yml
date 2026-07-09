@@ -5,7 +5,6 @@ services:
       dockerfile: Dockerfile
     volumes:
       - .:/app
-      - /app/node_modules
     ports:
       - "5173:5173"
     environment:
@@ -13,3 +12,4 @@ services:
     stdin_open: true # Permite que el contenedor reciba inputs de teclado/scripts
     tty: true        # Mantiene el contenedor vivo para que Vite funcione bien
     
+    command: sh -c "npm install && npm run dev"
