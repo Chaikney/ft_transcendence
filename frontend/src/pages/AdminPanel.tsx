@@ -29,7 +29,7 @@ export const AdminPanel = () => {
     if (activeTab === 'users') {
       const fetchUsers = async () => {
         setLoadingUsers(true);
-        const token = localStorage.getItem('auth_token');
+        const token = localStorage.getItem('auth_token'); // Usando tu key 'auth_token'
         try {
           const response = await fetch('http://localhost:3000/api/admin/users', {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -72,7 +72,33 @@ export const AdminPanel = () => {
     }
   };
 
-  // 4. Si React aún está cargando el usuario de la memoria, esperamos un segundo
+  // 4. NUEVO: Función para Borrar Cuenta
+  const handleDeleteUser = async (userId: number, username: string) => {
+    const confirmDelete = window.confirm(`⚠️ WARNING: ¿Estás seguro de que quieres BORRAR PERMANENTEMENTE a ${username}?`);
+    
+    if (!confirmDelete) return;
+
+    const token = localStorage.getItem('auth_token');
+    try {
+      const res = await fetch(`http://localhost:3000/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (res.ok) {
+        success(`Usuario ${username} eliminado del sistema`, 'SUCCESS');
+        // Lo sacamos de la tabla local al instante
+        setUsersList(usersList.filter(u => u.id !== userId));
+      } else {
+        const data = await res.json();
+        error(data.error || 'Error al eliminar el usuario', 'SYSTEM_ERROR');
+      }
+    } catch (e) {
+      error('Error de red', 'SYSTEM_ERROR');
+    }
+  };
+
+  // 5. Si React aún está cargando el usuario de la memoria, esperamos un segundo
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center font-mono text-accent">
@@ -81,10 +107,10 @@ export const AdminPanel = () => {
     );
   }
 
-  // 5. Comprobación de seguridad dura (Incluye a nkrasimi como Override de emergencia)
+  // 6. Comprobación de seguridad dura (Incluye a nkrasimi como Override de emergencia)
   const isAdmin = user.role === 1 || user.role === 'admin' || user.username === 'nkrasimi' || user.username === 'Kae';
 
-  // 6. PANTALLA DE ENTRADA PROHIBIDA
+  // 7. PANTALLA DE ENTRADA PROHIBIDA
   if (!isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
@@ -107,7 +133,7 @@ export const AdminPanel = () => {
     );
   }
 
-  // 7. PANEL DE CONTROL REAL (Solo visible para admins o nkrasimi)
+  // 8. PANEL DE CONTROL REAL (Solo visible para admins o nkrasimi)
   return (
     <div className="min-h-screen p-8 flex flex-col gap-6 font-mono text-text-primary">
       <header className="border-b border-accent pb-4 mb-4">
@@ -164,9 +190,12 @@ export const AdminPanel = () => {
                       usersList.map((u) => (
                         <tr key={u.id} className="border-b border-border-strong/50 hover:bg-white/5 transition-colors">
                           <td className="py-3 font-bold">{String(u.id).padStart(3, '0')}</td>
-                          <td className="py-3 text-accent">{u.username}</td>
-                          <td className={`py-3 ${u.status === 'online' ? 'text-green-500' : 'text-text-muted'}`}>
-                            {u.status.toUpperCase()}
+                          <td className={`py-3 ${u.banned ? 'text-red-500 line-through' : 'text-accent'}`}>{u.username}</td>
+                          <td className={`py-3 ${
+                            u.banned ? 'text-red-600' :
+                            u.status === 'online' ? 'text-green-500' : 'text-text-muted'
+                          }`}>
+                            {u.banned ? 'BANNED' : u.status.toUpperCase()}
                           </td>
                           <td className={`py-3 ${u.role === 1 ? 'text-yellow-500' : 'text-text-secondary'}`}>
                             {u.role === 1 ? 'ADMIN' : 'PLAYER'}
@@ -178,14 +207,24 @@ export const AdminPanel = () => {
                               </button>
                             ) : (
                               <>
+                                {/* BOTÓN BAN / UNBAN */}
                                 <button 
                                   onClick={() => handleBanToggle(u.id, u.banned)}
-                                  className={`text-xs px-2 py-1 border transition-colors ${u.banned ? 'border-green-500 text-green-500 hover:bg-green-500 hover:text-white' : 'border-red-500 text-red-500 hover:bg-red-500 hover:text-white'}`}
+                                  className={`text-xs px-2 py-1 border transition-colors ${
+                                    u.banned 
+                                      ? 'border-green-500 text-green-500 hover:bg-green-500 hover:text-white' 
+                                      : 'border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white'
+                                  }`}
                                 >
                                   {u.banned ? 'UNBAN' : 'BAN'}
                                 </button>
-                                <button className="text-xs px-2 py-1 border border-border-strong text-text-muted hover:border-accent hover:text-accent transition-colors">
-                                  {u.role === 1 ? 'REVOKE_ADMIN' : 'MAKE_ADMIN'}
+                                
+                                {/* BOTÓN DELETE (Reemplaza a MAKE_ADMIN) */}
+                                <button 
+                                  onClick={() => handleDeleteUser(u.id, u.username)}
+                                  className="text-xs px-2 py-1 border border-red-700 text-red-600 hover:bg-red-800 hover:text-white transition-colors"
+                                >
+                                  DELETE
                                 </button>
                               </>
                             )}

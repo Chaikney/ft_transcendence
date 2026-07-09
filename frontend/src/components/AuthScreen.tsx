@@ -2,19 +2,98 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store'; // Ajusta la ruta si es diferente
 
+// Define la interfaz de lo que esperamos del backend
+interface AdminUser {
+  id: number;
+  username: string;
+  email: string;
+  role: number;
+  status: string;
+  banned: boolean;
+}
 
 export const AdminPanel = () => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('users');
+  const [usersDb, setUsersDb] = useState<AdminUser[]>([]);
 
-  // Redirigir si el usuario no es admin. 
-  // (Ajusta 'admin' o 1 dependiendo de cómo devuelva el rol tu backend)
+  // 1. Redirigir si el usuario no es admin.
   useEffect(() => {
     if (user && user.role !== 1 && user.role !== 'admin') {
       navigate('/');
     }
   }, [user, navigate]);
+
+  // 2. Traer los usuarios de la base de datos
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const token = localStorage.getItem('token'); // Ajusta esto si guardas el token en otro sitio (ej: Zustand)
+        const res = await fetch('/api/admin/users', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setUsersDb(data);
+        }
+      } catch (error) {
+        console.error("Error al cargar la DB de usuarios:", error);
+      }
+    };
+
+    if (user && (user.role === 1 || user.role === 'admin')) {
+      fetchUsers();
+    }
+  }, [user]);
+
+  // 3. Ejecutar Ban / Unban
+  const handleBanUser = async (id: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`/api/admin/users/${id}/ban`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (res.ok) {
+        // Actualizamos la tabla local al instante invirtiendo su estado de ban
+        setUsersDb(prev => prev.map(u => u.id === id ? { ...u, banned: !u.banned } : u));
+      } else {
+        const errorData = await res.json();
+        alert(`Error: ${errorData.error}`);
+      }
+    } catch (error) {
+      console.error("Error ejecutando el ban:", error);
+    }
+  };
+
+  // 4. Ejecutar Borrado Permanente
+  const handleDeleteUser = async (id: number, username: string) => {
+    const confirmDelete = window.confirm(`⚠️ WARNING: ¿Estás seguro de que quieres BORRAR PERMANENTEMENTE a ${username}? Esta acción no se puede deshacer.`);
+    
+    if (!confirmDelete) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`/api/admin/users/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (res.ok) {
+        // Lo sacamos de la tabla local al instante
+        setUsersDb(prev => prev.filter(u => u.id !== id));
+      } else {
+        const errorData = await res.json();
+        alert(`Error: ${errorData.error}`);
+      }
+    } catch (error) {
+      console.error("Error borrando el usuario:", error);
+    }
+  };
 
   return (
     <div className="min-h-screen p-8 flex flex-col gap-6 font-mono text-text-primary">
@@ -76,23 +155,52 @@ export const AdminPanel = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {/* Fila de ejemplo. Aquí harás un map() de los usuarios que traigas del backend */}
-                    <tr className="border-b border-border-strong/50 hover:bg-white/5 transition-colors">
-                      <td className="py-3">001</td>
-                      <td className="py-3 text-accent">kae_meli</td>
-                      <td className="py-3 text-green-500">ONLINE</td>
-                      <td className="py-3 text-yellow-500">ADMIN</td>
-                      <td className="py-3 flex gap-2">
-                        <button className="text-xs px-2 py-1 border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors">
-                          BAN
-                        </button>
-                        <button className="text-xs px-2 py-1 border border-border-strong text-text-muted hover:border-accent hover:text-accent transition-colors">
-                          MAKE_ADMIN
-                        </button>
-                      </td>
-                    </tr>
+                    {usersDb.map((u) => (
+                      <tr key={u.id} className="border-b border-border-strong/50 hover:bg-white/5 transition-colors">
+                        <td className="py-3">
+                          {u.id.toString().padStart(3, '0')}
+                        </td>
+                        <td className={`py-3 ${u.banned ? 'text-red-500 line-through' : 'text-accent'}`}>
+                          {u.username}
+                        </td>
+                        <td className={`py-3 ${
+                          u.banned ? 'text-red-600' :
+                          u.status === 'online' ? 'text-green-500' : 'text-text-muted'
+                        }`}>
+                          {u.banned ? 'BANNED' : u.status.toUpperCase()}
+                        </td>
+                        <td className="py-3 text-yellow-500">
+                          {u.role === 1 ? 'ADMIN' : 'USER'}
+                        </td>
+                        <td className="py-3 flex gap-2">
+                          {/* BOTÓN BAN / UNBAN */}
+                          <button 
+                            onClick={() => handleBanUser(u.id)}
+                            className={`text-xs px-3 py-1 border transition-colors ${
+                              u.banned 
+                                ? 'border-green-500 text-green-500 hover:bg-green-500 hover:text-white' 
+                                : 'border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white'
+                            }`}
+                          >
+                            {u.banned ? 'UNBAN' : 'BAN'}
+                          </button>
+                          
+                          {/* BOTÓN DELETE */}
+                          <button 
+                            onClick={() => handleDeleteUser(u.id, u.username)}
+                            className="text-xs px-3 py-1 border border-red-700 text-red-600 hover:bg-red-800 hover:text-white transition-colors"
+                          >
+                            DELETE
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
+                
+                {usersDb.length === 0 && (
+                  <p className="text-center text-text-muted mt-8">_NO_USERS_FOUND</p>
+                )}
               </div>
             </div>
           )}

@@ -28,7 +28,7 @@ export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
   const { cable } = useActionCable();
   const navigate = useNavigate();
   const subscriptionRef = useRef<any>(null);
-
+  
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('connecting');
   const [lastEvent, setLastEvent] = useState<GameChannelEvent | null>(null);
 
@@ -44,79 +44,87 @@ export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
 
     setConnectionStatus('connecting');
 
-    // Guard: don't re-subscribe if already connected
-    if (subscriptionRef.current) return;
+    // 1. Identificador exacto de esta sala
+    const channelIdentifier = JSON.stringify({ channel: 'GameChannel', game_id: gameId });
 
-    subscriptionRef.current = cable.subscriptions.create(
-      { channel: 'GameChannel', game_id: gameId },
-      {
-        connected() {
-          setConnectionStatus('connected');
-        },
-        disconnected() {
-          setConnectionStatus('disconnected');
-        },
-        received(raw: unknown) {
-          if (!raw || typeof raw !== 'object') return;
-          const event = raw as GameChannelEvent;
-          setLastEvent(event);
+    // 2. ♻️ RECICLAJE EXTREMO: Miramos si el cable ya existe en ActionCable
+    let activeSub = cable.subscriptions.findAll(channelIdentifier)[0];
 
-          // 🛡️ Lógica inteligente para ignorar eventos multijugador en Sudoku
-          const isSudoku = gameId.includes('sudoku');
+    if (!activeSub) {
+      console.log("🏗️ Construyendo nuevo cable inquebrantable para", gameId);
+      
+      activeSub = cable.subscriptions.create(
+        { channel: 'GameChannel', game_id: gameId },
+        {
+          connected() {
+            setConnectionStatus('connected');
+          },
+          disconnected() {
+            setConnectionStatus('disconnected');
+          },
+          received(raw: unknown) {
+            if (!raw || typeof raw !== 'object') return;
+            const event = raw as GameChannelEvent;
+            setLastEvent(event);
 
-          switch (event.type) {
-            case 'move_updated':
-              if (!isSudoku) setChessGame(event.game as ChessGameState);
-              break;
+            const isSudoku = gameId.includes('sudoku');
 
-            case 'sudoku_updated':
-              if (isSudoku) setSudokuGame(event.game as SudokuGameState);
-              break;
-
-            case 'player_ready':
-              console.log(`👍 El jugador ${event.user_id} está listo.`);
-              break;
-
-            case "opponent_disconnect":
-              // Solo alertamos si es un juego de ajedrez
-              if (!isSudoku) {
-                alert("Tu rival se ha salido de la partida.");
-                useMatchStore.getState().resetMatch();
-                navigate('/');
-              } else {
-                console.log("Ignorando desconexión de oponente en Sudoku");
-              }
-              break;
-
-            case 'game_start':
-              if (!isSudoku) {
-                useMatchStore.setState({ status: 'in_progress' });
-              }
-              break;
-
-            case 'game_over':
-              if (!isSudoku) {
-                useMatchStore.setState({ status: 'finished' });
-                // 🛑 ACTUALIZACIÓN CLAVE: Inyectamos el estado final en el tablero
-                const currentChess = useMatchStore.getState().chessGame;
-                if (currentChess) {
-                  setChessGame({ ...currentChess, status: event.status as any });
+            switch (event.type) {
+              case 'move_updated':
+                if (!isSudoku) setChessGame(event.game as ChessGameState);
+                break;
+              case 'sudoku_updated':
+                if (isSudoku) setSudokuGame(event.game as SudokuGameState);
+                break;
+              case 'player_ready':
+                console.log(`👍 El jugador ${event.user_id} está listo.`);
+                break;
+              case "opponent_disconnect":
+                if (!isSudoku) {
+                  alert("Tu rival se ha salido de la partida.");
+                  useMatchStore.getState().resetMatch();
+                  navigate('/');
                 }
-              }
-              break;
+                break;
+              case 'game_start':
+                if (!isSudoku) {
+                  // 1. Actualizamos el estado global del MatchStore
+                  useMatchStore.setState({ status: 'in_progress' });
+                  
+                  // 2. 🚀 LA CLAVE: Actualizamos también el estado interno de la partida
+                  const currentChess = useMatchStore.getState().chessGame;
+                  if (currentChess) {
+                    setChessGame({ ...currentChess, status: 'active' });
+                  }
+                }
+                break;
+              case 'game_over':
+                if (!isSudoku) {
+                  useMatchStore.setState({ status: 'finished' });
+                  const currentChess = useMatchStore.getState().chessGame;
+                  if (currentChess) {
+                    setChessGame({ ...currentChess, status: event.status as any });
+                  }
+                }
+                break;
+              default:
+                console.warn('[GameChannel] Evento no procesado:', event);
+            }
+          },
+        }
+      );
+    } else {
+      console.log("♻️ Reutilizando cable existente para", gameId);
+      setConnectionStatus('connected');
+    }
 
-            default:
-              console.warn('[GameChannel] Evento no procesado:', event);
-          }
-        },
-      }
-    );
+    // Guardamos la referencia (ya sea nueva o reciclada)
+    subscriptionRef.current = activeSub;
 
-    return () => {
-      subscriptionRef.current?.unsubscribe();
-      subscriptionRef.current = null;
-    };
-  }, [gameId, cable]); // navigate, setChessGame, setSudokuGame are stable refs — omitting avoids spurious re-runs
+    // 🛑 MODO INMORTAL: NO HAY RETURN. NO HAY UNSUBSCRIBE.
+    // Dejamos que el cable viva tranquilamente en la memoria del navegador.
+    
+  }, [gameId, cable]);
 
   const sendReady = () => subscriptionRef.current?.perform('player_ready');
   const claimDraw = () => subscriptionRef.current?.perform('claim_draw');
@@ -124,3 +132,4 @@ export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
 
   return { connectionStatus, lastEvent, sendReady, claimDraw, resign };
 };
+

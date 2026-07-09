@@ -12,6 +12,7 @@ interface ChatState {
   messages:        Record<string, ChatMessage[]>;
   friends:         Friend[];
   friendRequests:  FriendRequest[];
+  networkUsers:    Friend[]; // <-- NUEVO: Para el escáner global
   typingUsers:     Record<string, string[]>;
   isOpen:          boolean;
   unreadTotal:     number;
@@ -23,6 +24,7 @@ interface ChatState {
   markRoomRead:        (roomId: string) => void;
   setFriends:          (friends: Friend[]) => void;
   setFriendRequests:   (requests: FriendRequest[]) => void;
+  setNetworkUsers:     (users: Friend[]) => void; // <-- NUEVO: Función para guardarlos
   setFriendOnline:     (userId: number, online: boolean) => void;
   setFriendInGame:     (userId: number) => void;
   addFriendRequest:    (req: FriendRequest) => void;
@@ -41,6 +43,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   messages:       {},
   friends:        [],
   friendRequests: [],
+  networkUsers:   [], // <-- NUEVO: Inicializado vacío
   typingUsers:    {},
   isOpen:         false,
   unreadTotal:    0,
@@ -97,6 +100,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
   
   setFriendRequests: (requests) => set({ friendRequests: requests }),
 
+  setNetworkUsers: (users) => set({ networkUsers: users }), // <-- NUEVO: Implementación
+
   setFriendOnline: (userId, online) =>
     set((state) => ({
       friends: state.friends.map((f) =>
@@ -104,12 +109,21 @@ export const useChatStore = create<ChatState>((set, get) => ({
           ? { ...f, status: online ? 'online' : 'offline' }
           : f
       ),
+      // También actualizamos el estado si están en la vista global
+      networkUsers: state.networkUsers.map((u) =>
+        u.id === userId
+          ? { ...u, status: online ? 'online' : 'offline' }
+          : u
+      ),
     })),
 
   setFriendInGame: (userId) =>
     set((state) => ({
       friends: state.friends.map((f) =>
         f.id === userId ? { ...f, status: 'in_game' } : f
+      ),
+      networkUsers: state.networkUsers.map((u) =>
+        u.id === userId ? { ...u, status: 'in_game' } : u
       ),
     })),
 

@@ -17,8 +17,9 @@ class User < ApplicationRecord
   enum :role, { player: 0, admin: 1 }
 
   # --- ASOCIACIONES DE JUEGOS ---
-  has_many :games_as_player1, class_name: 'Game', foreign_key: 'player1_id'
-  has_many :games_as_player2, class_name: 'Game', foreign_key: 'player2_id'
+  has_many :games_as_player1, class_name: 'Game', foreign_key: 'player1_id', dependent: :destroy
+  has_many :games_as_player2, class_name: 'Game', foreign_key: 'player2_id', dependent: :destroy
+  
   has_many :sudoku_games, dependent: :destroy
 
   # --- ASOCIACIONES DE AMIGOS ---
