@@ -99,9 +99,10 @@ class GameChannel < ApplicationCable::Channel
 
     # 🛡️ ESCUDO ANTI-SUDOKU: Solo repartimos ELO si es Ajedrez
     if game_type == 'chess'
-      partida.finalize_match(winner.id)
+        partida.finalize_match(winner.id)
     else
-      partida.update!(status: 'finished')
+      # 🚀 FIX: Añadimos el winner_id para el Sudoku
+      partida.update!(status: 'finished', winner_id: winner.id)
     end
 
     ActionCable.server.broadcast("game_#{room}", {
@@ -129,7 +130,8 @@ class GameChannel < ApplicationCable::Channel
       if game_type == 'chess'
         partida.finalize_match(winner.id)
       else
-        partida.update!(status: 'finished')
+        # 🚀 FIX: Añadimos el winner_id para el Sudoku
+        partida.update!(status: 'finished', winner_id: winner.id)
       end
 
       ActionCable.server.broadcast("game_#{room}", { type: 'opponent_disconnect' })

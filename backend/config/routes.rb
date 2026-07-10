@@ -39,8 +39,15 @@ Rails.application.routes.draw do
     get    '/users', to: 'users#index'    
     get    '/profile', to: 'users#profile'
     put    '/profile', to: 'users#update'
+    get    '/users/:username', to: 'users#show'
     delete '/profile', to: 'users#destroy'
 
+
+    # Rutas para el ecosistema de amigos y bloqueos
+    post '/friends/block', to: 'friendships#block'
+    post '/friends/unblock', to: 'friendships#unblock'
+    get '/friends/blacklist', to: 'friendships#blacklist'
+    
     # --- SOCIAL Y AMIGOS ---
     resources :rooms, only: [:index] do
       resources :messages, only: [:index]

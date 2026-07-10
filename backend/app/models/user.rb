@@ -29,6 +29,13 @@ class User < ApplicationRecord
   has_many :rooms, through: :room_memberships
   has_many :messages
 
+  # --- ASOCIACIONES DE BLOQUEOS ---
+  has_many :blocks_given, class_name: 'Block', foreign_key: 'blocker_id', dependent: :destroy
+  has_many :blocked_users, through: :blocks_given, source: :blocked
+
+  has_many :blocks_received, class_name: 'Block', foreign_key: 'blocked_id', dependent: :destroy
+  has_many :blockers, through: :blocks_received, source: :blocker
+
   # --- CALLBACKS ---
   after_initialize :set_default_role, if: :new_record?
   after_create :add_to_global_chat

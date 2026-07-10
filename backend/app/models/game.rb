@@ -20,6 +20,7 @@ class Game < ApplicationRecord
     winner.wins += 1
     loser.losses += 1
     self.status = 'finished'
+    self.winner_id = winner_id
 
     # Guardamos todo de golpe (Transacción para que si algo falla, no se guarde a medias)
     User.transaction do
