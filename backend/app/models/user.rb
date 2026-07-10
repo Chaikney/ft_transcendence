@@ -35,6 +35,7 @@ class User < ApplicationRecord
   before_save :enforce_minimum_elo
   before_create :generate_confirmation_token
   before_create :set_starting_elo
+  before_create :set_default_avatar
   
   # --- MÉTODOS PÚBLICOS ---
   def all_games
@@ -97,5 +98,9 @@ class User < ApplicationRecord
     if self.confirmation_token.blank?
       self.confirmation_token = SecureRandom.hex(20) 
     end
+  end
+
+  def set_default_avatar
+    self.avatar_url = "default.png" if self.avatar_url.blank?
   end
 end
