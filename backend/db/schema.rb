@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_06_090651) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_09_170751) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -87,6 +87,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_06_090651) do
     t.boolean "mfa_enabled"
     t.string "otp_secret"
     t.string "password_digest"
+    t.datetime "reset_password_sent_at"
+    t.string "reset_password_token"
     t.integer "role"
     t.string "status", default: "offline"
     t.integer "uid42"

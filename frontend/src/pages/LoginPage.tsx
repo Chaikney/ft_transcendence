@@ -192,16 +192,43 @@ export const LoginPage = () => {
             )}
           </>
         )}
-
-        {mode === 'guest_login' && (
+{mode === 'guest_login' && (
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
             <div className={styles.titleWrap}>
               <span className={styles.titleEye}>// manual override active</span>
               <h1 className={styles.title}><span className={styles.titleAccent}>&gt; </span>guest_login()</h1>
             </div>
             
-            <input type="text" required placeholder="USERNAME_" value={username} onChange={(e) => setUsername(e.target.value)} className={styles.input} />
-            <input type="password" required placeholder="PASSWORD_" value={password} onChange={(e) => setPassword(e.target.value)} className={styles.input} />
+            <input 
+              type="text" 
+              required 
+              placeholder="USERNAME_" 
+              value={username} 
+              onChange={(e) => setUsername(e.target.value)} 
+              className={styles.input} 
+            />
+            
+            <div className="flex flex-col">
+              <input 
+                type="password" 
+                required 
+                placeholder="PASSWORD_" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                className={styles.input} 
+              />
+              
+              {/* 🚀 EL NUEVO ENLACE DE RECUPERACIÓN */}
+              <div className="flex justify-end mt-2 mb-1">
+                <button 
+                  type="button"
+                  onClick={() => navigate('/forgot-password')}
+                  className="text-[10px] font-mono text-text-muted hover:text-accent transition-colors cursor-pointer tracking-widest"
+                >
+                  &gt; RECOVER_PASSWORD
+                </button>
+              </div>
+            </div>
             
             <div className="flex flex-col gap-2 mt-2">
               <button type="submit" className={styles.primaryBtn} disabled={loading}>

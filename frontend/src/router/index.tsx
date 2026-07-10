@@ -15,6 +15,8 @@ import { SpectatorPage } from '@/pages/SpectatorPage';
 import { ActiveGamesPage } from '@/pages/ActiveGamesPage';
 import { AdminPanel } from '@/pages/AdminPanel';
 import { VerifyEmail } from '@/pages/VerifyEmail'; // <-- AÑADE ESTO
+import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
+import { ResetPasswordPage } from '@/pages/ResetPasswordPage';
 
 export const router = createBrowserRouter([
   {
@@ -36,6 +38,14 @@ export const router = createBrowserRouter([
       {
         path: 'verify-email',
         element: <VerifyEmail />,
+      },
+      {
+        path: 'forgot-password',
+        element: <ForgotPasswordPage />,
+      },
+      {
+        path: 'reset-password/:token',
+        element: <ResetPasswordPage />,
       },
       {
         path: 'auth/callback',

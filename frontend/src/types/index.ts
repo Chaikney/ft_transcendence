@@ -7,6 +7,11 @@ export interface User {
 	avatar_url: string;
   role?: number | string;
   banned?: boolean;
+  
+  // 🚀 TUS 3 LÍNEAS NUEVAS AQUÍ:
+  wins?: number;
+  losses?: number;
+  match_history?: any[];
 }
 
 export interface GameData {
