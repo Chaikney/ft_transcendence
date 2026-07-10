@@ -16,9 +16,13 @@ class GameChannel < ApplicationCable::Channel
     Rails.logger.info "✅ [GAME] Usuario #{user_id} está READY en #{room}"
 
     if @@ready_players[room].length == 2
-      # Ambos listos: marcamos la partida como activa y arrancamos
+      # Ambos listos: marcamos la partida como activa, arrancamos y EMPEZAMOS EL RELOJ
       game_id = room.to_s.split('-').last
-      Game.find_by(id: game_id)&.update!(status: 'in_progress')
+      partida = Game.find_by(id: game_id)
+      
+      # 🚀 FIX: Le damos el turno inicial al player1 (Blancas)
+      partida&.update!(status: 'in_progress', current_turn_id: partida.player1_id)
+      
       ActionCable.server.broadcast("game_#{room}", { type: 'game_start' })
       @@ready_players.delete(room)
     else
@@ -48,11 +52,13 @@ class GameChannel < ApplicationCable::Channel
     estado_bd = is_threefold ? 'finished' : 'in_progress'
     estado_front = is_threefold ? 'draw' : 'in_progress'
 
+    siguiente_turno_id = (data['turn'] == 'w') ? partida.player1_id : partida.player2_id
     # Guardamos en la base de datos
     partida.update!(
       current_board: new_fen,
       fen_history:   nuevo_historial,
-      status:        estado_bd
+      status:        estado_bd,
+      current_turn_id: siguiente_turno_id
     )
 
     # 1. Devolvemos la jugada, ¡pero ahora con el estado correcto!
