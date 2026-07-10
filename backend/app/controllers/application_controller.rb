@@ -1,5 +1,7 @@
 class ApplicationController < ActionController::API
   
+  before_action :authorize_request
+
   def authorize_request
     # 1. Miramos si en la petición el frontend nos ha enviado el token en la cabecera 'Authorization'
     header = request.headers['Authorization']
@@ -23,5 +25,4 @@ class ApplicationController < ActionController::API
       render json: { errors: 'Acceso denegado. Token inválido o no proporcionado.' }, status: :unauthorized
     end
   end
-
 end
