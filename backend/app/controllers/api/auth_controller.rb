@@ -1,15 +1,22 @@
+require 'net/http'
+require 'uri'
+require 'json'
+
+
 module Api
   class AuthController < ::ApplicationController
     
+    skip_before_action :authorize_request, only: [:login, :register, :verify_email]
+    
     # --- REGISTRO ---
+    
     def register
       user = User.new(user_params)
-      
-      # 👇 INYECCIÓN 2FA: Le metemos la semilla ANTES de guardarlo
+
       user.otp_secret = ROTP::Base32.random if user.otp_secret.blank?
       
       if user.save
-        # 🚀 EL GATILLO: Disparamos el email a su correo
+        
         UserMailer.with(user: user).confirmation_email.deliver_now
         
         # 🛡️ CERRAR LA PUERTA: Ya NO damos el token JWT aquí. 

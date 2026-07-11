@@ -1,17 +1,16 @@
 import { useEffect } from 'react';
 import { useChatStore } from '@/store/chatStore';
 import { get } from '@/services/api';
-import type { Friend } from '../chat/types';
 
 // Sub-componentes
 import { UserSearch } from './UserSearch';
 import { PendingRequests } from './PendingRequests';
 import { ActiveFriends } from './ActiveFriends';
+import { BlockedUsers } from './BlockedUsers'; // 🚀 IMPORTAMOS LA BLACKLIST
 
 export const FriendsList = () => {
   const { friends, setFriends, setFriendRequests } = useChatStore();
 
-  // Cargamos los datos de la base de datos al iniciar
   useEffect(() => {
     const fetchFriendsData = async () => {
       try {
@@ -52,10 +51,11 @@ export const FriendsList = () => {
         </span>
       </div>
 
-      {/* Contenido (con scroll si hay muchos amigos) */}
+      {/* Contenido (con scroll si hay muchos amigos o bloqueados) */}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         <PendingRequests />
         <ActiveFriends />
+        <BlockedUsers /> {/* 🚀 LA BLACKLIST SE ACOMODA AQUÍ ABAJO */}
       </div>
 
       {/* Buscador fijo abajo */}

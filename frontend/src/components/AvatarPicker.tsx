@@ -6,6 +6,7 @@ const PREDEFINED_AVATARS = [
   '/avatars/kirito.png',
   '/avatars/roxas.png',
   '/avatars/tet.png',
+  '/avatars/default.png',
 ];
 
 interface AvatarPickerProps {

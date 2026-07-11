@@ -61,7 +61,6 @@ module Api
         historial_limpio = history.map { |f| f.to_s.split(' ')[0..3].join(' ') }
         
         # Ahora sí, el backend detectará que la primera y la tercera son idénticas
-        # ...código de arriba intacto...
         is_threefold = historial_limpio.tally.values.any? { |count| count >= 3 }
         game_status = engine.board.checkmate? ? 'checkmate' : ((engine.board.stalemate? || is_threefold) ? 'draw' : 'active')
         
@@ -81,11 +80,7 @@ module Api
           game.update!(status: 'in_progress')
         end
 
-        # 🚀 BROADCAST CORREGIDO (esto se queda igual):
-        channel_name = "game_#{params[:game_id]}"
-
         # 🚀 BROADCAST CORREGIDO: El nombre del canal DEBE coincidir con el del Channel
-        # Si en tu channel usas "game_#{game_id}", aquí debe ser lo mismo.
         channel_name = "game_#{params[:game_id]}"
         
         payload = {
@@ -104,25 +99,76 @@ module Api
         render json: payload[:game], status: :ok
       end
 
+      # POST /api/games/challenge
+      def challenge
+        target = User.find_by(id: params[:target_id])
+        
+        # 🛡️ Seguridad extra en el servidor por si hackean el botón del front
+        if target.nil? || target.status != 'online'
+          return render json: { error: 'El usuario no está disponible' }, status: :unprocessable_entity
+        end
+
+        # Avisamos al rival por su canal de WebSockets
+        ActionCable.server.broadcast("matchmaking_#{target.id}", {
+          type: 'incoming_challenge',
+          challenger: { id: @current_user.id, username: @current_user.username }
+        })
+        
+        render json: { message: 'Desafío enviado' }, status: :ok
+      end
+
+      # POST /api/games/accept_challenge
+      def accept_challenge
+        challenger = User.find_by(id: params[:challenger_id])
+        
+        if challenger.nil?
+          return render json: { error: 'El retador ha desaparecido' }, status: :not_found
+        end
+
+        # 🎲 LA MAGIA DEL AZAR: Mezclamos a los dos jugadores. 
+        jugadores = [@current_user.id, challenger.id].shuffle
+
+        # Creamos la partida oficial
+        game = Game.create!(
+          player1_id: jugadores[0],
+          player2_id: jugadores[1],
+          status: 'pending'
+        )
+
+        # 🚀 Avisamos a LOS DOS para que sus navegadores los envíen a la pantalla de juego
+        redirect_payload = { type: 'challenge_accepted', game_id: game.id }
+        
+        ActionCable.server.broadcast("matchmaking_#{@current_user.id}", redirect_payload)
+        ActionCable.server.broadcast("matchmaking_#{challenger.id}", redirect_payload)
+
+        render json: { message: 'Partida creada', game_id: game.id }, status: :ok
+      end
+
       private
 
-      # En games_controller.rb, dentro de render_game_state:
       def render_game_state(game, game_id)
-  render json: {
-    game_id: game_id,
-    fen: game.current_board,
-    turn: game.current_board.include?(" w ") ? 'white' : 'black',
-    status: game.status == 'finished' ? 'finished' : 'active',
-    # ASEGURAR IDs COMO ENTEROS
-    player1_id: game.player1_id.to_i, 
-    player2_id: game.player2_id.to_i,
-    player: {
-      player1: { name: game.player1.username, avatar: game.player1.avatar_url },
-      player2: { name: game.player2.username, avatar: game.player2.avatar_url }
-    },
-    last_move: nil
-  }, status: :ok
-end
+        render json: {
+          game_id: game_id,
+          fen: game.current_board,
+          turn: game.current_board.include?(" w ") ? 'white' : 'black',
+          status: game.status == 'finished' ? 'finished' : 'active',
+          player1_id: game.player1_id.to_i, 
+          player2_id: game.player2_id.to_i,
+          player: {
+            player1: { 
+              name: game.player1&.username || 'Unknown', 
+              avatar: game.player1&.avatar_url || '', 
+              elo: game.player1&.elo || 0 
+            },
+            player2: { 
+              name: game.player2&.username || 'Waiting...', 
+              avatar: game.player2&.avatar_url || '', 
+              elo: game.player2&.elo || 0  
+            }
+          },
+          last_move: nil
+        }, status: :ok
+      end
     end
   end
 end

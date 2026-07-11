@@ -24,7 +24,11 @@ class GameChannel < ApplicationCable::Channel
 
     if @@ready_players[room].length == 2
       game_id = room.to_s.split('-').last
-      Game.find_by(id: game_id)&.update!(status: 'in_progress')
+      partida = Game.find_by(id: game_id)
+      
+      # 🚀 FIX: Le damos el turno inicial al player1 (Blancas)
+      partida&.update!(status: 'in_progress', current_turn_id: partida.player1_id)
+      
       ActionCable.server.broadcast("game_#{room}", { type: 'game_start' })
       @@ready_players.delete(room)
     else
@@ -49,10 +53,13 @@ class GameChannel < ApplicationCable::Channel
     estado_bd = is_threefold ? 'finished' : 'in_progress'
     estado_front = is_threefold ? 'draw' : 'in_progress'
 
+    siguiente_turno_id = (data['turn'] == 'w') ? partida.player1_id : partida.player2_id
+    # Guardamos en la base de datos
     partida.update!(
       current_board: new_fen,
-      fen_history: nuevo_historial,
-      status: estado_bd
+      fen_history:   nuevo_historial,
+      status:        estado_bd,
+      current_turn_id: siguiente_turno_id
     )
 
     ActionCable.server.broadcast("game_#{room}", {
@@ -96,9 +103,10 @@ class GameChannel < ApplicationCable::Channel
     winner = (current_user == partida.player1) ? partida.player2 : partida.player1
 
     if game_type == 'chess'
-      partida.finalize_match(winner.id)
+        partida.finalize_match(winner.id)
     else
-      partida.update!(status: 'finished')
+      # 🚀 FIX: Añadimos el winner_id para el Sudoku
+      partida.update!(status: 'finished', winner_id: winner.id)
     end
 
     ActionCable.server.broadcast("game_#{room}", {
@@ -134,7 +142,8 @@ class GameChannel < ApplicationCable::Channel
       if game_type == 'chess'
         partida.finalize_match(winner.id)
       else
-        partida.update!(status: 'finished')
+        # 🚀 FIX: Añadimos el winner_id para el Sudoku
+        partida.update!(status: 'finished', winner_id: winner.id)
       end
 
       ActionCable.server.broadcast("game_#{room}", { type: 'opponent_disconnect' })

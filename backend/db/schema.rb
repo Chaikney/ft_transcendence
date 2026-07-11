@@ -14,6 +14,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_10_113417) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
+  create_table "blocks", force: :cascade do |t|
+    t.integer "blocked_id"
+    t.integer "blocker_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["blocked_id"], name: "index_blocks_on_blocked_id"
+    t.index ["blocker_id", "blocked_id"], name: "index_blocks_on_blocker_id_and_blocked_id", unique: true
+    t.index ["blocker_id"], name: "index_blocks_on_blocker_id"
+  end
+
   create_table "friendships", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "friend_id", null: false
@@ -28,6 +38,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_10_113417) do
   create_table "games", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "current_board"
+    t.integer "current_turn_id"
     t.json "fen_history"
     t.string "initial_board"
     t.integer "p1_score", default: 0
@@ -37,6 +48,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_10_113417) do
     t.string "status"
     t.datetime "updated_at", null: false
     t.index ["status"], name: "index_games_on_status"
+    t.integer "winner_id"
   end
 
   create_table "messages", force: :cascade do |t|

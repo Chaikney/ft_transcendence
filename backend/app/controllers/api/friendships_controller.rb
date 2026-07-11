@@ -73,35 +73,99 @@ module Api
       end
     end
 
-    # 🔨 POST /api/friends/block (NUEVO)
+    # POST /api/friends/block
     def block
-      target = User.find_by(username: params[:username])
+      target_user = User.find_by(username: params[:username])
       
-      return render json: { error: "Usuario no encontrado" }, status: :not_found unless target
+      if target_user.nil?
+        return render json: { error: "Usuario no encontrado" }, status: :not_found
+      end
 
-      # Destruimos cualquier rastro de amistad o petición previa
-      Friendship.where(user: @current_user, friend: target)
-                .or(Friendship.where(user: target, friend: @current_user)).destroy_all
+      if target_user.id == @current_user.id
+        return render json: { error: "No puedes bloquearte a ti mismo... aunque quieras" }, status: :unprocessable_entity
+      end
 
-      # Creamos el muro
-      @current_user.friendships.create(friend: target, status: 'blocked')
-      
-      render json: { message: "Has bloqueado a #{target.username}. No podrá interactuar contigo." }, status: :ok
+      # 💥 1. GUILLOTINA: Rompemos la amistad en ambas direcciones si existía
+      Friendship.where(
+        "(user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)",
+        @current_user.id, target_user.id, target_user.id, @current_user.id
+      ).destroy_all
+
+      # 📝 2. Registro en la Blacklist
+      block_record = Block.find_or_create_by(blocker_id: @current_user.id, blocked_id: target_user.id)
+
+      if block_record
+        render json: { message: "Usuario #{target_user.username} enviado a la zona fantasma (bloqueado)" }, status: :ok
+      end
     end
 
-    def remove
-      target = User.find_by(username: params[:username])
-      return render json: { error: 'Usuario no encontrado' }, status: :not_found unless target
+    # POST /api/friends/unblock
+    def unblock
+      target_user = User.find_by(username: params[:username])
+      
+      if target_user.nil?
+        return render json: { error: "Usuario no encontrado" }, status: :not_found
+      end
 
-      # Buscamos la relación de amistad (ya sea que tú le agregaste o él a ti)
-      friendship = Friendship.find_by(user: @current_user, friend: target) || 
-                   Friendship.find_by(user: target, friend: @current_user)
+      # Buscamos el bloqueo y lo destruimos
+      block_record = Block.find_or_create_by!(blocker_id: @current_user.id, blocked_id: target_user.id)
 
-      if friendship
-        friendship.destroy
-        render json: { message: 'Amistad fulminada con éxito' }, status: :ok
+      if block_record&.destroy
+        render json: { message: "Usuario #{target_user.username} desbloqueado con éxito" }, status: :ok
       else
-        render json: { error: 'No sois amigos' }, status: :not_found
+        render json: { error: "Este usuario no estaba bloqueado" }, status: :unprocessable_entity
+      end
+    end
+
+    # GET /api/friends/blacklist
+    # Devuelve la lista de usuarios que TÚ has bloqueado
+    def blacklist
+      blocked_users = @current_user.blocked_users.select(:id, :username, :avatar_url, :elo)
+      render json: { blacklist: blocked_users }, status: :ok
+    end
+    
+    # POST /api/friends/block
+    def block
+      target_user = User.find_by(username: params[:username])
+      
+      if target_user.nil?
+        return render json: { error: "Usuario no encontrado" }, status: :not_found
+      end
+
+      if target_user.id == @current_user.id
+        return render json: { error: "No puedes bloquearte a ti mismo" }, status: :unprocessable_entity
+      end
+
+      # 1. GUILLOTINA: Destruimos la amistad por completo (ya no cambiamos el estado)
+      Friendship.where(
+        "(user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)",
+        @current_user.id, target_user.id, target_user.id, @current_user.id
+      ).destroy_all
+
+      # 2. BLACKLIST: Lo metemos en la tabla correcta
+      block_record = Block.find_or_create_by!(blocker_id: @current_user.id, blocked_id: target_user.id)
+
+      render json: { message: "Usuario #{target_user.username} bloqueado y movido a la Blacklist" }, status: :ok
+    end
+
+    # DELETE /api/friends/remove
+    def remove
+      target_user = User.find_by(username: params[:username])
+      
+      if target_user.nil?
+        return render json: { error: "Usuario no encontrado" }, status: :not_found
+      end
+
+      # 💥 GUILLOTINA: Rompemos la relación en la base de datos
+      deleted = Friendship.where(
+        "(user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)",
+        @current_user.id, target_user.id, target_user.id, @current_user.id
+      ).destroy_all
+
+      if deleted.any?
+        render json: { message: "Amistad con #{target_user.username} eliminada" }, status: :ok
+      else
+        render json: { error: "No erais amigos" }, status: :unprocessable_entity
       end
     end
   end

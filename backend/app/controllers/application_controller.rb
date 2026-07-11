@@ -1,5 +1,10 @@
 class ApplicationController < ActionController::API
   
+  before_action :authorize_request
+  before_action :sweep_afk_games
+
+  private
+
   def authorize_request
     # 1. Miramos si en la petición el frontend nos ha enviado el token en la cabecera 'Authorization'
     header = request.headers['Authorization']
@@ -24,4 +29,9 @@ class ApplicationController < ActionController::API
     end
   end
 
+  def sweep_afk_games
+    Game.check_afk_timeouts
+  rescue => e
+    Rails.logger.error "Error en la guadaña AFK: #{e.message}"
+  end
 end

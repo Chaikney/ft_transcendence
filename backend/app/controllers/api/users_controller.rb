@@ -8,6 +8,52 @@ module Api
       render json: @current_user.as_json(only: [:id, :username, :email, :avatar_url, :elo, :status, :wins, :losses]), status: :ok
     end
 
+   # GET /api/users/:username
+    def show
+      target_user = User.find_by(username: params[:username])
+      
+      if target_user.nil?
+        return render json: { error: "Usuario extraviado en el vacío" }, status: :not_found
+      end
+
+      # Si soy yo mismo, devuelvo mis datos normales
+      if target_user.id == @current_user.id
+        return render json: { 
+          user: target_user.as_json(only: [:id, :username, :email, :avatar_url, :elo, :status, :wins, :losses]),
+          is_me: true 
+        }, status: :ok
+      end
+
+      # 🛡️ PROTECCIÓN ACTIVA: Intentamos calcular el H2H con un salvavidas
+      # 🛡️ PROTECCIÓN ACTIVA: Intentamos calcular el H2H con un salvavidas
+      h2h = { total: 0, wins: 0, losses: 0 }
+      
+      begin
+        # ⚔️ EL CARA A CARA: Solo partidas vuestras Y que estén terminadas
+        games_together = Game.where(
+          "((player1_id = ? AND player2_id = ?) OR (player1_id = ? AND player2_id = ?))",
+          @current_user.id, target_user.id, target_user.id, @current_user.id
+        ).where(status: 'finished')
+
+        h2h = {
+          total: games_together.count,
+          wins: games_together.where(winner_id: @current_user.id).count,
+          losses: games_together.where(winner_id: target_user.id).count
+        }
+      rescue => e
+        # 🚨 Si explota, lo pintamos en rojo en consola pero NO tiramos el servidor
+        Rails.logger.error "🚨 ERROR CALCULANDO H2H: #{e.message}"
+      end
+
+      # Devolvemos los datos del amigo SANOS Y SALVOS
+      render json: {
+        # 🚀 FIX: Añadimos :wins y :losses para que el frontend pueda sumar su TOTAL global
+        user: target_user.as_json(only: [:id, :username, :avatar_url, :elo, :status, :wins, :losses]),
+        is_me: false,
+        h2h: h2h
+      }, status: :ok
+    end
+
     # PUT /api/profile
     def update
       if @current_user.update(user_params)

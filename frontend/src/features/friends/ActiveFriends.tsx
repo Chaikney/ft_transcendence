@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useChatStore } from '@/store/chatStore';
 import { post, del } from '@/services/api';
@@ -14,26 +15,16 @@ const STATUS_CONFIG: Record<Friend['status'], { label: string; variant: 'success
 
 export const ActiveFriends = () => {
   const navigate = useNavigate();
-  const { friends, removeFriend, openChat, setActiveRoom, rooms } = useChatStore();
-
-  // 🛠️ FIX MENSAJES: Si no hay sala, abrimos el chat global por defecto
-  const handleOpenChat = async (friend: Friend) => {
-    const existing = rooms.find(r => r.type === 'direct' && r.participants.some((p) => p.id === friend.id));
-    
-    if (existing) {
-      setActiveRoom(existing.id);
-      openChat();
-    } else {
-      // Si no existe la sala, abrimos el chat igualmente. 
-      // NOTA FUTURA: Aquí deberías hacer un POST a tu backend para crear la sala DM.
-      console.warn(`[CHAT] No tienes historial con ${friend.username}. Debes crear la sala DM.`);
-      openChat(); 
-    }
-  };
+  // ✂️ GUILLOTINA: Hemos quitado openChat, setActiveRoom y rooms del Store
+  const { friends, removeFriend } = useChatStore();
+  
+  // 🛡️ ANTI-SPAM: Guardamos a quién hemos retado recientemente
+  const [challengedIds, setChallengedIds] = useState<number[]>([]);
+  const [cooldowns, setCooldowns] = useState<Record<number, boolean>>({});
 
   // 🛠️ FIX ELIMINAR: Borrado instantáneo (Optimistic UI)
   const handleRemoveFriend = async (friendUsername: string, friendId: number) => { 
-    removeFriend(friendId); // Desaparece al instante de la pantalla
+    removeFriend(friendId); 
     try {
       await del('/friends/remove', { data: { username: friendUsername } });
     } catch (e) { 
@@ -43,7 +34,7 @@ export const ActiveFriends = () => {
 
   // 🛠️ FIX BLOQUEAR: Borrado instantáneo y petición
   const handleBlockFriend = async (friendUsername: string, friendId: number) => {
-    removeFriend(friendId); // Desaparece al instante de la pantalla
+    removeFriend(friendId); 
     try {
       await post('/friends/block', { username: friendUsername });
     } catch (e) { 
@@ -51,11 +42,20 @@ export const ActiveFriends = () => {
     }
   };
 
-  // 🛠️ FIX AJEDREZ: Aviso de sistema pendiente
-  const handleChallenge = (friend: Friend) => {
-    // Para que esto sea real, tu backend necesita un sistema de notificaciones.
-    // Ej: cable.perform('send_challenge', { target: friend.id, game: 'chess' })
-    alert(`[SISTEMA DE RETOS] Falta implementar la notificación WebSocket para invitar a ${friend.username} a jugar.`);
+  const handleChallenge = async (friendId: number) => {
+    // 1. Bloqueamos el botón inmediatamente
+    setCooldowns(prev => ({ ...prev, [friendId]: true }));
+    
+    try {
+      await post('/games/challenge', { target_id: friendId });
+    } catch (error) {
+      console.error("Error al enviar el reto", error);
+    }
+
+    // 2. Iniciamos la cuenta atrás de 10 segundos para desbloquearlo
+    setTimeout(() => {
+      setCooldowns(prev => ({ ...prev, [friendId]: false }));
+    }, 10000);
   };
 
   if (friends.length === 0) {
@@ -70,7 +70,12 @@ export const ActiveFriends = () => {
   return (
     <div className="flex flex-col">
       {friends.map((friend) => {
+        // 🚀 AQUÍ VAN TODAS LAS CONSTANTES: Fuera del JSX, antes del return
         const cfg = STATUS_CONFIG[friend.status] || STATUS_CONFIG['offline'];
+        const isOnline = friend.status === 'online';
+        const isCooldown = cooldowns[friend.id];
+
+        // Ahora sí, devolvemos el HTML usando las variables limpiamente
         return (
           <div key={friend.id} className="flex items-center gap-3 px-4 py-3 border-b border-[#1a1a24] transition-colors duration-200 hover:bg-[#121218] group">
             <Avatar
@@ -88,13 +93,26 @@ export const ActiveFriends = () => {
             </div>
 
             <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button onClick={() => handleOpenChat(friend)} className="text-[#6a6a7a] hover:text-white font-mono text-xs px-1" title="Message">💬</button>
+              
               <button onClick={() => navigate(`/profile/${friend.username}`)} className="text-[#6a6a7a] hover:text-white font-mono text-xs px-1" title="Profile">👤</button>
-              {friend.status === 'online' && (
-                <button onClick={() => handleChallenge(friend)} className="text-[#6a6a7a] hover:text-[#4ade80] font-mono text-xs px-1" title="Challenge">♟</button>
-              )}
+
+              <button 
+                onClick={() => handleChallenge(friend.id)}
+                disabled={!isOnline || isCooldown}
+                className={`px-3 py-1 font-mono text-[10px] uppercase border transition-all ${
+                  !isOnline 
+                    ? 'border-gray-800 text-gray-600 cursor-not-allowed' // Gris apagado (Offline)
+                    : isCooldown
+                      ? 'border-yellow-500/50 text-yellow-500 cursor-wait' // Amarillo (Esperando 10s)
+                      : 'border-[#00ff88]/50 text-[#00ff88] hover:bg-[#00ff88]/10' // Verde neón (Listo)
+                }`}
+              >
+                {!isOnline ? 'OFFLINE' : isCooldown ? 'WAITING...' : 'CHALLENGE'}
+              </button>
+              
               <button onClick={() => handleRemoveFriend(friend.username, friend.id)} className="text-[#6a6a7a] hover:text-[#ff3366] font-mono text-xs px-1" title="Remove">✕</button>
               <button onClick={() => handleBlockFriend(friend.username, friend.id)} className="text-[#6a6a7a] hover:text-red-600 font-mono text-xs px-1" title="Block">🚫</button>
+            
             </div>
           </div>
         );

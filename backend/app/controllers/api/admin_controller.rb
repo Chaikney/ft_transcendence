@@ -1,6 +1,5 @@
 module Api
   class AdminController < ApplicationController
-    # Usamos el mismo método que en tus otros controladores
     before_action :authorize_request 
     before_action :authenticate_admin!
 
@@ -18,12 +17,12 @@ module Api
         return render json: { error: "No puedes borrarte a ti mismo" }, status: :unprocessable_entity
       end
 
-      if user.username == 'nkrasimi'
-         return render json: { error: "No puedes borrar al usuario raíz" }, status: :forbidden
+      # 🛡️ BLINDAJE: Nadie puede decapitar a otro administrador
+      if user.admin?
+         return render json: { error: "Operación denegada: No puedes borrar a otro administrador" }, status: :forbidden
       end
 
       if user.destroy
-        # 🚀 MISIL EN TIEMPO REAL: Expulsión definitiva de la pantalla
         ActionCable.server.broadcast("appearance_global", { type: 'banned', user_id: user.id })
         
         render json: { message: "Usuario #{user.username} eliminado del sistema" }, status: :ok
@@ -40,8 +39,8 @@ module Api
         return render json: { error: "No puedes banearte a ti mismo" }, status: :unprocessable_entity
       end
 
-      if user.username == 'nkrasimi'
-        return render json: { error: "No puedes banear al usuario raíz" }, status: :forbidden
+      if user.admin?
+        return render json: { error: "Operación denegada: No puedes banear a otro administrador" }, status: :forbidden
       end
 
       # Invertimos el estado (toggle)
@@ -50,12 +49,9 @@ module Api
       if user.update(banned: new_status)
         estado = new_status ? "BANEADO" : "DESBANEADO"
         
-        # 🚀 MISIL EN TIEMPO REAL: Avisamos al frontend
         if new_status
-          # Si lo baneamos, lanzamos la pantalla roja
           ActionCable.server.broadcast("appearance_global", { type: 'banned', user_id: user.id })
         else
-          # Si lo desbaneamos, le quitamos la pantalla roja para que siga navegando
           ActionCable.server.broadcast("appearance_global", { type: 'unbanned', user_id: user.id })
         end
 
@@ -68,9 +64,11 @@ module Api
     private
 
     def authenticate_admin!
-      # La regla de oro: O tienes role 1, o eres nkrasimi
-      unless @current_user.role == 1 || @current_user.username == 'nkrasimi'
-        render json: { error: 'Acceso no autorizado' }, status: :forbidden
+      unless @current_user.admin?
+        render json: { 
+          error: 'ERR_UNAUTHORIZED: Acceso denegado',
+          message: 'Tu intento de brecha ha sido registrado.'
+        }, status: :forbidden
       end
     end
   end
