@@ -1,27 +1,34 @@
+require 'net/http'
+require 'uri'
+require 'json'
+
+
 module Api
   class AuthController < ::ApplicationController
-
+    
+    skip_before_action :authorize_request, only: [:login, :register, :verify_email]
+    
     # --- REGISTRO ---
+    
     def register
       user = User.new(user_params)
 
-      # 👇 INYECCIÓN 2FA: Le metemos la semilla ANTES de guardarlo
       user.otp_secret = ROTP::Base32.random if user.otp_secret.blank?
-
+      
       if user.save
-        # 🚀 EL GATILLO: Disparamos el email a su correo
+        
         UserMailer.with(user: user).confirmation_email.deliver_now
-
-        # 🛡️ CERRAR LA PUERTA: Ya NO damos el token JWT aquí.
+        
+        # 🛡️ CERRAR LA PUERTA: Ya NO damos el token JWT aquí. 
         # Tienen que ir a su email, verificar, y luego hacer login.
-        render json: {
+        render json: { 
           message: "Identidad registrada en la base de datos. Se ha enviado un enlace de verificación a tu correo. Revísalo para activar tu cuenta.",
           user: { username: user.username, email: user.email }
         }, status: :created
       else
         # Si Rails hace ROLLBACK, imprimimos el error en la consola para verlo claro
         Rails.logger.error "🚨 ERROR AL CREAR USUARIO: #{user.errors.full_messages}"
-
+        
         render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
       end
     end
@@ -30,16 +37,16 @@ module Api
     def login
       # 1. Buscamos por USERNAME en lugar de email
       user = User.find_by(username: params[:username])
-
+      
       # 2. Comprobamos usuario y contraseña
       if user && user.authenticate(params[:password])
-
+        
         # 🛡️ 2.5 LA BARRERA DE VERIFICACIÓN (NUEVO)
         if user.confirmed_at.nil?
           render json: { error: 'Debes verificar tu email antes de iniciar sesión. Revisa tu bandeja de entrada.' }, status: :unauthorized
           return
         end
-
+        
         # 3. VERIFICACIÓN CONDICIONAL: Solo si tiene el 2FA activado
         if user.mfa_enabled?
           # Si no envía nada, le decimos que lo necesitamos
@@ -59,7 +66,7 @@ module Api
         # 4. Si NO tiene MFA activado, o si lo tiene y el código es correcto, entra.
         token = JWT.encode({ user_id: user.id }, Rails.application.secret_key_base)
         render json: { user: user, token: token }, status: :ok
-
+        
       else
         # 🚨 TU MENSAJE DE ERROR PERSONALIZADO
         render json: { error: '¡usuario o contraseña no validas!!!' }, status: :unauthorized

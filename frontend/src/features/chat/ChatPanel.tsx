@@ -279,6 +279,7 @@ export const ChatPanel = ({ sendMessage, sendTyping }: ChatPanelProps) => {
                 )}
                 {activeMessages.map((msg) => {
                   const isOwn = msg.sender_id === currentUser?.id;
+                  
                   return (
                     <div
                       key={msg.id}
@@ -300,7 +301,7 @@ export const ChatPanel = ({ sendMessage, sendTyping }: ChatPanelProps) => {
                         {msg.content}
                       </div>
                       <span className={s.msgMeta}>
-                        {!isOwn && `${msg.sender} · `}
+                        {!isOwn && `${msg.sender?.username ?? 'Unknown'} · `}
                         {fmtTime(msg.created_at)}
                       </span>
                     </div>

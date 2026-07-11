@@ -20,6 +20,7 @@ class Game < ApplicationRecord
     winner.wins += 1
     loser.losses += 1
     self.status = 'finished'
+    self.winner_id = winner_id
 
     # Guardamos todo de golpe (Transacción para que si algo falla, no se guarde a medias)
     User.transaction do
@@ -51,6 +52,40 @@ class Game < ApplicationRecord
       p1.save!
       p2.save!
       self.save!
+    end
+  end
+
+  def self.check_afk_timeouts
+    # Buscamos partidas activas que lleven más de 1 hora sin actualizarse
+    partidas_abandonadas = Game.where(status: 'in_progress').where("updated_at < ?", 1.hour.ago)
+
+    partidas_abandonadas.each do |partida|
+      Rails.logger.info "💀 [AFK TIMEOUT] Partida ##{partida.id} abandonada. Ejecutando castigo..."
+
+      perdedor_id = partida.current_turn_id
+      
+      # 🛡️ FIX: Si nadie había movido nunca (current_turn_id es nil)
+      if perdedor_id.nil?
+        partida.update!(status: 'finished') # Anulamos la partida sin cambiar ELOs
+        
+        ActionCable.server.broadcast("game_chess-#{partida.id}", {
+          type: 'game_over',
+          status: 'draw' # Mandamos 'draw' para que el frontend cierre la pantalla suavemente
+        })
+        next # Pasamos a la siguiente partida
+      end
+
+      # Si SÍ sabemos de quién era el turno, ejecutamos el castigo normal:
+      ganador_id = (perdedor_id == partida.player1_id) ? partida.player2_id : partida.player1_id
+
+      # Usamos el método que repara el ELO, contadores y cambia el estado a finished
+      partida.finalize_match(ganador_id)
+      
+      # Avisamos por WebSockets (usamos 'resigned' para que React muestre el cartel de fin de juego)
+      ActionCable.server.broadcast("game_chess-#{partida.id}", {
+        type: 'game_over',
+        status: 'resigned'
+      })
     end
   end
 end
