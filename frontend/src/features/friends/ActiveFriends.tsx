@@ -42,22 +42,6 @@ export const ActiveFriends = () => {
     }
   };
 
-  const handleChallenge = async (friendId: number) => {
-    // 1. Bloqueamos el botón inmediatamente
-    setCooldowns(prev => ({ ...prev, [friendId]: true }));
-    
-    try {
-      await post('/games/challenge', { target_id: friendId });
-    } catch (error) {
-      console.error("Error al enviar el reto", error);
-    }
-
-    // 2. Iniciamos la cuenta atrás de 10 segundos para desbloquearlo
-    setTimeout(() => {
-      setCooldowns(prev => ({ ...prev, [friendId]: false }));
-    }, 10000);
-  };
-
   if (friends.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-2 py-10 px-4 text-center">
@@ -95,21 +79,6 @@ export const ActiveFriends = () => {
             <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
               
               <button onClick={() => navigate(`/profile/${friend.username}`)} className="text-[#6a6a7a] hover:text-white font-mono text-xs px-1" title="Profile">👤</button>
-
-              <button 
-                onClick={() => handleChallenge(friend.id)}
-                disabled={!isOnline || isCooldown}
-                className={`px-3 py-1 font-mono text-[10px] uppercase border transition-all ${
-                  !isOnline 
-                    ? 'border-gray-800 text-gray-600 cursor-not-allowed' // Gris apagado (Offline)
-                    : isCooldown
-                      ? 'border-yellow-500/50 text-yellow-500 cursor-wait' // Amarillo (Esperando 10s)
-                      : 'border-[#00ff88]/50 text-[#00ff88] hover:bg-[#00ff88]/10' // Verde neón (Listo)
-                }`}
-              >
-                {!isOnline ? 'OFFLINE' : isCooldown ? 'WAITING...' : 'CHALLENGE'}
-              </button>
-              
               <button onClick={() => handleRemoveFriend(friend.username, friend.id)} className="text-[#6a6a7a] hover:text-[#ff3366] font-mono text-xs px-1" title="Remove">✕</button>
               <button onClick={() => handleBlockFriend(friend.username, friend.id)} className="text-[#6a6a7a] hover:text-red-600 font-mono text-xs px-1" title="Block">🚫</button>
             
