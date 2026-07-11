@@ -23,23 +23,25 @@
     --text-inverse: #020408; */
 
     /* ── Text ── */
-    --text-primary: #d1e5f0;
-    --text-secondary: #8fbcd9;
-    --text-muted: #4a758e;
+    --text-primary: #ffffff;
+    /* Blanco puro para máxima legibilidad */
+    --text-secondary: #c0f8ff;
+    /* Un cian mucho más brillante */
+    --text-muted: #88aacc;
     --text-inverse: #020408;
 
     /* ── Accent — electric cyan/blue ── */
     --accent: #00d4ff;
     --accent-dim: #0088aa;
     --accent-hover: #33ddff;
-    --accent-bg: rgba(0, 212, 255, 0.06);
-    --accent-border: rgba(0, 212, 255, 0.25);
-    --accent-glow: rgba(0, 212, 255, 0.15);
+    --accent-bg: #0ceedb;
+    --accent-border: #0bebf3;
+    --accent-glow: #10cab4;
 
     /* ── Secondary accent — electric indigo ── */
-    --accent2: #4d7cff;
-    --accent2-bg: rgba(77, 124, 255, 0.08);
-    --accent2-border: rgba(77, 124, 255, 0.25);
+    --accent2: #4df6ff;
+    --accent2-bg: #061923;
+    --accent2-border: #0a3d53;
 
     /* ── Status ── */
     --status-success: #00ff88;
@@ -60,17 +62,25 @@
     --chess-coord: #1e4d6b;
 
     /* ── Sudoku ── */
-    --sudoku-cell-light: #fdfbf7;      /* Crema muy claro (Fondo A) */
-    --sudoku-cell-dark: #eee8d9;       /* Crema un poco más oscuro (Fondo B) */
-    --sudoku-cell-hover: #e0d7c5;      /* Tono al pasar el ratón */
+    --sudoku-cell-light: #fdfbf7;
+    /* Crema muy claro (Fondo A) */
+    --sudoku-cell-dark: #eee8d9;
+    /* Crema un poco más oscuro (Fondo B) */
+    --sudoku-cell-hover: #e0d7c5;
+    /* Tono al pasar el ratón */
     --sudoku-selected-bg: rgba(0, 212, 255, 0.2);
     --sudoku-selected-ring: #00d4ff;
     --sudoku-related-bg: rgba(0, 212, 255, 0.1);
-    --sudoku-locked-text: #2d2a26;     /* Gris oscuro/carbón (Para leer bien en crema) */
-    --sudoku-input-text: #00d4ff;      /* Mantenemos tu Cian Cyber para tus números */
-    --sudoku-error-text: #e63946;      /* Rojo un poco más suave */
-    --sudoku-border: #dcd6c8;          /* Borde suave estilo papel */
-    --sudoku-border-box: #b8a994;      /* Borde de caja más marcado */
+    --sudoku-locked-text: #2d2a26;
+    /* Gris oscuro/carbón (Para leer bien en crema) */
+    --sudoku-input-text: #00d4ff;
+    /* Mantenemos tu Cian Cyber para tus números */
+    --sudoku-error-text: #e63946;
+    /* Rojo un poco más suave */
+    --sudoku-border: #dcd6c8;
+    /* Borde suave estilo papel */
+    --sudoku-border-box: #b8a994;
+    /* Borde de caja más marcado */
 
     /* ── Terminal effects ── */
     --scanline-color: rgba(0, 212, 255, 0.008);

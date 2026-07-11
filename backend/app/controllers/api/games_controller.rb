@@ -2,21 +2,37 @@ module Api
   class GamesController < ApplicationController
     before_action :authorize_request
 
+    # GET /api/games/active
+    def active
+      @games = Game.where(status: 'in_progress')
+      render json: { data: @games.map { |game| active_game_json(game) } }, status: :ok
+    end
+
+    # GET /api/games/:id
+    def show
+      game = Game.find_by(id: params[:id])
+
+      if game.nil?
+        render json: { error: "Partida no encontrada" }, status: :not_found
+        return
+      end
+
+      render json: { data: show_game_json(game) }, status: :ok
+    end
+
     # POST /api/games
     def create
-      # Creamos la partida. Asumimos que el jugador actual es el Player 1 (el retador)
       opponent = User.find_by(username: params[:opponent_username])
-      
       if opponent.nil?
         render json: { error: "Oponente no encontrado" }, status: :not_found
         return
       end
 
       game = Game.new(
-        player1: @current_user, 
-        player2: opponent, 
+        player1: @current_user,
+        player2: opponent,
         status: 'in_progress',
-        current_fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1' # 👈 FEN inicial obligatorio
+        current_board: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
       )
 
       if game.save
@@ -42,14 +58,50 @@ module Api
         return
       end
 
-      # Ejecutamos la magia del Elo
       game.finalize_match(winner.id)
 
-      render json: { 
+      render json: {
         message: "Partida finalizada. Elo actualizado.",
         player1: { username: game.player1.username, new_elo: game.player1.elo },
         player2: { username: game.player2.username, new_elo: game.player2.elo }
       }, status: :ok
+    end
+
+    private
+
+    # Shape para ActiveGamesPage.tsx (LiveGame)
+    def active_game_json(game)
+      {
+        id: game.id,
+        type: 'chess',
+        white: game.player1.username,
+        black: game.player2.username,
+        status: 'active',
+        turn: game.turn,
+        move_count: game.move_count,
+        spectators: spectator_count(game.id),
+        started_at: game.created_at.iso8601
+      }
+    end
+
+    # Shape para SpectatorPage.tsx (ChessGameState + extras)
+    def show_game_json(game)
+      {
+        game_id: game.id.to_s,
+        fen: game.current_board,
+        turn: game.turn,
+        status: game.status == 'in_progress' ? 'active' : game.status,
+        last_move: nil,
+        player1_id: game.player1_id,
+        player2_id: game.player2_id,
+        white: game.player1.username,
+        black: game.player2.username,
+        spectators: spectator_count(game.id)
+      }
+    end
+
+    def spectator_count(game_id)
+      Rails.cache.read("spectators:#{game_id}") || 0
     end
   end
 end

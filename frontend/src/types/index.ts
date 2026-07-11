@@ -7,11 +7,17 @@ export interface User {
   avatar_url: string;
   role?: number | string;
   banned?: boolean;
-  
-  // 🚀 TUS 3 LÍNEAS NUEVAS AQUÍ:
   wins?: number;
   losses?: number;
   match_history?: any[];
+}
+
+export interface ActiveGame {
+  id: string;
+  player1: string; // el username
+  player2: string; // el username
+  status: 'in_progress' | 'pending' | 'finished';
+  fen: string;
 }
 
 export interface GameData {

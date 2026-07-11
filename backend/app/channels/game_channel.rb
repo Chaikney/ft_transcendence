@@ -1,22 +1,28 @@
 class GameChannel < ApplicationCable::Channel
-  # Un diccionario global para guardar quién está listo en cada sala
   @@ready_players = Hash.new { |h, k| h[k] = [] }
 
   def subscribed
     stream_from "game_#{params[:game_id]}"
     Rails.logger.info "🔌 [GAME] Usuario #{current_user.id} entró a la sala game_#{params[:game_id]}"
+
+    game_id = params[:game_id].to_s.split('-').last
+    game = Game.find_by(id: game_id)
+    is_player = game.present? && (current_user == game.player1 || current_user == game.player2)
+
+    unless is_player
+      Rails.cache.increment("spectators:#{game_id}", 1, initial: 0)
+      broadcast_spectator_count(params[:game_id], game_id)
+    end
   end
 
   def player_ready
     room = params[:game_id]
     user_id = current_user.id
-    
     Rails.logger.info "✅ [GAME] Usuario #{user_id} envió READY a #{room}"
     @@ready_players[room] << user_id unless @@ready_players[room].include?(user_id)
     Rails.logger.info "✅ [GAME] Usuario #{user_id} está READY en #{room}"
 
     if @@ready_players[room].length == 2
-      # Ambos listos: marcamos la partida como activa y arrancamos
       game_id = room.to_s.split('-').last
       Game.find_by(id: game_id)&.update!(status: 'in_progress')
       ActionCable.server.broadcast("game_#{room}", { type: 'game_start' })
@@ -31,73 +37,64 @@ class GameChannel < ApplicationCable::Channel
     game_id = room.to_s.split('-').last
     partida = Game.find(game_id)
 
-    new_fen   = data['fen']
+    new_fen = data['fen']
     last_move = data['last_move']
 
     historial_actual = partida.fen_history || []
-    nuevo_historial  = historial_actual + [new_fen]
+    nuevo_historial = historial_actual + [new_fen]
 
-    # 🧠 EL ÁRBITRO SUPREMO DEL BACKEND
-    # Limpiamos el historial para comparar solo la posición (piezas, turno, enroque)
     historial_limpio = nuevo_historial.map { |f| f.to_s.split(' ')[0..3].join(' ') }
-    
-    # Comprobamos si alguna posición ha salido 3 o más veces
     is_threefold = historial_limpio.tally.values.any? { |count| count >= 3 }
 
-    # Si se repite 3 veces, el estado cambia a terminado sin preguntar al frontend
     estado_bd = is_threefold ? 'finished' : 'in_progress'
     estado_front = is_threefold ? 'draw' : 'in_progress'
 
-    # Guardamos en la base de datos
     partida.update!(
       current_board: new_fen,
-      fen_history:   nuevo_historial,
-      status:        estado_bd
+      fen_history: nuevo_historial,
+      status: estado_bd
     )
 
-    # 1. Devolvemos la jugada, ¡pero ahora con el estado correcto!
     ActionCable.server.broadcast("game_#{room}", {
       type: 'move_updated',
       game: {
-        status:      estado_front, # 👈 Ya no forzamos 'in_progress' a ciegas
-        fen:         new_fen,
+        status: estado_front,
+        fen: new_fen,
         fen_history: partida.fen_history,
-        turn:        data['turn'],
-        last_move:   last_move
+        turn: data['turn'],
+        last_move: last_move
       }
     })
 
-    # 2. Si detectamos el empate, pitamos el final desde el servidor al instante
     if is_threefold
       ActionCable.server.broadcast("game_#{room}", {
-        type:   'game_over',
+        type: 'game_over',
         status: 'draw'
       })
     end
   end
 
   def claim_draw
-    room    = params[:game_id]
+    room = params[:game_id]
     game_id = room.to_s.split('-').last
     partida = Game.find(game_id)
     partida.update!(status: 'finished')
 
     ActionCable.server.broadcast("game_#{room}", {
-      type:   'game_over',
+      type: 'game_over',
       status: 'draw'
     })
   end
 
   def resign
     room = params[:game_id]
-    game_type, game_id = room.to_s.split('-') # 👈 Separamos "chess" de "77"
+    game_type, game_id = room.to_s.split('-')
     partida = Game.find(game_id)
 
     return if partida.status != 'in_progress'
 
     winner = (current_user == partida.player1) ? partida.player2 : partida.player1
 
-    # 🛡️ ESCUDO ANTI-SUDOKU: Solo repartimos ELO si es Ajedrez
     if game_type == 'chess'
       partida.finalize_match(winner.id)
     else
@@ -105,7 +102,7 @@ class GameChannel < ApplicationCable::Channel
     end
 
     ActionCable.server.broadcast("game_#{room}", {
-      type:   'game_over',
+      type: 'game_over',
       status: 'resigned'
     })
   end
@@ -119,13 +116,21 @@ class GameChannel < ApplicationCable::Channel
     game_type, game_id = room.to_s.split('-')
     partida = Game.find_by(id: game_id)
 
-    # Si alguien corta el cable en mitad de la batalla...
-    if partida&.status == 'in_progress'
+    is_player = (current_user == partida&.player1 || current_user == partida&.player2)
+
+    unless is_player
+      Rails.cache.decrement("spectators:#{game_id}", 1)
+      count = Rails.cache.read("spectators:#{game_id}") || 0
+      if count < 0
+        Rails.cache.write("spectators:#{game_id}", 0)
+        count = 0
+      end
+      ActionCable.server.broadcast("game_#{room}", { type: 'spectator_count', count: count })
+    end
+
+    if partida&.status == 'in_progress' && is_player
       Rails.logger.info "💀 [GAME] Usuario #{current_user.id} abandonó #{room}"
-      
-      # 🏆 El jugador que se queda, gana por abandono.
       winner = (current_user == partida.player1) ? partida.player2 : partida.player1
-      
       if game_type == 'chess'
         partida.finalize_match(winner.id)
       else
@@ -136,5 +141,12 @@ class GameChannel < ApplicationCable::Channel
     else
       Rails.logger.info "👋 [GAME] Usuario #{current_user.id} salió de #{room} — sin broadcast"
     end
+  end
+
+  private
+
+  def broadcast_spectator_count(room, game_id)
+    count = Rails.cache.read("spectators:#{game_id}") || 0
+    ActionCable.server.broadcast("game_#{room}", { type: 'spectator_count', count: count })
   end
 end

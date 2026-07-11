@@ -15,8 +15,10 @@ Rails.application.routes.draw do
       resources :games, param: :game_id, only: [:show, :create, :update]
     end
 
-    # Partidas generales (ELO based)
-    resources :games, only: [:create] do
+    resources :games, only: [:create, :show, :update] do
+      collection do
+        get :active
+      end
       member do
         patch :finish, to: 'games#update'
       end
@@ -36,7 +38,7 @@ Rails.application.routes.draw do
     patch 'password_resets/:token', to: 'password_resets#update'
     
     # --- USUARIO Y PERFIL ---
-    get    '/users', to: 'users#index'    
+    get    '/users', to: 'users#index'
     get    '/profile', to: 'users#profile'
     put    '/profile', to: 'users#update'
     delete '/profile', to: 'users#destroy'

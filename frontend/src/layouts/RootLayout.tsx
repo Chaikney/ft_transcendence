@@ -22,7 +22,7 @@ const styles = {
   logoText:
     'text-text-primary font-mono text-sm font-bold tracking-widest uppercase',
   logoDim:
-    'text-text-muted font-mono text-xs',
+    'text-white font-mono text-xs',
   navLinks:
     'flex items-center gap-1',
   navLink:
@@ -32,8 +32,8 @@ const styles = {
     'text-accent border-accent-border bg-accent-bg ' +
     'shadow-[0_0_8px_rgba(0,212,255,0.2)]',
   navLinkInactive:
-    'text-text-muted border-transparent ' +
-    'hover:text-text-secondary hover:border-border-strong',
+    'text-white border-transparent ' +
+    'hover:text-white hover:border-border-strong',
   navRight:
     'flex items-center gap-4',
   statusWrap:
@@ -106,10 +106,15 @@ export const RootLayout = () => {
                 location.pathname.startsWith(
                   path.split('/').slice(0, 3).join('/')
                 ));
+                const isDisabled = path.includes('chess') || path.includes('sudoku');
             return (
               <button
                 key={path}
-                onClick={() => navigate(path)}
+                onClick={() => {
+                  if (!isDisabled) {
+                    navigate(path)}
+                  }
+                } 
                 className={[
                   styles.navLink,
                   isActive ? styles.navLinkActive : styles.navLinkInactive,

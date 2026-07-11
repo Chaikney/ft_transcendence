@@ -4,54 +4,7 @@ import { TerminalCard } from '@/components/TerminalCard';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
 import { InlineLoader } from '@/components';
-
-interface LiveGame {
-  id:          string;
-  type:        'chess' | 'sudoku';
-  white:       string;
-  black:       string;
-  status:      'active' | 'checkmate' | 'draw';
-  turn:        'white' | 'black';
-  move_count:  number;
-  spectators:  number;
-  started_at:  string;
-}
-
-const MOCK_GAMES: LiveGame[] = [
-  {
-    id:         'chess-001',
-    type:       'chess',
-    white:      'mdiaz-or',
-    black:      'jlopez',
-    status:     'active',
-    turn:       'white',
-    move_count: 14,
-    spectators: 3,
-    started_at: '5 min ago',
-  },
-  {
-    id:         'chess-002',
-    type:       'chess',
-    white:      'agarcia',
-    black:      'rperez',
-    status:     'active',
-    turn:       'black',
-    move_count: 28,
-    spectators: 7,
-    started_at: '12 min ago',
-  },
-  {
-    id:         'chess-003',
-    type:       'chess',
-    white:      'msmith',
-    black:      'CPU',
-    status:     'active',
-    turn:       'white',
-    move_count: 6,
-    spectators: 1,
-    started_at: '1 min ago',
-  },
-];
+import type { LiveGame } from '@/types/Types game.d ';
 
 const styles = {
   page:
@@ -110,31 +63,24 @@ const styles = {
 
 export const ActiveGamesPage = () => {
   const navigate = useNavigate();
-  const isMock   = import.meta.env.VITE_USE_MOCK === 'true';
 
-  const [games,   setGames]   = useState<LiveGame[]>([]);
+  const [games, setGames] = useState<LiveGame[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       try {
-        if (isMock) {
-          // Simulate network delay
-          await new Promise((r) => setTimeout(r, 600));
-          setGames(MOCK_GAMES);
-        } else {
-          // Real: GET /api/v1/games/active
-          const { get } = await import('@/services/api');
-          const res = await get<LiveGame[]>('/games/active');
-          setGames(res.data);
-        }
+        const { get } = await import('@/services/api');
+        const res = await get<LiveGame[]>('/games/active');
+        setGames(Array.isArray(res.data) ? res.data : []);
       } catch {
         setGames([]);
       } finally {
         setLoading(false);
       }
     };
+
     load();
 
     const interval = setInterval(load, 15000);
@@ -211,9 +157,7 @@ export const ActiveGamesPage = () => {
                     started: <span className={styles.statVal}>{game.started_at}</span>
                   </span>
                   <span className={styles.stat}>
-                    <span
-                      style={{ color: '#ffaa00' }}
-                    >
+                    <span style={{ color: '#ffaa00' }}>
                       {game.spectators} watching
                     </span>
                   </span>
@@ -221,9 +165,7 @@ export const ActiveGamesPage = () => {
 
                 {/* Action */}
                 <div className={styles.actionRow}>
-                  <span
-                    className="text-[10px] font-mono text-text-muted"
-                  >
+                  <span className="text-[10px] font-mono text-text-muted">
                     &gt; click to spectate
                   </span>
                   <Button variant="ghost" size="sm">
