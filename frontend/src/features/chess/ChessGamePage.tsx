@@ -62,9 +62,20 @@ export const ChessGamePage = () => {
 
   // 🚀 AÑADIDO: Las constantes que faltaban para saber los turnos
 // 🚀 Ahora entiende ambos idiomas y mantiene el tablero despierto
-const isGameActive = chessGame.status === 'in_progress' || chessGame.status === 'active';
+  const isGameActive = chessGame.status === 'in_progress' || chessGame.status === 'active';
   const isPlayer1Turn = chessGame.turn === 'white';
   const isPlayer2Turn = chessGame.turn === 'black';
+  
+  // 1. Averiguamos si el usuario logueado es el jugador 1 (Blancas)
+  const isMeWhite = currentUser?.id === chessGame.player1_id;
+
+  // 2. Asignamos quién va arriba (Rival) y quién va abajo (Tú) usando '?. ' por seguridad
+  const topPlayer = isMeWhite ? chessGame.player?.player2 : chessGame.player?.player1;
+  const bottomPlayer = isMeWhite ? chessGame.player?.player1 : chessGame.player?.player2;
+
+  // 3. Calculamos a quién le toca mover para iluminar su tarjeta
+  const isTopTurn = isMeWhite ? (chessGame.turn === 'black') : (chessGame.turn === 'white');
+  const isBottomTurn = isMeWhite ? (chessGame.turn === 'white') : (chessGame.turn === 'black');
 
   return (
     <div className={styles.page}>
@@ -82,12 +93,13 @@ const isGameActive = chessGame.status === 'in_progress' || chessGame.status === 
         <div className="flex flex-col items-center gap-4 w-full">
           
           {/* 🃏 TARJETA DEL RIVAL (NEGRAS - ARRIBA) */}
-          {chessGame.player && (
+          {topPlayer && (
             <PlayerCard 
-              name={chessGame.player.player2.name} 
-              elo={chessGame.player.player2.elo} 
-              avatar={chessGame.player.player2.avatar} 
-              isTurn={isPlayer2Turn && isGameActive} 
+              name={topPlayer.name}
+              elo={topPlayer.elo}
+              avatar={topPlayer.avatar}
+              isTurn={isTopTurn}
+              align="left" 
             />
           )}
 
@@ -100,13 +112,14 @@ const isGameActive = chessGame.status === 'in_progress' || chessGame.status === 
             localPlayerColor={localColor} 
           />
 
-          {/* 🃏 TU TARJETA (BLANCAS - ABAJO) */}
-          {chessGame.player && (
-            <PlayerCard 
-              name={chessGame.player.player1.name} 
-              elo={chessGame.player.player1.elo} 
-              avatar={chessGame.player.player1.avatar} 
-              isTurn={isPlayer1Turn && isGameActive} 
+          {/* 🃏 TU TARJETA (ABAJO) */}
+          {bottomPlayer && (
+            <PlayerCard  
+              name={bottomPlayer.name}
+              elo={bottomPlayer.elo}
+              avatar={bottomPlayer.avatar}
+              isTurn={isBottomTurn}
+              align="left" 
             />
           )}
 
