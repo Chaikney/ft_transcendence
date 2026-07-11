@@ -8,7 +8,6 @@ export interface User {
   role?: number | string;
   banned?: boolean;
   
-  // 🚀 TUS 3 LÍNEAS NUEVAS AQUÍ:
   wins?: number;
   losses?: number;
   match_history?: any[];

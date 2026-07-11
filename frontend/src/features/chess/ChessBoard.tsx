@@ -60,7 +60,8 @@ const styles = {
 
 interface ChessBoardProps {
   gameState: ChessGameState;
-  onMove:    (move: Omit<ChessMove, 'piece'>) => void;
+
+  onMove: (move: Omit<ChessMove, 'piece'> & { promotion?: string }) => void;
   disabled?: boolean;
   onDraw: () => void;
   localPlayerColor?: 'w' | 'b';
@@ -105,7 +106,7 @@ export const ChessBoard = ({
 
   const boardSize  = 'min(80vw, 480px)';
   const squareSize = `calc(${boardSize} / 8)`;
-  const isActive   = gameState.status === 'active';
+  const isActive   = gameState.status === 'active' || gameState.status === 'in_progress';
 
   const displayRows = localPlayerColor === 'b' ? [7, 6, 5, 4, 3, 2, 1, 0] : [0, 1, 2, 3, 4, 5, 6, 7];
   const displayCols = localPlayerColor === 'b' ? [7, 6, 5, 4, 3, 2, 1, 0] : [0, 1, 2, 3, 4, 5, 6, 7];

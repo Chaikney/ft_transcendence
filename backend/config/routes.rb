@@ -47,11 +47,16 @@ Rails.application.routes.draw do
     post '/friends/block', to: 'friendships#block'
     post '/friends/unblock', to: 'friendships#unblock'
     get '/friends/blacklist', to: 'friendships#blacklist'
-    
+
+    post '/games/challenge', to: 'games#challenge'
+    post '/games/accept_challenge', to: 'games#accept_challenge'
+
     # --- SOCIAL Y AMIGOS ---
     resources :rooms, only: [:index] do
       resources :messages, only: [:index]
     end
+
+    get '/games/:id', to: 'games#show'
 
     get    '/friends',           to: 'friendships#index'
     post   '/friends/request',   to: 'friendships#create'

@@ -159,7 +159,26 @@ export const ProfilePage = () => {
                         <AvatarPicker
                           currentAvatar={currentUser?.avatar_url || ''}
                           onSelect={async (newAvatarPath) => {
-                            // ... código de actualización del avatar igual ...
+                            try {
+                              // 1. Enviamos el objeto con la estructura { user: { avatar_url: ... } }
+                              const response = await fetch('http://localhost:3000/api/profile', {
+                                method: 'PUT',
+                                headers: { 
+                                  'Content-Type': 'application/json',
+                                  'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                                },
+                                body: JSON.stringify({ user: { avatar_url: newAvatarPath } }) // 👈 CLAVE: Envuelve en 'user'
+                              });
+
+                              if (response.ok) {
+                                // 2. Si el servidor responde bien, actualizamos el estado local
+                                // Aquí deberías llamar a tu función que refresca los datos del usuario
+                                console.log("Avatar actualizado con éxito");
+                                setProfileUser((prev: any) => ({ ...prev, avatar_url: newAvatarPath }));
+                              }
+                            } catch (err) {
+                              console.error("Error al actualizar avatar:", err);
+                            }
                             setShowPicker(false);
                           }}
                           onClose={() => setShowPicker(false)}
