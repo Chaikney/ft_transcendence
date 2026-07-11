@@ -13,7 +13,7 @@ export const PlayerCard = ({ name, elo, avatar, isTurn }: PlayerProps) => {
     <div className={`flex items-center gap-4 p-3 border-2 transition-colors duration-300 w-full max-w-sm ${
       isTurn ? 'border-[#00ff88] bg-[#00ff88]/5' : 'border-[#1a1a24] bg-[#0c0c12]'
     }`}>
-      <Avatar username={name} size="md" status="online" />
+      <Avatar username={name} size="md" status="online" src={avatar} />
       
       <div className="flex flex-col min-w-0">
         <span className="text-lg font-mono text-gray-200 uppercase tracking-wider truncate">

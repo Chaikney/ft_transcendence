@@ -108,6 +108,6 @@ class User < ApplicationRecord
   end
 
   def set_default_avatar
-    self.avatar_url = "default.png" if self.avatar_url.blank?
+    self.avatar_url = "../../../frontend/public/avatars/default.png" if self.avatar_url.blank?
   end
 end
