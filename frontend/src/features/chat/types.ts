@@ -2,7 +2,7 @@ export interface ChatMessage {
   id:         string;
   content:    string;
   sender_id:  number;
-  sender:     ChatParticipant;
+  sender:     string | ChatParticipant;
   room_id:    string;
   created_at: string;
   read:       boolean;
