@@ -22,7 +22,14 @@ const PREDEFINED_AVATARS = [
   '/avatars/sonic.png',
   '/avatars/spawn.png',
   '/avatars/vader.png',
-  '/avatars/zero.png'
+  '/avatars/zero.png',
+  '/avatars/michi.png',
+  '/avatars/2b.png',
+  '/avatars/umaru.png',
+  '/avatars/frieren.png',
+  '/avatars/glados.png',
+  '/avatars/hataraku.png',
+  '/avatars/miku.png'
 ];
 
 interface AvatarPickerProps {
