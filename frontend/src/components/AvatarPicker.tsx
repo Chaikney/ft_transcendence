@@ -7,6 +7,22 @@ const PREDEFINED_AVATARS = [
   '/avatars/roxas.png',
   '/avatars/tet.png',
   '/avatars/default.png',
+  '/avatars/ben10.png',
+  '/avatars/cloud.png',
+  '/avatars/doom.png',
+  '/avatars/ghostrider.png',
+  '/avatars/halo.png',
+  '/avatars/ironman.png',
+  '/avatars/jake.png',
+  '/avatars/link.png',
+  '/avatars/moonknight.png',
+  '/avatars/nightwing.png',
+  '/avatars/reed.png',
+  '/avatars/shadow.png',
+  '/avatars/sonic.png',
+  '/avatars/spawn.png',
+  '/avatars/vader.png',
+  '/avatars/zero.png'
 ];
 
 interface AvatarPickerProps {
