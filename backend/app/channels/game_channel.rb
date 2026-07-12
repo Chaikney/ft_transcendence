@@ -45,6 +45,14 @@ class GameChannel < ApplicationCable::Channel
     last_move = data['last_move']
 
     historial_actual = partida.fen_history || []
+    
+    # 🛡️ BARRERA ANTI-EMPATE FANTASMA:
+    # Si React se vuelve loco y manda el mismo tablero repetido, lo ignoramos.
+    if historial_actual.last == new_fen
+      Rails.logger.warn "⚠️ [GAME] Tablero duplicado ignorado para #{room}"
+      return
+    end
+
     nuevo_historial = historial_actual + [new_fen]
 
     historial_limpio = nuevo_historial.map { |f| f.to_s.split(' ')[0..3].join(' ') }
@@ -54,6 +62,7 @@ class GameChannel < ApplicationCable::Channel
     estado_front = is_threefold ? 'draw' : 'in_progress'
 
     siguiente_turno_id = (data['turn'] == 'w') ? partida.player1_id : partida.player2_id
+    
     # Guardamos en la base de datos
     partida.update!(
       current_board: new_fen,
@@ -98,7 +107,7 @@ class GameChannel < ApplicationCable::Channel
     game_type, game_id = room.to_s.split('-')
     partida = Game.find(game_id)
 
-    return if partida.status != 'in_progress'
+    return if partida.status != 'finished'
 
     winner = (current_user == partida.player1) ? partida.player2 : partida.player1
 
@@ -136,7 +145,7 @@ class GameChannel < ApplicationCable::Channel
       ActionCable.server.broadcast("game_#{room}", { type: 'spectator_count', count: count })
     end
 
-    if partida&.status == 'in_progress' && is_player
+    if (partida&.status != 'finished') && is_player
       Rails.logger.info "💀 [GAME] Usuario #{current_user.id} abandonó #{room}"
       winner = (current_user == partida.player1) ? partida.player2 : partida.player1
       if game_type == 'chess'

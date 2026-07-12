@@ -1,5 +1,5 @@
 import { useParams, Navigate, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react'; // 🚀 AÑADIDO: useRef para la trampa del abandono
 import { ChessBoard } from './ChessBoard';
 import { useChessGame } from './hooks/useChessGame';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
@@ -9,7 +9,6 @@ import { ErrorMessage } from '@/components/ErrorMessage';
 import { useMatchStore, useAuthStore } from '@/store'; 
 import { LobbyScreen } from '@/components/LobbyScreen'; 
 
-// 🚀 AÑADIDO: Importamos la tarjeta
 import { PlayerCard } from '@/components/PlayerCard'; 
 
 const styles = {
@@ -32,6 +31,47 @@ export const ChessGamePage = () => {
 
   const [localColor, setLocalColor] = useState<'w' | 'b'>('w');
   const [isResigning, setIsResigning] = useState(false);
+
+  // 🛡️ BARRERA 1: Rastreador silencioso del estado de la partida
+  // 1. 🛡️ BARRERA: Metemos estado y funciones en Refs para que React no entre en bucle
+  const gameStatusRef = useRef(chessGame?.status);
+  const resignRef = useRef(resign);
+  const resetMatchRef = useRef(resetMatch);
+  
+  useEffect(() => {
+    gameStatusRef.current = chessGame?.status;
+    resignRef.current = resign;
+    resetMatchRef.current = resetMatch;
+  }, [chessGame?.status, resign, resetMatch]);
+
+  // 2. 🧹 EL CASTIGO DEFINITIVO Y SEGURO (Solo al salir de la URL)
+  useEffect(() => {
+    return () => {
+      // 1. Aplicamos el castigo
+      if (gameStatusRef.current !== 'finished') {
+        resignRef.current();
+      }
+      
+      // 2. Formateamos la memoria del tablero
+      resetMatchRef.current(); 
+
+      // 3. 🚀 MAGIA: Pedimos los datos frescos al backend para que el ELO visual se actualice
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        fetch('http://localhost:3000/api/profile', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(data => {
+          // Si el backend nos devuelve al usuario, forzamos a Zustand a actualizarse
+          if (data && data.username) {
+            useAuthStore.getState().setUser(data);
+          }
+        })
+        .catch(err => console.error("Error refrescando ELO:", err));
+      }
+    };
+  }, []);
 
   useEffect(() => {
     // Revisamos si el backend nos ha mandado ya los datos del player2
@@ -60,8 +100,6 @@ export const ChessGamePage = () => {
   if (status === 'lobby') return <LobbyScreen onAccept={sendReady} isConnected={connectionStatus === 'connected'} />;
   if (!chessGame) return <div className={styles.page}><InlineLoader label="Connecting to game..." /></div>;
 
-  // 🚀 AÑADIDO: Las constantes que faltaban para saber los turnos
-// 🚀 Ahora entiende ambos idiomas y mantiene el tablero despierto
   const isGameActive = chessGame.status === 'in_progress' || chessGame.status === 'active';
   const isPlayer1Turn = chessGame.turn === 'white';
   const isPlayer2Turn = chessGame.turn === 'black';
