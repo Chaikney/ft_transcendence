@@ -48,7 +48,7 @@ export const ChessGamePage = () => {
   useEffect(() => {
     return () => {
       // 1. Aplicamos el castigo
-      if (gameStatusRef.current !== 'finished') {
+      if (gameStatusRef.current === 'in_progress' || gameStatusRef.current === 'active') {
         resignRef.current();
       }
       

@@ -107,7 +107,7 @@ class GameChannel < ApplicationCable::Channel
     game_type, game_id = room.to_s.split('-')
     partida = Game.find(game_id)
 
-    return if partida.status != 'finished'
+    return if partida.status == 'finished'
 
     winner = (current_user == partida.player1) ? partida.player2 : partida.player1
 
