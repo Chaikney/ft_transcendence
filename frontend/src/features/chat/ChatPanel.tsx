@@ -301,7 +301,15 @@ export const ChatPanel = ({ sendMessage, sendTyping }: ChatPanelProps) => {
                         {msg.content}
                       </div>
                       <span className={s.msgMeta}>
-                        {!isOwn && `${msg.sender?.username ?? 'Unknown'} · `}
+                        {!isOwn && (
+                          <>
+                            {/* Lógica: Si es string lo usamos directo, si es objeto buscamos .username */}
+                            {typeof msg.sender === 'string' 
+                              ? msg.sender 
+                              : msg.sender?.username ?? 'Unknown'
+                            } · 
+                          </>
+                        )}
                         {fmtTime(msg.created_at)}
                       </span>
                     </div>
