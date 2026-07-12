@@ -4,7 +4,7 @@ import { useAuthStore } from '@/store';
 import { createSudokuGame } from '@/features/sudoku/service';
 import { FriendsList } from '@/features/friends/FriendsList';
 import { AvatarPicker } from '@/components/AvatarPicker';
-import { Avatar } from '@/components/Avatar'
+import { Avatar } from '@/components/Avatar';
 
 // ── Styles ────────────────────────────────────────────────────────────────
 const styles = {
@@ -161,19 +161,16 @@ export const ProfilePage = () => {
                           currentAvatar={currentUser?.avatar_url || ''}
                           onSelect={async (newAvatarPath) => {
                             try {
-                              // 1. Enviamos el objeto con la estructura { user: { avatar_url: ... } }
                               const response = await fetch('http://localhost:3000/api/profile', {
                                 method: 'PUT',
                                 headers: { 
                                   'Content-Type': 'application/json',
                                   'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                                 },
-                                body: JSON.stringify({ user: { avatar_url: newAvatarPath } }) // 👈 CLAVE: Envuelve en 'user'
+                                body: JSON.stringify({ user: { avatar_url: newAvatarPath } })
                               });
 
                               if (response.ok) {
-                                // 2. Si el servidor responde bien, actualizamos el estado local
-                                // Aquí deberías llamar a tu función que refresca los datos del usuario
                                 console.log("Avatar actualizado con éxito");
                                 setProfileUser((prev: any) => ({ ...prev, avatar_url: newAvatarPath }));
                               }
@@ -241,7 +238,31 @@ export const ProfilePage = () => {
               {/* 🎮 Actions (SOLO SI ES TU PERFIL) */}
               {isOwnProfile && (
                 <div className={styles.actionRow}>
-                  <button className={[styles.actionBtn, styles.actionBtnPrimary].join(' ')} onClick={() => navigate('/game/chess/chess-new')}>&gt; play_chess()</button>
+                  <button 
+                    className={[styles.actionBtn, styles.actionBtnPrimary].join(' ')} 
+                    onClick={async () => {
+                      try {
+                        const response = await fetch('http://localhost:3000/api/games', {
+                          method: 'POST',
+                          headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                          },
+                          body: JSON.stringify({}) // Pide al backend que cree la partida oficial
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (response.ok && data.game_id) {
+                          navigate(`/game/chess/chess-${data.game_id}`);
+                        }
+                      } catch (err) {
+                        console.error("Error al crear la partida de ajedrez:", err);
+                      }
+                    }}
+                  >
+                    &gt; play_chess()
+                  </button>
                   <button className={[styles.actionBtn, styles.actionBtnPrimary].join(' ')} onClick={async () => {
                       try {
                         const res = await createSudokuGame('easy');

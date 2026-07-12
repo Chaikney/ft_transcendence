@@ -22,20 +22,28 @@ module Api
 
     # POST /api/games
     def create
-      opponent = User.find_by(username: params[:opponent_username])
-      if opponent.nil?
-        render json: { error: "Oponente no encontrado" }, status: :not_found
-        return
+      opponent = nil
+
+      # 1. Si nos envían un oponente (ej. desde un botón de reto), lo buscamos
+      if params[:opponent_username].present?
+        opponent = User.find_by(username: params[:opponent_username])
+        if opponent.nil?
+          render json: { error: "Oponente no encontrado" }, status: :not_found
+          return
+        end
       end
 
+      # 2. Creamos la partida. ¡Rails le asignará un ID único de forma 100% segura!
+      # Si no hay oponente, player2 se queda en nil (sala de espera / open lobby)
       game = Game.new(
         player1: @current_user,
         player2: opponent,
-        status: 'in_progress',
+        status: opponent ? 'in_progress' : 'active', # 'active' para que el frontend sepa que espera jugador
         current_board: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
       )
 
       if game.save
+        # Devolvemos el ID real que la base de datos ha generado
         render json: { message: "Partida iniciada", game_id: game.id }, status: :created
       else
         render json: { errors: game.errors.full_messages }, status: :unprocessable_entity
