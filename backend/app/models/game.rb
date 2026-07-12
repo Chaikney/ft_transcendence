@@ -67,7 +67,7 @@ class Game < ApplicationRecord
     partidas_abandonadas = Game.where(status: 'in_progress').where("updated_at < ?", 1.hour.ago)
 
     partidas_abandonadas.each do |partida|
-      Rails.logger.info "💀 [AFK TIMEOUT] Partida ##{partida.id} abandonada. Ejecutando castigo..."
+      #Rails.logger.info "💀 [AFK TIMEOUT] Partida ##{partida.id} abandonada. Ejecutando castigo..."
 
       perdedor_id = partida.current_turn_id
       

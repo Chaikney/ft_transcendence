@@ -32,7 +32,7 @@ export const useActionCable = () => {
     
     // FIX: Añadido ': any' a err para silenciar TypeScript
     cable.connection.events.error = (err: any) => console.error("WebSocket Error:", err);
-    cable.connection.events.open = () => console.log("✅ WebSocket Connected!");
+    //cable.connection.events.open = () => console.log("✅ WebSocket Connected!");
     
   }, [cable]);
 
@@ -55,11 +55,11 @@ export const useAppearanceRadar = () => {
       { channel: "AppearanceChannel" },
       {
         connected() {
-          console.log("📡 RADAR ONLINE: Conectado.");
+          //console.log("📡 RADAR ONLINE: Conectado.");
           useRadarStore.getState().setStatus('connected'); 
         },
         disconnected() {
-          console.log("📡 RADAR OFFLINE: Conexión perdida.");
+          //console.log("📡 RADAR OFFLINE: Conexión perdida.");
           useRadarStore.getState().setStatus('disconnected');
         },
         // FIX: Añadido ': any' a data
@@ -95,7 +95,7 @@ export const useMatchmaking = () => {
         { channel: "MatchmakingChannel" },
         {
           connected() {
-            console.log("⚔️ MATCHMAKING: Canal de Rails conectado y escuchando.");
+            //console.log("⚔️ MATCHMAKING: Canal de Rails conectado y escuchando.");
           },
           // FIX: Añadido ': any' a data
           received(data: any) {

@@ -28,7 +28,7 @@ export const useGameSocket = (
       { channel: "GameChannel", game_id: gameId },
       {
         connected() {
-          console.log(`📡 [GameSocket] Conectado a game_${gameId}`);
+          //console.log(`📡 [GameSocket] Conectado a game_${gameId}`);
         },
         disconnected() {
           console.warn(`📡 [GameSocket] Desconectado de game_${gameId}`);
@@ -43,7 +43,7 @@ export const useGameSocket = (
     // 4. Cleanup: Al desmontar el componente o cambiar de partida
     return () => {
       if (subscriptionRef.current) {
-        console.log(`📡 [GameSocket] Limpiando suscripción de game_${gameId}`);
+        //console.log(`📡 [GameSocket] Limpiando suscripción de game_${gameId}`);
         subscriptionRef.current.unsubscribe();
         subscriptionRef.current = null;
       }

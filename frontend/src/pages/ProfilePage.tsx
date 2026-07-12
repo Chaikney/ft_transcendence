@@ -171,7 +171,7 @@ export const ProfilePage = () => {
                               });
 
                               if (response.ok) {
-                                console.log("Avatar actualizado con éxito");
+                                //console.log("Avatar actualizado con éxito");
                                 setProfileUser((prev: any) => ({ ...prev, avatar_url: newAvatarPath }));
                               }
                             } catch (err) {

@@ -3,7 +3,7 @@ class GameChannel < ApplicationCable::Channel
 
   def subscribed
     stream_from "game_#{params[:game_id]}"
-    Rails.logger.info "🔌 [GAME] Usuario #{current_user.id} entró a la sala game_#{params[:game_id]}"
+    #Rails.logger.info "🔌 [GAME] Usuario #{current_user.id} entró a la sala game_#{params[:game_id]}"
 
     game_id = params[:game_id].to_s.split('-').last
     game = Game.find_by(id: game_id)
@@ -18,9 +18,9 @@ class GameChannel < ApplicationCable::Channel
   def player_ready
     room = params[:game_id]
     user_id = current_user.id
-    Rails.logger.info "✅ [GAME] Usuario #{user_id} envió READY a #{room}"
+    #Rails.logger.info "✅ [GAME] Usuario #{user_id} envió READY a #{room}"
     @@ready_players[room] << user_id unless @@ready_players[room].include?(user_id)
-    Rails.logger.info "✅ [GAME] Usuario #{user_id} está READY en #{room}"
+    #Rails.logger.info "✅ [GAME] Usuario #{user_id} está READY en #{room}"
 
     if @@ready_players[room].length == 2
       game_id = room.to_s.split('-').last
@@ -49,7 +49,7 @@ class GameChannel < ApplicationCable::Channel
     # 🛡️ BARRERA ANTI-EMPATE FANTASMA:
     # Si React se vuelve loco y manda el mismo tablero repetido, lo ignoramos.
     if historial_actual.last == new_fen
-      Rails.logger.warn "⚠️ [GAME] Tablero duplicado ignorado para #{room}"
+      #Rails.logger.warn "⚠️ [GAME] Tablero duplicado ignorado para #{room}"
       return
     end
 
@@ -146,7 +146,7 @@ class GameChannel < ApplicationCable::Channel
     end
 
     if (partida&.status != 'finished') && is_player
-      Rails.logger.info "💀 [GAME] Usuario #{current_user.id} abandonó #{room}"
+      #Rails.logger.info "💀 [GAME] Usuario #{current_user.id} abandonó #{room}"
       winner = (current_user == partida.player1) ? partida.player2 : partida.player1
       if game_type == 'chess'
         partida.finalize_match(winner.id)
@@ -157,7 +157,7 @@ class GameChannel < ApplicationCable::Channel
 
       ActionCable.server.broadcast("game_#{room}", { type: 'opponent_disconnect' })
     else
-      Rails.logger.info "👋 [GAME] Usuario #{current_user.id} salió de #{room} — sin broadcast"
+      #Rails.logger.info "👋 [GAME] Usuario #{current_user.id} salió de #{room} — sin broadcast"
     end
   end
 

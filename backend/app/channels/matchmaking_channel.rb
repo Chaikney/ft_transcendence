@@ -4,20 +4,20 @@ class MatchmakingChannel < ApplicationCable::Channel
 
   def subscribed
     stream_from "matchmaking_#{current_user.id}"
-    Rails.logger.info "📡 [MATCHMAKING] Usuario #{current_user.id} acaba de conectar el cable."
+    #Rails.logger.info "📡 [MATCHMAKING] Usuario #{current_user.id} acaba de conectar el cable."
   end
 
   def join_queue(data)
     game_type = data['game_type'] || 'chess'
     
-    Rails.logger.info "⚔️ [MATCHMAKING] Usuario #{current_user.id} le dio al botón de #{game_type}"
+    #Rails.logger.info "⚔️ [MATCHMAKING] Usuario #{current_user.id} le dio al botón de #{game_type}"
 
     @@mutex.synchronize do
       opponent_id = @@waiting_players[game_type]
-      Rails.logger.info "🔍 [MATCHMAKING] Cola actual de #{game_type}: #{@@waiting_players.inspect}"
+      #Rails.logger.info "🔍 [MATCHMAKING] Cola actual de #{game_type}: #{@@waiting_players.inspect}"
 
       if opponent_id && opponent_id != current_user.id
-        Rails.logger.info "🎉 [MATCHMAKING] ¡BINGO! Emparejando a #{opponent_id} con #{current_user.id}"
+        #Rails.logger.info "🎉 [MATCHMAKING] ¡BINGO! Emparejando a #{opponent_id} con #{current_user.id}"
         
         @@waiting_players.delete(game_type)
         
@@ -53,7 +53,7 @@ class MatchmakingChannel < ApplicationCable::Channel
           opponent: { id: opponent_user.id, username: opponent_user.username, elo: opponent_user.elo }
         })
       else
-        Rails.logger.info "⏳ [MATCHMAKING] No hay nadie más. Usuario #{current_user.id} se queda esperando."
+        #Rails.logger.info "⏳ [MATCHMAKING] No hay nadie más. Usuario #{current_user.id} se queda esperando."
         @@waiting_players[game_type] = current_user.id
       end
     end
@@ -64,7 +64,7 @@ class MatchmakingChannel < ApplicationCable::Channel
     @@mutex.synchronize do
       if @@waiting_players[game_type] == current_user.id
         @@waiting_players.delete(game_type)
-        Rails.logger.info "🚪 [MATCHMAKING] Usuario #{current_user.id} abortó la secuencia."
+        #Rails.logger.info "🚪 [MATCHMAKING] Usuario #{current_user.id} abortó la secuencia."
       end
     end
   end
