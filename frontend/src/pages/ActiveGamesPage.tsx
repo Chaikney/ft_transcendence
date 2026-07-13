@@ -4,7 +4,7 @@ import { TerminalCard } from '@/components/TerminalCard';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
 import { InlineLoader } from '@/components';
-import type { LiveGame } from '@/types/Types game.d ';
+import type { LiveGame } from '@/types/game.d ';
 
 const styles = {
   page:
