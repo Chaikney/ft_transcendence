@@ -2,30 +2,37 @@ export type ConnectionStatusType = 'connected' | 'connecting' | 'disconnected' |
 
 export interface ChessGameState {
 	game_id: string;
-    fen: string;                
+	fen: string;				//standar representation board
 	turn: 'white' | 'black';
-    status: 'active' | 'in_progress' | 'checkmate' | 'draw' | 'finished'; 
+	status: 'active' | 'checkmate' | 'draw' | 'finished';
 	last_move: ChessMove | null;
 	player2_id?: number;
 	player1_id?: number;
-    
-    fen_history?: string[];
-    player?: {
-        player1: { name: string; avatar?: string; elo?: number };
-        player2: { name: string; avatar?: string; elo?: number };
-    };
+	white: string;
+	black: string;
+	spectators: number;
 }
 
 export interface ChessMove {
 	from: string;	// ex: "e2"
 	to: string;		// ex: "e4"
 	piece: string;
-    promotion?: string; // Added for pawn promotion
 }
 
 export interface ChessMovePayload {
 	game_id: string;
 	from: string;
 	to: string;
-    promotion?: string; // Added for pawn promotion request
+}
+
+export interface LiveGame {
+	id: string;
+	type: 'chess' | 'sudoku';
+	white: string;
+	black: string;
+	status: 'active' | 'checkmate' | 'draw';
+	turn: 'white' | 'black';
+	move_count: number;
+	spectators: number;
+	started_at: string;
 }

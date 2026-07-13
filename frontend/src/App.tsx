@@ -8,7 +8,7 @@ import { ToastContainer } from '@/components/Toast';
 
 export default function App() {
   // 🚀 Mantenemos la telemetría en consola, pero quitamos el alert molesto
-  console.log("🚀 ¡HOLA! APP.TSX SE ESTÁ EJECUTANDO (VERSIÓN BAN HAMMER)");
+  //console.log("🚀 ¡HOLA! APP.TSX SE ESTÁ EJECUTANDO (VERSIÓN BAN HAMMER)");
 
   const setUser = useAuthStore((s) => s.setUser);
   const setLoading = useAuthStore((s) => s.setLoading);
@@ -23,10 +23,10 @@ export default function App() {
 
   useEffect(() => {
     const initializeAuth = async () => {
-      console.log("🔍 [INIT] Iniciando secuencia de validación...");
+      //console.log("🔍 [INIT] Iniciando secuencia de validación...");
 
       if (import.meta.env.VITE_USE_MOCK === 'true') {
-        console.log("⚠️ [INIT] Modo MOCK activado. Saltando validación de backend.");
+        //console.log("⚠️ [INIT] Modo MOCK activado. Saltando validación de backend.");
         // @ts-ignore - Ignoramos tipado estricto para el mock de momento
         setUser({ id: 1, username: 'mdiaz-or', elo: 1247, avatar_url: '', banned: false });
         setIsInitializing(false);
@@ -34,12 +34,12 @@ export default function App() {
       }
 
       const token = localStorage.getItem('auth_token');
-      console.log("🔑 [INIT] Token encontrado en localStorage:", token ? "SÍ" : "NO");
+      //console.log("🔑 [INIT] Token encontrado en localStorage:", token ? "SÍ" : "NO");
 
       if (token) {
         setLoading(true);
         try {
-          console.log("🌐 [INIT] Enviando petición al backend: http://localhost:3000/api/profile");
+          //console.log("🌐 [INIT] Enviando petición al backend: http://localhost:3000/api/profile");
           const response = await fetch('http://localhost:3000/api/profile', {
             method: 'GET',
             headers: {
@@ -48,11 +48,11 @@ export default function App() {
             }
           });
 
-          console.log(`📊 [INIT] Respuesta del backend: Status ${response.status}`);
+          //console.log(`📊 [INIT] Respuesta del backend: Status ${response.status}`);
 
           if (response.ok) {
             const userData = await response.json();
-            console.log("✅ [INIT] Usuario validado por el backend:", userData.username);
+            //console.log("✅ [INIT] Usuario validado por el backend:", userData.username);
             setUser(userData); // Esto mete tus datos y pone isAuthenticated a true
           } else {
             console.error("❌ [INIT] El backend rechazó el token. Borrando de memoria.");
@@ -66,8 +66,7 @@ export default function App() {
           setIsInitializing(false); // 👈 ¡Solo se quita el candado cuando Ruby ha respondido!
         }
       } else {
-        // Si no hay token de inicio, terminamos la carga rápido
-        console.log("🚪 [INIT] No hay token. Abriendo puertas para redirigir al login.");
+        //console.log("🚪 [INIT] No hay token. Abriendo puertas para redirigir al login.");
         setLoading(false);
         setIsInitializing(false);
       }

@@ -4,11 +4,14 @@ module Api
 
     # GET /api/profile
     def profile
-      # 🚀 FIX: Añadimos :elo y los demás datos necesarios para el frontend
-      render json: @current_user.as_json(only: [:id, :username, :email, :avatar_url, :elo, :status, :wins, :losses]), status: :ok
+      # 🚀 INYECCIÓN: Fusionamos los datos del usuario con su historial
+      user_data = @current_user.as_json(only: [:id, :username, :email, :avatar_url, :elo, :status, :wins, :losses])
+                               .merge(match_history: build_match_history(@current_user))
+      
+      render json: user_data, status: :ok
     end
 
-   # GET /api/users/:username
+    # GET /api/users/:username
     def show
       target_user = User.find_by(username: params[:username])
       
@@ -18,13 +21,15 @@ module Api
 
       # Si soy yo mismo, devuelvo mis datos normales
       if target_user.id == @current_user.id
+        user_data = target_user.as_json(only: [:id, :username, :email, :avatar_url, :elo, :status, :wins, :losses])
+                               .merge(match_history: build_match_history(target_user))
+                               
         return render json: { 
-          user: target_user.as_json(only: [:id, :username, :email, :avatar_url, :elo, :status, :wins, :losses]),
+          user: user_data,
           is_me: true 
         }, status: :ok
       end
 
-      # 🛡️ PROTECCIÓN ACTIVA: Intentamos calcular el H2H con un salvavidas
       # 🛡️ PROTECCIÓN ACTIVA: Intentamos calcular el H2H con un salvavidas
       h2h = { total: 0, wins: 0, losses: 0 }
       
@@ -45,10 +50,12 @@ module Api
         Rails.logger.error "🚨 ERROR CALCULANDO H2H: #{e.message}"
       end
 
-      # Devolvemos los datos del amigo SANOS Y SALVOS
+      # Devolvemos los datos del amigo SANOS Y SALVOS (con historial incluido)
+      user_data = target_user.as_json(only: [:id, :username, :avatar_url, :elo, :status, :wins, :losses])
+                             .merge(match_history: build_match_history(target_user))
+
       render json: {
-        # 🚀 FIX: Añadimos :wins y :losses para que el frontend pueda sumar su TOTAL global
-        user: target_user.as_json(only: [:id, :username, :avatar_url, :elo, :status, :wins, :losses]),
+        user: user_data,
         is_me: false,
         h2h: h2h
       }, status: :ok
@@ -104,6 +111,41 @@ module Api
     def user_params
       # Aseguramos que solo se permitan los atributos necesarios
       params.require(:user).permit(:username, :email, :password, :avatar_url)
+    end
+
+    # 🚀 NUEVO: Prepara el historial de partidas formateado
+    # Ahora está correctamente dentro de la sección "private" de la clase
+    def build_match_history(target_user)
+      Game.where("(player1_id = ? OR player2_id = ?) AND status = 'finished'", target_user.id, target_user.id)
+          .order(updated_at: :desc)
+          .limit(100) # 🛡️ Límite para no saturar la red si un usuario tiene 500 partidas
+          .map do |game|
+            
+            # ♟️ Lógica de resultados estándar de ajedrez
+            result = if game.winner_id.nil?
+                       "1/2-1/2" # Empate
+                     elsif game.winner_id == game.player1_id
+                       "1-0"     # Ganan Blancas (Player 1)
+                     else
+                       "0-1"     # Ganan Negras (Player 2)
+                     end
+
+            {
+              id: game.id,
+              result: result,
+              white: {
+                username: game.player1&.username || 'Unknown',
+                avatar_url: game.player1&.avatar_url,
+                elo: game.player1&.elo || 0
+              },
+              black: {
+                username: game.player2&.username || 'Unknown',
+                avatar_url: game.player2&.avatar_url,
+                elo: game.player2&.elo || 0
+              },
+              date: game.updated_at
+            }
+          end
     end
   end
 end

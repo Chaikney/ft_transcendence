@@ -1,39 +1,80 @@
-import { useParams, Navigate, useNavigate } from 'react-router-dom'; // 👈 Añadido useNavigate
-import { useEffect, useState } from 'react';
+import { useParams, Navigate, useNavigate } from 'react-router-dom';
+import { useEffect, useState, useRef } from 'react'; // 🚀 AÑADIDO: useRef para la trampa del abandono
 import { ChessBoard } from './ChessBoard';
 import { useChessGame } from './hooks/useChessGame';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
 import { InlineLoader, Button } from '@/components';
 import { TerminalCard } from '@/components/TerminalCard';
 import { ErrorMessage } from '@/components/ErrorMessage';
-import { useMatchStore, useAuthStore } from '@/store';
-import { LobbyScreen } from '@/components/LobbyScreen';
+import { useMatchStore, useAuthStore } from '@/store'; 
+import { LobbyScreen } from '@/components/LobbyScreen'; 
+
+import { PlayerCard } from '@/components/PlayerCard'; 
 
 const styles = {
   page: 'min-h-screen flex flex-col items-center justify-center px-4 py-8 gap-6',
   topBar: 'flex items-center justify-between w-full max-w-[520px]',
   gameId: 'text-xs font-mono text-text-muted tracking-widest truncate',
-  actionRow: 'flex items-center justify-center gap-3 w-full',
+  actionRow: 'flex items-center justify-center gap-3 w-full mt-4',
 } as const;
 
 export const ChessGamePage = () => {
   const { id: gameId } = useParams<{ id: string }>();
-  const navigate = useNavigate(); // 👈 Inicializamos el navegador
-
+  const navigate = useNavigate();
+  
   const { chessGame, sendMove, resign, connectionStatus, sendReady, claimDraw } = useChessGame(gameId || "");
-
-  const status = useMatchStore((s) => s.status);
+  
+  const status = useMatchStore((s) => s.status); 
   const error = useMatchStore((s) => s.error);
   const resetMatch = useMatchStore((s) => s.resetMatch);
   const currentUser = useAuthStore((s) => s.user);
 
-  // 🛡️ EL BLINDAJE CONTRA LA AMNESIA:
   const [localColor, setLocalColor] = useState<'w' | 'b'>('w');
+  const [isResigning, setIsResigning] = useState(false);
 
-  // 🏳️ CONTROL DE BOTÓN ÚNICO:
-  const [isResigning, setIsResigning] = useState(false); // 👈 Nuevo estado
+  // 🛡️ BARRERA 1: Rastreador silencioso del estado de la partida
+  // 1. 🛡️ BARRERA: Metemos estado y funciones en Refs para que React no entre en bucle
+  const gameStatusRef = useRef(chessGame?.status);
+  const resignRef = useRef(resign);
+  const resetMatchRef = useRef(resetMatch);
+  
+  useEffect(() => {
+    gameStatusRef.current = chessGame?.status;
+    resignRef.current = resign;
+    resetMatchRef.current = resetMatch;
+  }, [chessGame?.status, resign, resetMatch]);
+
+  // 2. 🧹 EL CASTIGO DEFINITIVO Y SEGURO (Solo al salir de la URL)
+  useEffect(() => {
+    return () => {
+      // 1. Aplicamos el castigo
+      if (gameStatusRef.current === 'in_progress' || gameStatusRef.current === 'active') {
+        resignRef.current();
+      }
+      
+      // 2. Formateamos la memoria del tablero
+      resetMatchRef.current(); 
+
+      // 3. 🚀 MAGIA: Pedimos los datos frescos al backend para que el ELO visual se actualice
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        fetch('http://localhost:3000/api/profile', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(data => {
+          // Si el backend nos devuelve al usuario, forzamos a Zustand a actualizarse
+          if (data && data.username) {
+            useAuthStore.getState().setUser(data);
+          }
+        })
+        .catch(err => console.error("Error refrescando ELO:", err));
+      }
+    };
+  }, []);
 
   useEffect(() => {
+    // Revisamos si el backend nos ha mandado ya los datos del player2
     if (chessGame?.player2_id && currentUser?.id) {
       const p2 = String(chessGame.player2_id);
       const me = String(currentUser.id);
@@ -41,17 +82,15 @@ export const ChessGamePage = () => {
     }
   }, [chessGame?.player2_id, currentUser?.id]);
 
-  // 🚪 LA PUERTA DE SALIDA
   const handleNewGame = () => {
-    resetMatch();
-    navigate('/');
+    resetMatch(); 
+    navigate('/'); 
   };
 
-  // 🏳️ MANEJADOR DE RENDICIÓN
   const handleResignClick = () => {
-    if (isResigning) return; // Si ya se está procesando, ignoramos clics extra
-    setIsResigning(true);    // Bloqueamos instantáneamente el botón en local
-    resign();                // Enviamos la señal al backend
+    if (isResigning) return;
+    setIsResigning(true);
+    resign();
   };
 
   const isLocked = connectionStatus !== 'connected';
@@ -60,6 +99,21 @@ export const ChessGamePage = () => {
   if (error) return <div className={styles.page}><ErrorMessage title="Failed to load game" message={error} onRetry={resetMatch} /></div>;
   if (status === 'lobby') return <LobbyScreen onAccept={sendReady} isConnected={connectionStatus === 'connected'} />;
   if (!chessGame) return <div className={styles.page}><InlineLoader label="Connecting to game..." /></div>;
+
+  const isGameActive = chessGame.status === 'in_progress' || chessGame.status === 'active';
+  const isPlayer1Turn = chessGame.turn === 'white';
+  const isPlayer2Turn = chessGame.turn === 'black';
+  
+  // 1. Averiguamos si el usuario logueado es el jugador 1 (Blancas)
+  const isMeWhite = currentUser?.id === chessGame.player1_id;
+
+  // 2. Asignamos quién va arriba (Rival) y quién va abajo (Tú) usando '?. ' por seguridad
+  const topPlayer = isMeWhite ? chessGame.player?.player2 : chessGame.player?.player1;
+  const bottomPlayer = isMeWhite ? chessGame.player?.player1 : chessGame.player?.player2;
+
+  // 3. Calculamos a quién le toca mover para iluminar su tarjeta
+  const isTopTurn = isMeWhite ? (chessGame.turn === 'black') : (chessGame.turn === 'white');
+  const isBottomTurn = isMeWhite ? (chessGame.turn === 'white') : (chessGame.turn === 'black');
 
   return (
     <div className={styles.page}>
@@ -70,32 +124,57 @@ export const ChessGamePage = () => {
 
       <TerminalCard
         title={`chess — game_${gameId}`}
-        status={(chessGame?.status || 'unknown').toUpperCase()}
-        statusVariant={chessGame?.status === 'active' ? 'active' : 'error'}
+        status={chessGame.status.toUpperCase()} 
+        statusVariant={isGameActive ? 'active' : 'error'} 
         maxWidth="max-w-[560px]"
       >
-        <div className="flex flex-col items-center gap-5">
+        <div className="flex flex-col items-center gap-4 w-full">
+          
+          {/* 🃏 TARJETA DEL RIVAL (NEGRAS - ARRIBA) */}
+          {topPlayer && (
+            <PlayerCard 
+              name={topPlayer.name}
+              elo={topPlayer.elo}
+              avatar={topPlayer.avatar}
+              isTurn={isTopTurn}
+              align="left" 
+            />
+          )}
+
+          {/* ♟️ EL TABLERO */}
           <ChessBoard
             gameState={chessGame}
             onMove={sendMove}
             onDraw={claimDraw}
-            disabled={isLocked}
-            localPlayerColor={localColor}
+            disabled={isLocked || !isGameActive} 
+            localPlayerColor={localColor} 
           />
+
+          {/* 🃏 TU TARJETA (ABAJO) */}
+          {bottomPlayer && (
+            <PlayerCard  
+              name={bottomPlayer.name}
+              elo={bottomPlayer.elo}
+              avatar={bottomPlayer.avatar}
+              isTurn={isBottomTurn}
+              align="left" 
+            />
+          )}
+
           <div className={styles.actionRow}>
-            <Button
-              variant="primary"
-              onClick={handleResignClick}
-              disabled={isLocked || isResigning || (chessGame.status !== 'active' && chessGame.status !== 'in_progress')}
+            <Button 
+              variant="primary" 
+              onClick={handleResignClick} 
+              disabled={isLocked || isResigning || !isGameActive}
             >
               {isResigning ? 'Resigning...' : 'Resign'}
             </Button>
-
+            
             <Button variant="ghost" size="sm" onClick={handleNewGame}>
               New game
             </Button>
-
           </div>
+
         </div>
       </TerminalCard>
     </div>

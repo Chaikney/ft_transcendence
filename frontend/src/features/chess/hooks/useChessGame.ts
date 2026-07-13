@@ -29,7 +29,7 @@ export const useChessGame = (gameId: string) => {
       if (actualData.status === 'active') {
         actualData.status = 'in_progress';
       }
-      console.log("DEBUG: Datos recibidos del servidor:", actualData);
+      //console.log("DEBUG: Datos recibidos del servidor:", actualData);
       setChessGame(actualData as ChessGameState);
     } catch (err) {
       setError('Failed to load game');

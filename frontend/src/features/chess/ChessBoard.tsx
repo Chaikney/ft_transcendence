@@ -49,7 +49,7 @@ const styles = {
   pieceWhite: 'text-[var(--chess-piece-white)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] transition-transform duration-[var(--ease-fast)]',
   pieceBlack: 'text-[var(--chess-piece-black)] drop-shadow-[0_1px_2px_rgba(56,189,248,0.2)] transition-transform duration-[var(--ease-fast)]',
   lastMoveDot: 'absolute bottom-0.5 right-0.5 w-1.5 h-1.5 rounded-none bg-accent opacity-60',
-
+  
   // Estilos del modal de promoción
   promoOverlay: 'absolute inset-0 bg-black/60 z-50 flex items-center justify-center backdrop-blur-sm',
   promoMenu: 'bg-bg-surface p-4 rounded-xl shadow-2xl border border-accent-border flex flex-col items-center gap-3',
@@ -60,7 +60,8 @@ const styles = {
 
 interface ChessBoardProps {
   gameState: ChessGameState;
-  onMove:    (move: Omit<ChessMove, 'piece'>) => void;
+
+  onMove: (move: Omit<ChessMove, 'piece'> & { promotion?: string }) => void;
   disabled?: boolean;
   onDraw: () => void;
   localPlayerColor?: 'w' | 'b';
@@ -73,16 +74,16 @@ export const ChessBoard = ({
   disabled = false,
   localPlayerColor = 'w'
 }: ChessBoardProps) => {
-
+  
   // 🛑 ESTADO: Guarda el movimiento congelado mientras elegimos pieza
   const [pendingPromotion, setPendingPromotion] = useState<{ from: string, to: string } | null>(null);
-
+  
   const board = useMemo(() => parseFen(gameState.fen), [gameState.fen]);
 
   // 🛡️ INTERCEPTOR DE MOVIMIENTOS
   const handleMoveInterceptor = (move: Omit<ChessMove, 'piece'>) => {
     const { from, to } = move;
-
+    
     // Calculamos qué pieza había en la casilla de origen leyendo el 'board'
     const col = from.charCodeAt(0) - 97;
     const row = 8 - parseInt(from[1], 10);
@@ -105,11 +106,11 @@ export const ChessBoard = ({
 
   const boardSize  = 'min(80vw, 480px)';
   const squareSize = `calc(${boardSize} / 8)`;
-  const isActive   = gameState.status === 'active';
+  const isActive   = gameState.status === 'active' || gameState.status === 'in_progress';
 
   const displayRows = localPlayerColor === 'b' ? [7, 6, 5, 4, 3, 2, 1, 0] : [0, 1, 2, 3, 4, 5, 6, 7];
   const displayCols = localPlayerColor === 'b' ? [7, 6, 5, 4, 3, 2, 1, 0] : [0, 1, 2, 3, 4, 5, 6, 7];
-
+  
   const rankLabels = localPlayerColor === 'b' ? [1, 2, 3, 4, 5, 6, 7, 8] : [8, 7, 6, 5, 4, 3, 2, 1];
   const fileLabels = localPlayerColor === 'b' ? ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'] : ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
@@ -129,7 +130,7 @@ export const ChessBoard = ({
       </div>
 
       <div className={styles.boardFrame} style={{ width: `calc(${boardSize} + 25px)`, height: boardSize }}>
-
+  
         {/* 👑 EL MENÚ DE CORONACIÓN */}
         {pendingPromotion && (
           <div className={styles.promoOverlay}>
@@ -144,10 +145,10 @@ export const ChessBoard = ({
                       className={styles.promoBtn}
                       onClick={() => {
                         // Enviamos el movimiento final con la pieza elegida
-                        onMove({
-                          from: pendingPromotion.from,
-                          to: pendingPromotion.to,
-                          promotion: p
+                        onMove({ 
+                          from: pendingPromotion.from, 
+                          to: pendingPromotion.to, 
+                          promotion: p 
                         });
                         setPendingPromotion(null); // Ocultamos el menú
                       }}
@@ -175,15 +176,15 @@ export const ChessBoard = ({
           {displayRows.map((r) =>
             displayCols.map((c) => {
               const piece = board[r][c];
-              const square = toSquare(r, c);
-              const isLight = (r + c) % 2 === 0;
+              const square = toSquare(r, c); 
+              const isLight = (r + c) % 2 === 0; 
               const isSelected = selectedSquare === square;
               const isLastMove = gameState.last_move?.from === square || gameState.last_move?.to === square;
               const isDisabled = disabled || !isActive || !!pendingPromotion; // 👈 Bloqueamos el tablero si el menú está abierto
 
-            return (
-              <button
-                key={square}
+              return (
+                <button
+                  key={square}
                   disabled={isDisabled}
                   onClick={() => selectSquare(square, piece)}
                   className={[
@@ -205,11 +206,11 @@ export const ChessBoard = ({
                     </span>
                   )}
                   {isLastMove && !isSelected && !piece && <span className={styles.lastMoveDot} />}
-              </button>
-            );
-          })
-        )}
-      </div>
+                </button>
+              );
+            })
+          )}
+        </div>
       </div>
 
       <div className={styles.fileLabels} style={{ width: boardSize }}>

@@ -48,6 +48,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_10_212957) do
     t.string "status"
     t.datetime "updated_at", null: false
     t.integer "winner_id"
+    t.index ["status"], name: "index_games_on_status"
   end
 
   create_table "messages", force: :cascade do |t|

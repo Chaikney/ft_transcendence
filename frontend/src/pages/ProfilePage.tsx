@@ -4,6 +4,7 @@ import { useAuthStore } from '@/store';
 import { createSudokuGame } from '@/features/sudoku/service';
 import { FriendsList } from '@/features/friends/FriendsList';
 import { AvatarPicker } from '@/components/AvatarPicker';
+import { Avatar } from '@/components/Avatar';
 
 // ── Styles ────────────────────────────────────────────────────────────────
 const styles = {
@@ -159,7 +160,23 @@ export const ProfilePage = () => {
                         <AvatarPicker
                           currentAvatar={currentUser?.avatar_url || ''}
                           onSelect={async (newAvatarPath) => {
-                            // ... código de actualización del avatar igual ...
+                            try {
+                              const response = await fetch('http://localhost:3000/api/profile', {
+                                method: 'PUT',
+                                headers: { 
+                                  'Content-Type': 'application/json',
+                                  'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                                },
+                                body: JSON.stringify({ user: { avatar_url: newAvatarPath } })
+                              });
+
+                              if (response.ok) {
+                                //console.log("Avatar actualizado con éxito");
+                                setProfileUser((prev: any) => ({ ...prev, avatar_url: newAvatarPath }));
+                              }
+                            } catch (err) {
+                              console.error("Error al actualizar avatar:", err);
+                            }
                             setShowPicker(false);
                           }}
                           onClose={() => setShowPicker(false)}
@@ -221,7 +238,31 @@ export const ProfilePage = () => {
               {/* 🎮 Actions (SOLO SI ES TU PERFIL) */}
               {isOwnProfile && (
                 <div className={styles.actionRow}>
-                  <button className={[styles.actionBtn, styles.actionBtnPrimary].join(' ')} onClick={() => navigate('/game/chess/chess-new')}>&gt; play_chess()</button>
+                  <button 
+                    className={[styles.actionBtn, styles.actionBtnPrimary].join(' ')} 
+                    onClick={async () => {
+                      try {
+                        const response = await fetch('http://localhost:3000/api/games', {
+                          method: 'POST',
+                          headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                          },
+                          body: JSON.stringify({}) // Pide al backend que cree la partida oficial
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (response.ok && data.game_id) {
+                          navigate(`/game/chess/chess-${data.game_id}`);
+                        }
+                      } catch (err) {
+                        console.error("Error al crear la partida de ajedrez:", err);
+                      }
+                    }}
+                  >
+                    &gt; play_chess()
+                  </button>
                   <button className={[styles.actionBtn, styles.actionBtnPrimary].join(' ')} onClick={async () => {
                       try {
                         const res = await createSudokuGame('easy');
@@ -238,8 +279,58 @@ export const ProfilePage = () => {
         </div>
 
         {/* Match History Section */}
-        <div className="w-full">
-          {/* ... código del historial igual, pero leyendo de matchHistory ... */}
+        <div className="w-full mt-8">
+          <span className={styles.sectionLabel}>// combat_logs</span>
+          
+          <div className="flex flex-col gap-2 mt-3">
+            {(!profileUser.match_history || profileUser.match_history.length === 0) ? (
+              <div className="flex items-center justify-center py-8 border border-[#1a1a24] bg-[#0a0a0f] rounded">
+                <span className="text-xs font-mono text-[#4a4a5a]">// no matches recorded yet</span>
+              </div>
+            ) : (
+              profileUser.match_history.map((match: any) => (
+                <div 
+                  key={match.id} 
+                  className="flex items-center justify-between p-3 border border-[#1a1a24] bg-[#0c0c12] hover:border-[#2a2a35] transition-colors rounded"
+                >
+                  
+                  {/* ⚪ BLANCAS (Izquierda) */}
+                  <div className="flex items-center gap-3 w-2/5">
+                    <Avatar 
+                      src={match.white.avatar_url && match.white.avatar_url.length > 0 ? match.white.avatar_url : undefined} 
+                      username={match.white.username} 
+                      size="sm" 
+                    />
+                    <div className="flex flex-col min-w-0">
+                      <span className="font-mono text-xs text-gray-200 truncate">{match.white.username}</span>
+                      <span className="font-mono text-[10px] text-[#6a6a7a]">ELO: {match.white.elo}</span>
+                    </div>
+                  </div>
+
+                  {/* ⚔️ RESULTADO (Centro) */}
+                  <div className="flex justify-center w-1/5">
+                    <span className="font-mono text-xs tracking-widest px-2 py-1 bg-[#1a1a24] border border-[#2a2a35] text-[#00d4ff] rounded">
+                      {match.result}
+                    </span>
+                  </div>
+
+                  {/* ⚫ NEGRAS (Derecha) */}
+                  <div className="flex items-center justify-end gap-3 w-2/5 text-right">
+                    <div className="flex flex-col min-w-0">
+                      <span className="font-mono text-xs text-gray-200 truncate">{match.black.username}</span>
+                      <span className="font-mono text-[10px] text-[#6a6a7a]">ELO: {match.black.elo}</span>
+                    </div>
+                    <Avatar 
+                      src={match.black.avatar_url && match.black.avatar_url.length > 0 ? match.black.avatar_url : undefined} 
+                      username={match.black.username} 
+                      size="sm" 
+                    />
+                  </div>
+
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
 

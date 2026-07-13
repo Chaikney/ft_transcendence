@@ -28,7 +28,7 @@ export const useChatChannel = () => {
       { channel: 'ChatChannel' },
       {
         connected() {
-          console.log('[ChatChannel] connected');
+          //console.log('[ChatChannel] connected');
         },
         disconnected() {
           console.warn('[ChatChannel] disconnected');

@@ -9,6 +9,8 @@ class User < ApplicationRecord
             if: -> { email.present? }
 
   validates :password, presence: true, length: { minimum: 6 }, if: :password_digest_changed?
+
+  validates :username, presence: true, uniqueness: { case_sensitive: false }
   
   # 🟢 1. DEFINICIÓN DE ROLES
   enum :role, { player: 0, admin: 1 }
@@ -108,6 +110,6 @@ class User < ApplicationRecord
   end
 
   def set_default_avatar
-    self.avatar_url = "default.png" if self.avatar_url.blank?
+    self.avatar_url = "/avatars/default.png" if self.avatar_url.blank?
   end
 end

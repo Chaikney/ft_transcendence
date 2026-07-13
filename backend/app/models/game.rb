@@ -3,20 +3,26 @@ class Game < ApplicationRecord
   belongs_to :player2, class_name: 'User'
 
   validates :status, inclusion: { in: %w[pending in_progress finished] }
+  validates :player1, :player2, presence: true
+
+  # --- Helpers de ajedrez (todo vive en Game, no hay modelo ChessGame) ---
+
+  def turn
+    return nil if current_board.blank?
+    current_board.split(' ')[1] == 'w' ? 'white' : 'black'
+  end
+
+  def move_count
+    (fen_history || []).size
+  end
 
   # El motor del Torneo
+
   def finalize_match(winner_id)
-    winner = User.find(winner_id)
+    winner = (winner_id == player1_id) ? player1 : player2
     loser = (winner == player1) ? player2 : player1
 
-    # Matemáticas de Elo (Factor K = 32)
-    expected_winner = 1.0 / (1.0 + 10.0**((loser.elo - winner.elo) / 400.0))
-    expected_loser = 1.0 / (1.0 + 10.0**((winner.elo - loser.elo) / 400.0))
-
-    winner.elo += (32 * (1 - expected_winner)).round
-    loser.elo += (32 * (0 - expected_loser)).round
-
-    # Actualizamos contadores
+    update_elo_logic(winner, 1.0, loser, 0.0)
     winner.wins += 1
     loser.losses += 1
     self.status = 'finished'
@@ -31,26 +37,27 @@ class Game < ApplicationRecord
   end
 
   def finalize_draw
-    # Evitamos ejecutar esto dos veces si la partida ya había terminado
-    return if self.status == 'finished'
+    return if status == 'finished'
 
-    p1 = self.player1
-    p2 = self.player2
+    update_elo_logic(player1, 0.5, player2, 0.5)
+    save_all(player1, player2)
+  end
 
-    # Matemáticas de Elo (Factor K = 32)
+  private
+
+  def update_elo_logic(p1, score1, p2, score2)
     expected_p1 = 1.0 / (1.0 + 10.0**((p2.elo - p1.elo) / 400.0))
     expected_p2 = 1.0 / (1.0 + 10.0**((p1.elo - p2.elo) / 400.0))
 
-    # En caso de empate, la "puntuación real" es 0.5 para ambos
-    p1.elo += (32 * (0.5 - expected_p1)).round
-    p2.elo += (32 * (0.5 - expected_p2)).round
-
+    p1.elo += (32 * (score1 - expected_p1)).round
+    p2.elo += (32 * (score2 - expected_p2)).round
     self.status = 'finished'
+  end
 
-    # Guardamos todo de golpe
+  def save_all(u1, u2)
     User.transaction do
-      p1.save!
-      p2.save!
+      u1.save!
+      u2.save!
       self.save!
     end
   end
@@ -60,7 +67,7 @@ class Game < ApplicationRecord
     partidas_abandonadas = Game.where(status: 'in_progress').where("updated_at < ?", 1.hour.ago)
 
     partidas_abandonadas.each do |partida|
-      Rails.logger.info "💀 [AFK TIMEOUT] Partida ##{partida.id} abandonada. Ejecutando castigo..."
+      #Rails.logger.info "💀 [AFK TIMEOUT] Partida ##{partida.id} abandonada. Ejecutando castigo..."
 
       perdedor_id = partida.current_turn_id
       

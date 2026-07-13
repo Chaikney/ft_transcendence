@@ -51,7 +51,7 @@ export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
     let activeSub = cable.subscriptions.findAll(channelIdentifier)[0];
 
     if (!activeSub) {
-      console.log("🏗️ Construyendo nuevo cable inquebrantable para", gameId);
+      //console.log("🏗️ Construyendo nuevo cable inquebrantable para", gameId);
       
       activeSub = cable.subscriptions.create(
         { channel: 'GameChannel', game_id: gameId },
@@ -77,7 +77,7 @@ export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
                 if (isSudoku) setSudokuGame(event.game as SudokuGameState);
                 break;
               case 'player_ready':
-                console.log(`👍 El jugador ${event.user_id} está listo.`);
+                //console.log(`👍 El jugador ${event.user_id} está listo.`);
                 break;
               case "opponent_disconnect":
                 if (!isSudoku) {
@@ -114,7 +114,7 @@ export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
         }
       );
     } else {
-      console.log("♻️ Reutilizando cable existente para", gameId);
+      //console.log("♻️ Reutilizando cable existente para", gameId);
       setConnectionStatus('connected');
     }
 

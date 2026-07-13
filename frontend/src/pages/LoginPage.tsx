@@ -46,6 +46,7 @@ const styles = {
 } as const;
 
 type AuthMode = 'main' | 'guest_login' | 'guest_register' | '2fa_setup' | '2fa_verify' | 'email_verify';
+
 // ── Component ──────────────────────────────────────────────────────────────
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -78,14 +79,22 @@ export const LoginPage = () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      await registerGuest({ username, email, password });
+      const res: any = await registerGuest({ username, email, password });
       
-      // 🚀 EL CAMBIO: Ya no buscamos el OTP Secret, pasamos a la pantalla de email.
+      // 🥷 LA TRAMPA NINJA: Si el backend nos avisa de un error de forma suave
+      if (res && res.ok === false) {
+        setErrorMessage(res.error || 'Error en el registro');
+        showError(res.error || 'Error en el registro', 'System Error');
+        return; // Cortamos la ejecución aquí
+      }
+      
+      // Si todo ha ido bien, pasamos a la pantalla de email.
       setMode('email_verify');
       success('Identity compiled. Check your inbox.', 'Verification Required');
     } catch (err: any) {
-      setErrorMessage(err.message || 'Error en el registro');
-      showError(err.message || 'Error en el registro', 'System Error');
+      // Aquí solo caerá si el servidor está apagado o se corta internet
+      setErrorMessage(err.message || 'Error crítico en el servidor');
+      showError(err.message || 'Error crítico en el servidor', 'System Error');
     } finally {
       setLoading(false);
     }
@@ -96,7 +105,24 @@ export const LoginPage = () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const res = await loginGuest({ username, password, totp_code: totpCode });
+      const res: any = await loginGuest({ username, password, totp_code: totpCode });
+      
+      // 🥷 LA TRAMPA NINJA 2: Hacemos lo mismo para el login
+      if (res && res.ok === false) {
+        const msg = res.error || 'Error en el acceso';
+        
+        // Comprobamos si el error es de 2FA o de email sin verificar
+        if (msg.includes('Código') || msg.includes('2FA')) {
+          setMode('2fa_verify');
+          info('Se requiere código de seguridad', '2FA Detectado');
+        } else {
+          setErrorMessage(msg);
+          showError(msg, 'Access Denied');
+        }
+        return; // Cortamos la ejecución aquí
+      }
+
+      // Si todo ha ido bien
       if (res.token) {
         localStorage.setItem('auth_token', res.token);
         setUser(res.user);
@@ -104,14 +130,8 @@ export const LoginPage = () => {
         navigate('/');
       }
     } catch (err: any) {
-      const msg = err.message || 'Error en el acceso';
-      if (msg.includes('Código') || msg.includes('2FA')) {
-        setMode('2fa_verify');
-        info('Se requiere código de seguridad', '2FA Detectado');
-      } else {
-        setErrorMessage(msg);
-        showError(msg, 'Access Denied');
-      }
+      setErrorMessage(err.message || 'Error crítico en el servidor');
+      showError(err.message || 'Error crítico en el servidor', 'System Error');
     } finally {
       setLoading(false);
     }
@@ -185,7 +205,8 @@ export const LoginPage = () => {
             )}
           </>
         )}
-{mode === 'guest_login' && (
+        
+        {mode === 'guest_login' && (
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
             <div className={styles.titleWrap}>
               <span className={styles.titleEye}>// manual override active</span>
@@ -211,7 +232,6 @@ export const LoginPage = () => {
                 className={styles.input} 
               />
               
-              {/* 🚀 EL NUEVO ENLACE DE RECUPERACIÓN */}
               <div className="flex justify-end mt-2 mb-1">
                 <button 
                   type="button"
@@ -234,7 +254,6 @@ export const LoginPage = () => {
           </form>
         )}
 
-        {/* 👇 AQUÍ ESTÁ LA MAGIA PARA EL GUEST REGISTER 👇 */}
         {mode === 'guest_register' && (
           <form onSubmit={handleRegister} className="flex flex-col gap-4">
             <div className={styles.titleWrap}>
@@ -293,7 +312,6 @@ export const LoginPage = () => {
           </div>
         )}
 
-        {/* 👇 NUEVA PANTALLA: ESPERANDO VERIFICACIÓN POR EMAIL 👇 */}
         {mode === 'email_verify' && (
           <div className="flex flex-col items-center gap-6 text-center">
             <div className={styles.titleWrap}>

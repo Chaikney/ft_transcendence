@@ -15,8 +15,10 @@ Rails.application.routes.draw do
       resources :games, param: :game_id, only: [:show, :create, :update]
     end
 
-    # Partidas generales (ELO based)
-    resources :games, only: [:create] do
+    resources :games, only: [:create, :show, :update] do
+      collection do
+        get :active
+      end
       member do
         patch :finish, to: 'games#update'
       end
@@ -36,7 +38,7 @@ Rails.application.routes.draw do
     patch 'password_resets/:token', to: 'password_resets#update'
     
     # --- USUARIO Y PERFIL ---
-    get    '/users', to: 'users#index'    
+    get    '/users', to: 'users#index'
     get    '/profile', to: 'users#profile'
     put    '/profile', to: 'users#update'
     get    '/users/:username', to: 'users#show'
@@ -47,11 +49,16 @@ Rails.application.routes.draw do
     post '/friends/block', to: 'friendships#block'
     post '/friends/unblock', to: 'friendships#unblock'
     get '/friends/blacklist', to: 'friendships#blacklist'
-    
+
+    post '/games/challenge', to: 'games#challenge'
+    post '/games/accept_challenge', to: 'games#accept_challenge'
+
     # --- SOCIAL Y AMIGOS ---
     resources :rooms, only: [:index] do
       resources :messages, only: [:index]
     end
+
+    get '/games/:id', to: 'games#show'
 
     get    '/friends',           to: 'friendships#index'
     post   '/friends/request',   to: 'friendships#create'
