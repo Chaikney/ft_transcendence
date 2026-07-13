@@ -1,6 +1,6 @@
 ARG RUBY_VERSION
 
-FROM ruby:${RUBY_VERSION}-slim AS base
+FROM ruby:${RUBY_VERSION}-slim AS deps
 #FROM ruby:3.3-slim AS base
 
 # Instalamos dependencias necesarias:
@@ -14,6 +14,8 @@ RUN apt-get update -qq && apt-get install -y --no-install-recommends \
     libyaml-dev \
     netcat-openbsd \
     && rm -rf /var/lib/apt/lists/*
+
+FROM deps AS base
 
 # Carpeta de trabajo
 WORKDIR /app
