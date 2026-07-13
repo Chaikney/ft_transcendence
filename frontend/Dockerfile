@@ -12,12 +12,16 @@ RUN npm install
 # Copiamos el resto del código del frontend
 COPY . .
 
-# Copiamos el script de inicio y le damos permisos de ejecución
-COPY start.sh /app/start.sh
-RUN chmod +x /app/start.sh
-
 # Exponemos el puerto por defecto de Vite
-EXPOSE 5173
-
+# RUN npm run  build
+RUN npx vite build
 # Arrancamos Vite asegurando que escuche en todas las interfaces de red (--host)
-CMD ["/app/start.sh"]
+# CMD ["npm", "run", "dev", "--", "--host"]
+
+FROM nginx:1.27-alpine
+COPY --from=development /app/dist/ /usr/share/nginx/html/
+# copy config and  certificates
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY secret/trans.crt /etc/nginx/ssl/server.crt
+COPY secret/trans.key /etc/nginx/ssl/server.key
+CMD ["nginx", "-g", "daemon off;"]

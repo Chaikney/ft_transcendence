@@ -2,19 +2,28 @@ name: ft_transcendence
 
 services:
   web:
+    # FIXME should be depends on api or similar, transient faults if not
     build:
       context: ./frontend
-      dockerfile: Dockerfile
       # NOTE This is one bind mount and one storage volume defined on the fly
     volumes:
       - ../frontend:/app
        - /app/node_modules
+    # TODO Ideally this would be binding to 80 but that needs root
     ports:
-      - "5173:5173"
+      - "8080:80"
+      - "8443:443"
     env_file:
       - frontend/.env
+    depends_on:
+      - api
     networks:
       - app_int
+    healthcheck:
+      test: ["CMD-SHELL","nginx -t"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
   # web_complex:
   #   build:
   #     context: ./frontend
@@ -36,13 +45,9 @@ services:
   #   ports:
   #     - "8080:80"
   #     - "8443:443"
-  #   # NOTE This is an alternative way to specify healthchecks if they are not in the image
-  #   # healthcheck:
-  #   #   test: ["CMD-SHELL","nginx -t"]
-  #   #   interval: 30s
-  #   #   timeout: 5s
-  #   #   retries: 3
+     # NOTE This is an alternative way to specify healthchecks if they are not in the image
 
+  # TODO This part is formatted different from the others, not ideal.
   db:
     image: postgres:15-alpine
     restart: always
@@ -54,32 +59,46 @@ services:
       - backend/.env
     volumes:
       - DB_vol:/var/lib/postgresql/data
-    ports:
-      - "5432:5432" # Expone el puerto por si quieres conectarte con DBeaver o pgAdmin
     networks:
       - app_int
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U postgres || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   api:
     build:
       context: backend
+      args:
+        RUBY_VERSION: ${RUBY_VERSION}
     environment:
-      # FIXME The copntainer does not use this
       POSTGRES_PASSWORD_FILE: /run/secrets/RB_DBPASS
+      SECRET_42: /run/secrets/42_SECRET
+
     # Este comando es vital: borra el PID fantasma de Rails y luego arranca el servidor
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
     # NOTE Bind mount for development
     volumes:
       - ./backend:/app  # <--- LA MAGIA: Sincroniza tu carpeta local con el contenedor
-    ports:
-      - "3000:3000"
     env_file:
       - backend/.env
     secrets:
       - RB_DBPASS
+      - 42_SECRET
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - app_int
+    healthcheck:
+      test:
+      - "CMD-SHELL"
+      - "ruby -e 'require \"net/http\"; u=URI(\"http://localhost:3000/health\");
+r=Net::HTTP.get_response(u); exit(r.code.start_with?(\"2\") ? 0 : 1)'"
+      interval: 30s
+      timeout: 2s
+      retries: 20
 
   # db_complex:
   #   build:
@@ -104,11 +123,6 @@ services:
   #   expose:
   #     - "5432"
   #   env_file: ".env"
-  #   # healthcheck:
-  #   #   test: ["CMD-SHELL","pg_isready -U postgres || exit 1"]
-  #   #   interval: 30s
-  #   #   timeout: 5s
-  #   #   retries: 3
 
  # TODO Do we need a location for the ruby files? Other pieces?
 volumes:
@@ -126,6 +140,8 @@ secrets:
     file: ./secret/rb_dbname
   RB_DBPASS:
     file: ./secret/rb_dbpass
+  42_SECRET:
+    file: ./secret/42API_SEC
 
 # "the presence of these objects is sufficient to define them"
 networks:
