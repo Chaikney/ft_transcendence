@@ -38,7 +38,7 @@ module Api
       game = Game.new(
         player1: @current_user,
         player2: opponent,
-        status: opponent ? 'active', # 'active' para que el frontend sepa que espera jugador
+        status: opponent ? 'in_progress' : 'active', # 'active' para que el frontend sepa que espera jugador
         current_board: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
       )
 
