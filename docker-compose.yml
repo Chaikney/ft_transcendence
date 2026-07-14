@@ -2,15 +2,17 @@ name: ft_transcendence
 
 services:
   web:
-    # FIXME should be depends on api or similar, transient faults if not
+    # FIXME should be depends on api or similar,   transient faults if not
     build:
       context: ./frontend
       # NOTE This is one bind mount and one storage volume defined on the fly
       # TODO Work out which of these are actually needed
-    environment:
-      VITE_API_URL: ${VITE_API_URL}
-      VITE_CABLE_URL: ${VITE_CABLE_URL}
-      VITE_USE_MOCK: ${VITE_USE_MOCK}
+      args:
+        VITE_42_REDIRECT_URI: ${REDIRECT_URI_42}
+        VITE_API_URL: ${VITE_API_URL}
+        VITE_CABLE_URL: ${VITE_CABLE_URL}
+        VITE_USE_MOCK: ${VITE_USE_MOCK}
+        VITE_42_CLIENT_ID: ${UID_42}
     volumes:
       - ../frontend:/app
        - /app/node_modules

@@ -11,7 +11,16 @@ RUN npm install
 
 # Copiamos el resto del código del frontend
 COPY . .
-
+# NOTE These are needed *before* the build begins, else vite doesn't see them
+ARG VITE_API_URL
+ARG VITE_CABLE_URL
+ARG VITE_USE_MOCK
+ARG VITE_42_CLIENT_ID
+ARG VITE_42_REDIRECT_URI
+ENV VITE_42_CLIENT_ID=${VITE_42_CLIENT_ID}
+ENV VITE_42_REDIRECT_URI=${VITE_42_REDIRECT_URI}
+ENV VITE_USE_MOCK=${VITE_USE_MOCK}
+ENV VITE_42_CLIENT_ID=${VITE_42_CLIENT_ID}
 # Exponemos el puerto por defecto de Vite
 # RUN npm run  build
 RUN npx vite build
