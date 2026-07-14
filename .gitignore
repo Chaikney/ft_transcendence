@@ -32,8 +32,8 @@ coverage/
 # Ignore bundler config.
 /.bundle
 
-# Ignore all environment files.
-/.env*
+# Ignore all environment files. (Not the .env.example!)
+/.env
 
 # Ignore all logfiles and tempfiles.
 /log/*
