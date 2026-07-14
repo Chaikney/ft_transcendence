@@ -69,10 +69,10 @@ export const ProfilePage = () => {
     const fetchProfileData = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`http://localhost:3000/api/users/${username}`, {
+          const response = await fetch(`${BASE_URL}/users/${username}`, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           setProfileUser(data.user);
@@ -94,7 +94,7 @@ export const ProfilePage = () => {
 
   const handleGenerate2FA = async () => { /* ... igual ... */ };
   const handleVerify2FA = async () => { /* ... igual ... */ };
-  
+
   const handleLogout = () => {
     localStorage.removeItem('auth_token');
     clearUser();
@@ -112,14 +112,14 @@ export const ProfilePage = () => {
   }
 
   // Variables para la tabla (se llenarán cuando el backend devuelva el array de match_history)
-  const matchHistory = profileUser.match_history || []; 
+  const matchHistory = profileUser.match_history || [];
   const wins         = profileUser.wins || 0;
   const losses       = profileUser.losses || 0;
   const total        = wins + losses;
 
   return (
     <div className={styles.page}>
-      
+
       {/* ── COLUMNA IZQUIERDA: Perfil e Historial ── */}
       <div className={styles.leftColumn}>
         <div className="w-full">
@@ -161,9 +161,9 @@ export const ProfilePage = () => {
                           currentAvatar={currentUser?.avatar_url || ''}
                           onSelect={async (newAvatarPath) => {
                             try {
-                              const response = await fetch('http://localhost:3000/api/profile', {
+                                const response = await fetch(`${BASE_URL}/profile`, {
                                 method: 'PUT',
-                                headers: { 
+                                headers: {
                                   'Content-Type': 'application/json',
                                   'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                                 },
@@ -238,21 +238,21 @@ export const ProfilePage = () => {
               {/* 🎮 Actions (SOLO SI ES TU PERFIL) */}
               {isOwnProfile && (
                 <div className={styles.actionRow}>
-                  <button 
-                    className={[styles.actionBtn, styles.actionBtnPrimary].join(' ')} 
+                  <button
+                    className={[styles.actionBtn, styles.actionBtnPrimary].join(' ')}
                     onClick={async () => {
                       try {
-                        const response = await fetch('http://localhost:3000/api/games', {
+                          const response = await fetch(`${BASE_URL}/games`, {
                           method: 'POST',
-                          headers: { 
+                          headers: {
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                           },
                           body: JSON.stringify({}) // Pide al backend que cree la partida oficial
                         });
-                        
+
                         const data = await response.json();
-                        
+
                         if (response.ok && data.game_id) {
                           navigate(`/game/chess/chess-${data.game_id}`);
                         }
@@ -281,7 +281,7 @@ export const ProfilePage = () => {
         {/* Match History Section */}
         <div className="w-full mt-8">
           <span className={styles.sectionLabel}>// combat_logs</span>
-          
+
           <div className="flex flex-col gap-2 mt-3">
             {(!profileUser.match_history || profileUser.match_history.length === 0) ? (
               <div className="flex items-center justify-center py-8 border border-[#1a1a24] bg-[#0a0a0f] rounded">
@@ -289,17 +289,17 @@ export const ProfilePage = () => {
               </div>
             ) : (
               profileUser.match_history.map((match: any) => (
-                <div 
-                  key={match.id} 
+                <div
+                  key={match.id}
                   className="flex items-center justify-between p-3 border border-[#1a1a24] bg-[#0c0c12] hover:border-[#2a2a35] transition-colors rounded"
                 >
-                  
+
                   {/* ⚪ BLANCAS (Izquierda) */}
                   <div className="flex items-center gap-3 w-2/5">
-                    <Avatar 
-                      src={match.white.avatar_url && match.white.avatar_url.length > 0 ? match.white.avatar_url : undefined} 
-                      username={match.white.username} 
-                      size="sm" 
+                    <Avatar
+                      src={match.white.avatar_url && match.white.avatar_url.length > 0 ? match.white.avatar_url : undefined}
+                      username={match.white.username}
+                      size="sm"
                     />
                     <div className="flex flex-col min-w-0">
                       <span className="font-mono text-xs text-gray-200 truncate">{match.white.username}</span>
@@ -320,10 +320,10 @@ export const ProfilePage = () => {
                       <span className="font-mono text-xs text-gray-200 truncate">{match.black.username}</span>
                       <span className="font-mono text-[10px] text-[#6a6a7a]">ELO: {match.black.elo}</span>
                     </div>
-                    <Avatar 
-                      src={match.black.avatar_url && match.black.avatar_url.length > 0 ? match.black.avatar_url : undefined} 
-                      username={match.black.username} 
-                      size="sm" 
+                    <Avatar
+                      src={match.black.avatar_url && match.black.avatar_url.length > 0 ? match.black.avatar_url : undefined}
+                      username={match.black.username}
+                      size="sm"
                     />
                   </div>
 

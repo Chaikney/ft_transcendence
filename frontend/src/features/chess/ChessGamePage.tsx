@@ -6,10 +6,10 @@ import { ConnectionStatus } from '@/components/ConnectionStatus';
 import { InlineLoader, Button } from '@/components';
 import { TerminalCard } from '@/components/TerminalCard';
 import { ErrorMessage } from '@/components/ErrorMessage';
-import { useMatchStore, useAuthStore } from '@/store'; 
-import { LobbyScreen } from '@/components/LobbyScreen'; 
+import { useMatchStore, useAuthStore } from '@/store';
+import { LobbyScreen } from '@/components/LobbyScreen';
 
-import { PlayerCard } from '@/components/PlayerCard'; 
+import { PlayerCard } from '@/components/PlayerCard';
 
 const styles = {
   page: 'min-h-screen flex flex-col items-center justify-center px-4 py-8 gap-6',
@@ -21,10 +21,10 @@ const styles = {
 export const ChessGamePage = () => {
   const { id: gameId } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   const { chessGame, sendMove, resign, connectionStatus, sendReady, claimDraw } = useChessGame(gameId || "");
-  
-  const status = useMatchStore((s) => s.status); 
+
+  const status = useMatchStore((s) => s.status);
   const error = useMatchStore((s) => s.error);
   const resetMatch = useMatchStore((s) => s.resetMatch);
   const currentUser = useAuthStore((s) => s.user);
@@ -37,7 +37,7 @@ export const ChessGamePage = () => {
   const gameStatusRef = useRef(chessGame?.status);
   const resignRef = useRef(resign);
   const resetMatchRef = useRef(resetMatch);
-  
+
   useEffect(() => {
     gameStatusRef.current = chessGame?.status;
     resignRef.current = resign;
@@ -51,14 +51,14 @@ export const ChessGamePage = () => {
       if (gameStatusRef.current === 'in_progress' || gameStatusRef.current === 'active') {
         resignRef.current();
       }
-      
+
       // 2. Formateamos la memoria del tablero
-      resetMatchRef.current(); 
+      resetMatchRef.current();
 
       // 3. 🚀 MAGIA: Pedimos los datos frescos al backend para que el ELO visual se actualice
       const token = localStorage.getItem('auth_token');
       if (token) {
-        fetch('http://localhost:3000/api/profile', {
+          fetch(`${BASE_URL}/profile`, {
           headers: { 'Authorization': `Bearer ${token}` }
         })
         .then(res => res.json())
@@ -83,8 +83,8 @@ export const ChessGamePage = () => {
   }, [chessGame?.player2_id, currentUser?.id]);
 
   const handleNewGame = () => {
-    resetMatch(); 
-    navigate('/'); 
+    resetMatch();
+    navigate('/');
   };
 
   const handleResignClick = () => {
@@ -103,7 +103,7 @@ export const ChessGamePage = () => {
   const isGameActive = chessGame.status === 'in_progress' || chessGame.status === 'active';
   const isPlayer1Turn = chessGame.turn === 'white';
   const isPlayer2Turn = chessGame.turn === 'black';
-  
+
   // 1. Averiguamos si el usuario logueado es el jugador 1 (Blancas)
   const isMeWhite = currentUser?.id === chessGame.player1_id;
 
@@ -124,20 +124,20 @@ export const ChessGamePage = () => {
 
       <TerminalCard
         title={`chess — game_${gameId}`}
-        status={chessGame.status.toUpperCase()} 
-        statusVariant={isGameActive ? 'active' : 'error'} 
+        status={chessGame.status.toUpperCase()}
+        statusVariant={isGameActive ? 'active' : 'error'}
         maxWidth="max-w-[560px]"
       >
         <div className="flex flex-col items-center gap-4 w-full">
-          
+
           {/* 🃏 TARJETA DEL RIVAL (NEGRAS - ARRIBA) */}
           {topPlayer && (
-            <PlayerCard 
+            <PlayerCard
               name={topPlayer.name}
               elo={topPlayer.elo}
               avatar={topPlayer.avatar}
               isTurn={isTopTurn}
-              align="left" 
+              align="left"
             />
           )}
 
@@ -146,30 +146,30 @@ export const ChessGamePage = () => {
             gameState={chessGame}
             onMove={sendMove}
             onDraw={claimDraw}
-            disabled={isLocked || !isGameActive} 
-            localPlayerColor={localColor} 
+            disabled={isLocked || !isGameActive}
+            localPlayerColor={localColor}
           />
 
           {/* 🃏 TU TARJETA (ABAJO) */}
           {bottomPlayer && (
-            <PlayerCard  
+            <PlayerCard
               name={bottomPlayer.name}
               elo={bottomPlayer.elo}
               avatar={bottomPlayer.avatar}
               isTurn={isBottomTurn}
-              align="left" 
+              align="left"
             />
           )}
 
           <div className={styles.actionRow}>
-            <Button 
-              variant="primary" 
-              onClick={handleResignClick} 
+            <Button
+              variant="primary"
+              onClick={handleResignClick}
               disabled={isLocked || isResigning || !isGameActive}
             >
               {isResigning ? 'Resigning...' : 'Resign'}
             </Button>
-            
+
             <Button variant="ghost" size="sm" onClick={handleNewGame}>
               New game
             </Button>

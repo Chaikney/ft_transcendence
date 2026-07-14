@@ -22,7 +22,7 @@ export const AdminPanel = () => {
   const [usersList, setUsersList] = useState<AdminUser[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
 
-  // 2. Traer los usuarios reales cuando la pestaña "users" está activa
+  TE// 2. Traer los usuarios reales cuando la pestaña "users" está activa
   useEffect(() => {
     if (!user || (user.role !== 1 && user.username !== 'nkrasimi')) return;
 
@@ -31,7 +31,7 @@ export const AdminPanel = () => {
         setLoadingUsers(true);
         const token = localStorage.getItem('auth_token'); // Usando tu key 'auth_token'
         try {
-          const response = await fetch('http://localhost:3000/api/admin/users', {
+          const response = await fetch(`${BASE_URL}/admin/users`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           
@@ -56,7 +56,7 @@ export const AdminPanel = () => {
   const handleBanToggle = async (userId: number, currentBannedStatus: boolean) => {
     const token = localStorage.getItem('auth_token');
     try {
-      const res = await fetch(`http://localhost:3000/api/admin/users/${userId}/ban`, {
+         const res = await fetch(`${BASE_URL}/admin/users/${userId}/ban`, {
         method: 'PATCH',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -80,7 +80,7 @@ export const AdminPanel = () => {
 
     const token = localStorage.getItem('auth_token');
     try {
-      const res = await fetch(`http://localhost:3000/api/admin/users/${userId}`, {
+         const res = await fetch(`${BASE_URL}/admin/users/${userId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
