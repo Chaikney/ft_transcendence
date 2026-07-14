@@ -6,6 +6,11 @@ services:
     build:
       context: ./frontend
       # NOTE This is one bind mount and one storage volume defined on the fly
+      # TODO Work out which of these are actually needed
+    environment:
+      VITE_API_URL: ${VITE_API_URL}
+      VITE_CABLE_URL: ${VITE_CABLE_URL}
+      VITE_USE_MOCK: ${VITE_USE_MOCK}
     volumes:
       - ../frontend:/app
        - /app/node_modules
@@ -13,8 +18,6 @@ services:
     ports:
       - "8080:80"
       - "8443:443"
-    env_file:
-      - frontend/.env
     depends_on:
       - api
     networks:
@@ -53,10 +56,10 @@ services:
     restart: always
     environment:
       POSTGRES_PASSWORD_FILE: /run/secrets/RB_DBPASS
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
     secrets:
       - RB_DBPASS
-    env_file:
-      - backend/.env
     volumes:
       - DB_vol:/var/lib/postgresql/data
     networks:
@@ -73,7 +76,11 @@ services:
       args:
         RUBY_VERSION: ${RUBY_VERSION}
     environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD_FILE: /run/secrets/RB_DBPASS
+      UID_42: ${UID_42}
+      REDIRECT_URI_42: ${REDIRECT_URI_42}
       SECRET_42: /run/secrets/42_SECRET
 
     # Este comando es vital: borra el PID fantasma de Rails y luego arranca el servidor
@@ -81,8 +88,6 @@ services:
     # NOTE Bind mount for development
     volumes:
       - ./backend:/app  # <--- LA MAGIA: Sincroniza tu carpeta local con el contenedor
-    env_file:
-      - backend/.env
     secrets:
       - RB_DBPASS
       - 42_SECRET
