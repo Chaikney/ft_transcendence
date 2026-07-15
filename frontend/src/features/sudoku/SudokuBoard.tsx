@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from 'react';
+import { useRef, useCallback, useState, useEffect } from 'react';
 import { useSudokuBoard } from './hooks/useSudokuBoard';
 import type { CellValue, SudokuGameState, SudokuMovePayload } from './types';
 import { useToast } from '@/components/Toast';
@@ -142,19 +142,17 @@ export const SudokuBoard = ({ gameState, originalGrid, onMove, disabled = false 
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
-  const boardSize = 'min(80vw, 450px)';
-  const cellSize = `calc(${boardSize} / 9)`;
-
   const selectedValue = selectedCell ? gameState.grid[selectedCell[0]][selectedCell[1]] : null;
 
   return (
-    <div className="flex flex-col items-center gap-4 animate-board-reveal">
-      <div className="rounded-lg overflow-hidden border border-[#9A9184] shadow-[0_4px_16px_rgba(0,0,0,0.4)] bg-[#C5BAAC] p-[2px]" style={{ width: boardSize, height: boardSize }}>
-        <div className="grid grid-cols-9" style={{ width: boardSize, height: boardSize }}>
+    <div className="flex flex-col items-center gap-4 animate-board-reveal w-full">
+      {/* 🚀 FIX: Contenedor con aspect-square que ocupa el 100% de su padre elástico */}
+      <div className="w-full aspect-square rounded-lg overflow-hidden border border-[#9A9184] shadow-[0_4px_16px_rgba(0,0,0,0.4)] bg-[#C5BAAC] p-[2px]">
+        {/* 🚀 FIX: CSS Grid automático para 9x9 ocupando el 100% */}
+        <div className="grid grid-cols-9 grid-rows-9 w-full h-full">
           {gameState.grid.map((row, rowIdx) => row.map((value, colIdx) => {
             const isSelected = selectedCell?.[0] === rowIdx && selectedCell?.[1] === colIdx;
 
-            // Resaltar si coincide con la celda seleccionada O con el número seleccionado en el panel
             const isSameNumber = (
               (selectedValue !== null && selectedValue !== 0 && value !== 0 && Number(value) === Number(selectedValue)) ||
               (activePanelNumber !== null && value !== 0 && Number(value) === activePanelNumber)
@@ -169,18 +167,18 @@ export const SudokuBoard = ({ gameState, originalGrid, onMove, disabled = false 
                 disabled={disabled || (locked && !isSelected)}
                 onClick={() => {
                   selectCell(rowIdx, colIdx);
-                  setActivePanelNumber(null); // Limpiamos el panel al tocar el tablero
+                  setActivePanelNumber(null);
                 }}
+                className="w-full h-full"
                 style={{
-                  width: cellSize, height: cellSize,
-                  fontSize: `calc(${cellSize} * 0.44)`,
+                  // 🚀 FIX: Tamaño de fuente adaptable con clamp() para que escale con las celdas
+                  fontSize: 'clamp(14px, 4vmin, 22px)',
                   ...getCellStyle(isSelected, isSameNumber, isConflict, locked, value as CellValue, rowIdx, colIdx),
                 }}
               >
-
                 <div style={{ opacity: disabled || (locked && !isSelected) ? 0.4 : 1 }}>
                   {value !== 0 ? value : ''}
-              </div>
+                </div>
               </button>
             );
           }))}
@@ -188,7 +186,7 @@ export const SudokuBoard = ({ gameState, originalGrid, onMove, disabled = false 
       </div>
 
       {!disabled && gameState.status === 'active' && (
-        <div className="grid grid-cols-10 gap-1.5" style={{ width: boardSize }}>
+        <div className="grid grid-cols-10 gap-1.5 w-full">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
             <button
               key={n}
@@ -196,14 +194,14 @@ export const SudokuBoard = ({ gameState, originalGrid, onMove, disabled = false 
                 inputValue(n);
                 setActivePanelNumber(n);
               }}
-              className="aspect-square flex items-center justify-center font-mono font-medium text-sm rounded-md transition-all duration-200 border border-[#9A9184] bg-[#D1C7B7] hover:bg-[#BDB2A5] text-black"
+              className="aspect-square flex items-center justify-center font-mono font-medium text-sm sm:text-base rounded-md transition-all duration-200 border border-[#9A9184] bg-[#D1C7B7] hover:bg-[#BDB2A5] text-black"
             >
                 {n}
             </button>
           ))}
           <button
             onClick={() => { inputValue(0); setActivePanelNumber(null); }}
-            className="aspect-square flex items-center justify-center font-mono font-medium text-sm rounded-md transition-all duration-200 border border-[#9A9184] bg-[#D1C7B7] hover:bg-[#BDB2A5] text-black opacity-60"
+            className="aspect-square flex items-center justify-center font-mono font-medium text-sm sm:text-base rounded-md transition-all duration-200 border border-[#9A9184] bg-[#D1C7B7] hover:bg-[#BDB2A5] text-black opacity-60"
             title="Erase"
           >
             ✕

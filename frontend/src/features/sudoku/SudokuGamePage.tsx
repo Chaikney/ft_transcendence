@@ -13,11 +13,12 @@ import { createSudokuGame, finishSudokuGame } from './service';
 import type { SudokuDifficulty } from './types';
 
 const styles = {
-  page: 'min-h-screen flex flex-col items-center justify-center px-4 py-8 gap-6',
+  page: 'min-h-screen flex flex-col items-center justify-center px-4 py-4 gap-4', // <- Ajustado para más espacio vertical
   topBar: 'flex items-center justify-between w-full max-w-[500px]',
   gameId: 'text-xs font-mono text-text-muted tracking-widest truncate',
   actionRow: 'relative flex items-center justify-center gap-3 w-full',
   hintText: 'text-xs font-mono text-text-muted text-center',
+  boardWrapper: 'w-full max-w-[85vmin] max-h-[85vmin] sm:max-w-[450px] sm:max-h-[450px] aspect-square mx-auto', // <- ¡LA MAGIA AQUÍ!
 } as const;
 
 export const SudokuGamePage = () => {
@@ -139,12 +140,14 @@ export const SudokuGamePage = () => {
             {sudokuGame.difficulty}
           </Badge>
 
-      <SudokuBoard
-        gameState={sudokuGame}
-        originalGrid={originalGridRef.current}
-        onMove={sendMove}
-            disabled={isLocked}
-          />
+          <div className={styles.boardWrapper}>
+            <SudokuBoard
+              gameState={sudokuGame}
+              originalGrid={originalGridRef.current}
+              onMove={sendMove}
+              disabled={isLocked}
+            />
+          </div>
 
           {!isLocked && sudokuGame.status === 'active' && (
             <p className={styles.hintText}>
