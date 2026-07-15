@@ -13,6 +13,8 @@ BASEDIR	=	./
 BASECMD	=	podman
 SOCK	=	/run/podman/podman.sock
 SOCK_UNIT=	podman.socket
+ENV_FILE=	.env
+42_FILE	=	secret/42API_SEC
 
 
 all: $(NAME)
@@ -26,15 +28,24 @@ check_host:
 	@systemctl is-active --quiet $(SOCK_UNIT) || { echo "$(SOCK_UNIT) not active - this might cause problems"; exit 0; }
 	@podman system connection --log-level=error >/dev/null 2>&1 || { echo "podman connection failed"; exit 0; }
 
+# Fail fast if .env is missing
+# NOTE this is a *pre-launch* check not to be confused with review_env below
+check_env:
+	@test -f "$(ENV_FILE)" || (echo "Error: $(ENV_FILE) file not found, cannot launch containers without it." && exit 1)
+
+check_keys:
+	@test -f "$(42_FILE)" || (echo "Error: $(42_FILE) file not found, cannot launch containers without it." && exit 1)
+
 # Evaluator convenience: use this to check the container ENV VARs
-check_envs:
+review_envs:
+	@echo "About to print ENV of all running containers..."
 	@${BASECMD} ps -q | xargs -r -I {} sh -c '\
 		echo "== $$(${BASECMD} inspect -f "{{.Name}}" {}) =="; ${BASECMD} exec {} printenv'
 
 # Launch the cluster / pod of 3 containers
 # NOTE podman compose and podman-compose behave differently! BOOOO!
 # NOTE !! if you get a "cant get socket" error, *LAUNCH THE podman.socket SERVICE!
-start: check_host secrets
+start: check_host check_env secrets
 	@echo "Building and launching the containers"
 	@echo "BASEDIR is $(BASEDIR)"
 	$(BASECMD) compose -f "$(abspath $(BASEDIR)/docker-compose.yml)" up
@@ -50,7 +61,7 @@ rebuild:
 	$(BASECMD)-compose -f "$(abspath $(BASEDIR)/docker-compose.yml)" up --build
 
 # Finding or generating secrets that are not in the repo
-secrets: secret_dir secret/rb_dbpass server_cert
+secrets: secret_dir check_keys secret/rb_dbpass server_cert
 	@echo "Ensuring presence of necessary secret values"
 
 secret_dir:
@@ -110,6 +121,8 @@ help:
 the containers in this project.\n\
 The targets are:\n \
 * ft_transcendence (or all, or no target)\tlaunch the whole project\n \
+* check_host\tEnsure that the container controller is present\n \
+* check_env\tEnsure that the environment file is present\n \
 * builds\t\tTODO build all the containers needed for the project\n \
 * stop\t\thalt any running containers, using compose\n \
 * secrets\tEnsure we have a database password and web certificates\n \
@@ -119,4 +132,4 @@ The targets are:\n \
 * wipe\t\tremoves the storage volumes. Destructive!\n \
 * nuke\t\tRemove container cache *and* the storage volumes. Very destructive!"
 
-.PHONY: clean, all, fclean, re, wipe, nuke, help
+.PHONY: clean, all, fclean, re, wipe, nuke, help, review_envs, check_host, check_env, check_keys, start, stop
