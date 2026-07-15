@@ -26,6 +26,11 @@ check_host:
 	@systemctl is-active --quiet $(SOCK_UNIT) || { echo "$(SOCK_UNIT) not active - this might cause problems"; exit 0; }
 	@podman system connection --log-level=error >/dev/null 2>&1 || { echo "podman connection failed"; exit 0; }
 
+# Evaluator convenience: use this to check the container ENV VARs
+check_envs:
+	@${BASECMD} ps -q | xargs -r -I {} sh -c '\
+		echo "== $$(${BASECMD} inspect -f "{{.Name}}" {}) =="; ${BASECMD} exec {} printenv'
+
 # Launch the cluster / pod of 3 containers
 # NOTE podman compose and podman-compose behave differently! BOOOO!
 # NOTE !! if you get a "cant get socket" error, *LAUNCH THE podman.socket SERVICE!
