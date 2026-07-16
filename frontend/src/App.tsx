@@ -5,6 +5,7 @@ import { useAuthStore } from '@/store';
 import { useAppearanceRadar } from './hooks/useActionCable';
 import { AuthScreen } from './components/AuthScreen';
 import { ToastContainer } from '@/components/Toast';
+import { BASE_URL } from './services/api';
 
 export default function App() {
   // 🚀 Mantenemos la telemetría en consola, pero quitamos el alert molesto

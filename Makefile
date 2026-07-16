@@ -100,6 +100,8 @@ wipe: stop
 
 nuke: stop fclean wipe
 
+down: stop
+
 clean: stop
 # delete all the built containers
 	@echo "Removing all the cached pieces"

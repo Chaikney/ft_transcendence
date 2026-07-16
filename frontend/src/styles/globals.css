@@ -3,8 +3,6 @@
 *::before,
 *::after {
     box-sizing: border-box;
-    margin: 2;
-    padding: 8;
 }
 
 html {

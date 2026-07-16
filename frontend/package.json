@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@rails/actioncable": "^8.1.300",
-    "axios": "^1.17.0",
+    "axios": "^1.18.1",
     "canvas-confetti": "^1.9.4",
     "chess.js": "^1.4.0",
     "qrcode.react": "^4.2.0",

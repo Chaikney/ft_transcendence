@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store'; 
 import { useToast } from '@/components/Toast';
+import { BASE_URL } from '../services/api';
 
 // 1. Definimos cómo es un usuario según la base de datos
 interface AdminUser {
@@ -22,7 +23,7 @@ export const AdminPanel = () => {
   const [usersList, setUsersList] = useState<AdminUser[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
 
-  TE// 2. Traer los usuarios reales cuando la pestaña "users" está activa
+  // 2. Traer los usuarios reales cuando la pestaña "users" está activa
   useEffect(() => {
     if (!user || (user.role !== 1 && user.username !== 'nkrasimi')) return;
 

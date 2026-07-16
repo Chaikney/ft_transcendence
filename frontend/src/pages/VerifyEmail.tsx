@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/components/Toast';
+import { BASE_URL } from '../services/api';
 
 export const VerifyEmail = () => {
   const [searchParams] = useSearchParams();

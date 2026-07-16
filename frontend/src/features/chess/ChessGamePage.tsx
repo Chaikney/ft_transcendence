@@ -8,6 +8,7 @@ import { TerminalCard } from '@/components/TerminalCard';
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { useMatchStore, useAuthStore } from '@/store';
 import { LobbyScreen } from '@/components/LobbyScreen';
+import { BASE_URL } from '../../services/api';
 
 import { PlayerCard } from '@/components/PlayerCard';
 
@@ -171,7 +172,7 @@ export const ChessGamePage = () => {
             </Button>
 
             <Button variant="ghost" size="sm" onClick={handleNewGame}>
-              New game
+              Home
             </Button>
           </div>
 

@@ -5,6 +5,7 @@ import { createSudokuGame } from '@/features/sudoku/service';
 import { FriendsList } from '@/features/friends/FriendsList';
 import { AvatarPicker } from '@/components/AvatarPicker';
 import { Avatar } from '@/components/Avatar';
+import { BASE_URL } from '../services/api';
 
 // ── Styles ────────────────────────────────────────────────────────────────
 const styles = {
