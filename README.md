@@ -77,36 +77,23 @@ make
 
 ### Database Schema
 The backend uses PostgreSQL, we see it as the default choice for many applications and it is well-supported by the standard ruby tools and in containers. It works at our small scale and would be scalable if this platform were to go excitingly viral. The detailed schema of the database can be consulted in [a separate document](./docs/DB_details.md). The core schema consists of the following primary relations:
-users
+
+* users
 : can be defined locally or through registration by 42 OAUTH
-games
+* games
 : Store the chess games started and their existing state.
-sudoku_games
+* sudoku_games
 : Stores the sudoku games started and their existing state.
-blocks
+* blocks
 : manages social relationships between players
-friendships
+* friendships
 : Also manages social relationships between players, this is the nice side of it.
-rooms
+* rooms
 : defines the chat rooms
-room_memberships
+* room_memberships
 : defines membership of the chat rooms
-messages
+* messages
 : Chat functionality
 
-* **Users Table:** Manages authentication and profiles.
-  * `id` (Primary Key)
-  * `uid42`: Unique identifier from the 42 Network OAuth.
-  * `username`, `email`, `avatar_url`: User profile data.
-  * `status`: Enum mapping (`online`, `offline`, `in_game`).
-  * `elo`: Integer tracking the user's matchmaking rating.
-* **Games Table:** Tracks matches (Chess & Sudoku) and their states.
-  * `id` (Primary Key)
-  * `type`: STI (Single Table Inheritance) defining if it's a Chess or Sudoku match.
-  * `status`: Enum (`active`, `in_progress`, `won`, `lost`, `finished`).
-  * `difficulty`: Specifically for Sudoku instances.
-  * `grid` / `moves`: JSON column storing the complex matrix data and move history efficiently.
-  * `timestamps`: For tracking AFK timeouts and match duration.
-
-## 7. Modules & Points Claimed
+## 7. TODO Modules & Points Claimed
 _[Lista pendiente de rellenar con los Major y Minor modules de la hoja de corrección para la evaluación]_
