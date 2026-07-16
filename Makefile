@@ -43,10 +43,9 @@ review_envs:
 
 # Launch the cluster / pod of 3 containers
 # NOTE podman compose and podman-compose behave differently! BOOOO!
-# NOTE !! if you get a "cant get socket" error, *LAUNCH THE podman.socket SERVICE!
+# NOTE If using podman and you get a "cant get socket" error, *LAUNCH THE podman.socket SERVICE!
 start: check_host check_env secrets
 	@echo "Building and launching the containers"
-	@echo "BASEDIR is $(BASEDIR)"
 	$(BASECMD) compose -f "$(abspath $(BASEDIR)/docker-compose.yml)" up
 
 stop:
@@ -55,9 +54,9 @@ stop:
 	$(BASECMD) compose -f "$(abspath $(BASEDIR)/docker-compose.yml)" down
 
 # Launch the cluster with rebuilt containers (will use cache if present)
-rebuild:
+rebuild: stop
 	@echo "Rebuilding and launching the containers"
-	$(BASECMD)-compose -f "$(abspath $(BASEDIR)/docker-compose.yml)" up --build
+	$(BASECMD) compose -f "$(abspath $(BASEDIR)/docker-compose.yml)" up --build
 
 # Finding or generating secrets that are not in the repo
 secrets: secret_dir check_keys secret/rb_dbpass server_cert
@@ -122,7 +121,6 @@ The targets are:\n \
 * ft_transcendence (or all, or no target)\tlaunch the whole project\n \
 * check_host\tEnsure that the container controller is present\n \
 * check_env\tEnsure that the environment file is present\n \
-* builds\t\tTODO build all the containers needed for the project\n \
 * stop\t\thalt any running containers, using compose\n \
 * secrets\tEnsure we have a database password and web certificates\n \
 * re\t\tTODO launch the containers while forcing their rebuild\n \
@@ -131,4 +129,4 @@ The targets are:\n \
 * wipe\t\tremoves the storage volumes. Destructive!\n \
 * nuke\t\tRemove container cache *and* the storage volumes. Very destructive!"
 
-.PHONY: clean, all, fclean, re, wipe, nuke, help, review_envs, check_host, check_env, check_keys, start, stop
+.PHONY: clean, all, fclean, re, wipe, nuke, help, review_envs, check_host, check_env, check_keys, start, stop, rebuild
