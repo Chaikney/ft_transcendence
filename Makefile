@@ -8,9 +8,8 @@ REPO	=	team42
 BASEDIR	=	./
 # Location of the individual containers (in their subfolders)
 
-# NOTE Change BASECMD to docker if that is what is being used
-# TODO Ideally this would work interchangeably but I bet it doesn't
-BASECMD	=	podman
+# NOTE Change BASECMD to podman if you have that on your machine; it should work the same.
+BASECMD	=	docker
 SOCK	=	/run/podman/podman.sock
 SOCK_UNIT=	podman.socket
 ENV_FILE=	.env
