@@ -6,6 +6,8 @@
 
 A **Single Page Application (SPA)** built with **React** and **Ruby on Rails**, featuring real-time multiplayer gaming via **WebSockets (ActionCable)**, secure **OAuth 2.0 (42)** authentication, and a robust **ELO-based ranking system**.
 
+**Note for evaluators** you may want to jump to Section 5 on launching the project. You may also enjoy the convenience function `make review_envs` to inspect the running containers.
+
 ## 2. Key Features
 
 - **Real-time Gaming:** Multiplayer engine with low-latency synchronization.
@@ -19,7 +21,7 @@ A **Single Page Application (SPA)** built with **React** and **Ruby on Rails**, 
 - **Frontend:** React, TypeScript, Tailwind CSS, Zustand (Global State).
 - **Backend:** Ruby on Rails (API Mode), PostgreSQL.
 - **Real-time:** ActionCable (WebSockets), Redis.
-- **Infrastructure:** Docker & Docker Compose (for production-ready deployment), Nginx.
+- **Infrastructure:** Docker & Docker Compose, Nginx. A [full discussion of the infrastructural choices can be found here](./docs/containers.rst).
 
 **Why this stack?**
 * **React & TypeScript:** Provides a predictable, strictly-typed component architecture essential for managing the complex, rapidly changing state of the Sudoku and Chess game logic and real-time UI synchronization.
@@ -54,9 +56,13 @@ A **Single Page Application (SPA)** built with **React** and **Ruby on Rails**, 
 
 ## 5. Getting Started
 
+The simplest possible setup is the following.
 ```bash
-# Clone the repository
-git clone [https://github.com/your-repo/ft_transcendence.git](https://github.com/your-repo/ft_transcendence.git)
+# Clone the repository from vog
+git clone git@vogsphere.42urduliz.com:vogsphere/intra-uuid-d9bb6f6a-1246-45bc-9a4a-cac51a66ad36-7514648-gcassi-d
+# or from GitHub:
+git clone https://github.com/Chaikney/ft_transcendence.git
+
 cd ft_transcendence
 
 # Set up environment variables
@@ -74,6 +80,9 @@ make
 
 - **Pub/Sub Pattern:** Explain how you use WebSockets for real-time game updates and spectator broadcasting.
 - **Security:** Highlight the backend-first validation approach (RBAC and TOTP verification).
+
+### Container orchestration
+There are more details than you need in [containers.rst](./docs/containers.rst)
 
 ### Database Schema
 The backend uses PostgreSQL, we see it as the default choice for many applications and it is well-supported by the standard ruby tools and in containers. It works at our small scale and would be scalable if this platform were to go excitingly viral. The detailed schema of the database can be consulted in [a separate document](./docs/DB_details.md). The core schema consists of the following primary relations:
