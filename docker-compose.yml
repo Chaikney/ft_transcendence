@@ -84,6 +84,11 @@ services:
       UID_42: ${UID_42}
       REDIRECT_URI_42: ${REDIRECT_URI_42}
       SECRET_42: /run/secrets/42_SECRET
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_ADDRESS: ${SMTP_ADDRESS}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_DOMAIN: ${SMTP_DOMAIN}
 
     # Este comando es vital: borra el PID fantasma de Rails y luego arranca el servidor
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"

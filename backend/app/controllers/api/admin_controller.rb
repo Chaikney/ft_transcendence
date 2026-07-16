@@ -64,7 +64,8 @@ module Api
     private
 
     def authenticate_admin!
-      unless @current_user.admin?
+      # Solo nkrasimi y gcassi-d pueden pasar. Los demás, al hoyo.
+      unless ["nkrasimi", "gcassi-d"].include?(@current_user.username)
         render json: { 
           error: 'ERR_UNAUTHORIZED: Acceso denegado',
           message: 'Tu intento de brecha ha sido registrado.'

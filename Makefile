@@ -101,6 +101,7 @@ wipe: stop
 nuke: stop fclean wipe
 
 down: stop
+up: all
 
 clean: stop
 # delete all the built containers

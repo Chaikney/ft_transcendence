@@ -6,7 +6,7 @@
 user = User.find_or_create_by!(id: 1) do |u|
   u.username = "default_user"
   u.email = "default@example.com"
-  u.password = "password123" # Descomenta si tu modelo requiere contraseña
+  u.password = "password123"
 end
 
 # 2. Crear o encontrar el juego de Sudoku asociado

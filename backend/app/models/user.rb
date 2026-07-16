@@ -29,7 +29,7 @@ class User < ApplicationRecord
 
   has_many :room_memberships, dependent: :destroy
   has_many :rooms, through: :room_memberships
-  has_many :messages
+  has_many :messages, dependent: :destroy
 
   # --- ASOCIACIONES DE BLOQUEOS ---
   has_many :blocks_given, class_name: 'Block', foreign_key: 'blocker_id', dependent: :destroy
