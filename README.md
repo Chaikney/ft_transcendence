@@ -1,0 +1,112 @@
+# ft_transcendence
+
+> "The final project of the common core: A real-time competitive gaming platform."
+
+## 1. Project Overview
+
+A **Single Page Application (SPA)** built with **React** and **Ruby on Rails**, featuring real-time multiplayer gaming via **WebSockets (ActionCable)**, secure **OAuth 2.0 (42)** authentication, and a robust **ELO-based ranking system**.
+
+## 2. Key Features
+
+- **Real-time Gaming:** Multiplayer engine with low-latency synchronization.
+- **Authentication:** Secure OAuth 2.0 integration with 42 Intra or local acccount registration.
+- **Security:** Advanced RBAC (Role-Based Access Control) for Admin/Player roles and 2FA via TOTP.
+- **Social & Competitive:** Global leaderboard, detailed match history, chat, and friend systems.
+- **Spectator Mode:** Live match broadcasting with real-time viewer counting.
+
+## 3. Tech Stack & Justifications
+
+- **Frontend:** React, TypeScript, Tailwind CSS, Zustand (Global State).
+- **Backend:** Ruby on Rails (API Mode), PostgreSQL.
+- **Real-time:** ActionCable (WebSockets), Redis.
+- **Infrastructure:** Docker & Docker Compose (for production-ready deployment), Nginx.
+
+**Why this stack?**
+* **React & TypeScript:** Provides a predictable, strictly-typed component architecture essential for managing the complex, rapidly changing state of the Sudoku and Chess game logic and real-time UI synchronization.
+* **Ruby on Rails (API Mode):** Chosen for its rapid development capabilities and robust ActiveRecord ORM, allowing us to build secure endpoints and complex database queries for the matchmaking and ELO systems quickly.
+* **PostgreSQL:** Essential for relational data integrity, specifically handling concurrent user match history, matchmaking queues, and secure storage of OAuth profiles without locking issues.
+* **Zustand:** Selected over Redux for a lighter, boilerplate-free global state management, critical for maintaining the `ConnectionStatus` and WebSocket payloads without unnecessary re-renders.
+
+## 4. Team Members & Individual Contributions
+
+* **mdiaz-or (Project Manager)**
+  * _[Añadir descripciones específicas de sus aportaciones reales]_
+  * Planning, scheduling, project tracking, and documentation.
+
+* **nkrasimi (Technical Lead / Backend & Fullstack)**
+  * Designed and implemented the PostgreSQL database schema and ActiveRecord relationships.
+  * Engineered the Sudoku gameplay mechanics, real-time board state validation, and responsive UI logic.
+  * Built the backend user matchmaking system and the ELO calculation engine.
+  * Integrated secure OAuth 2.0 authentication with the 42 Network API.
+
+* **gcassi-d (Software Developer)**
+  * _[Añadir descripciones específicas de sus aportaciones reales]_
+  * Implementation of features, debugging, and testing.
+
+* **chaikney (DevOps, Release Manager)**
+  * Implementation and orchestration of production containers.
+  * Deployment tooling. Makefile with checks, convenience functions.
+  * Secure environment handling. Managing secrets with the compose file and ensuring they are not visible in container environments.
+  * Continuous testing of builds.
+  * Liaison with 42 staff, demonstrate project progress.
+  * Manage git branching and merges.
+  * Patching backend and frontend code to ensure the project works outwith the developers' machines.
+
+## 5. Getting Started
+
+```bash
+# Clone the repository
+git clone [https://github.com/your-repo/ft_transcendence.git](https://github.com/your-repo/ft_transcendence.git)
+cd ft_transcendence
+
+# Set up environment variables
+cp .env.example .env
+
+# Set up 42 API Secret for OAuth
+mkdir -p secret
+nano secret/42API_SEC # Paste your 42 API Secret inside and save
+
+# Build and start services using the Makefile (generates local SSL certs and uses Docker)
+make
+```
+
+## 6. Architecture & Design
+
+- **Pub/Sub Pattern:** Explain how you use WebSockets for real-time game updates and spectator broadcasting.
+- **Security:** Highlight the backend-first validation approach (RBAC and TOTP verification).
+
+### Database Schema
+The backend uses PostgreSQL, we see it as the default choice for many applications and it is well-supported by the standard ruby tools and in containers. It works at our small scale and would be scalable if this platform were to go excitingly viral. The detailed schema of the database can be consulted in [a separate document](./docs/DB_details.md). The core schema consists of the following primary relations:
+users
+: can be defined locally or through registration by 42 OAUTH
+games
+: Store the chess games started and their existing state.
+sudoku_games
+: Stores the sudoku games started and their existing state.
+blocks
+: manages social relationships between players
+friendships
+: Also manages social relationships between players, this is the nice side of it.
+rooms
+: defines the chat rooms
+room_memberships
+: defines membership of the chat rooms
+messages
+: Chat functionality
+
+* **Users Table:** Manages authentication and profiles.
+  * `id` (Primary Key)
+  * `uid42`: Unique identifier from the 42 Network OAuth.
+  * `username`, `email`, `avatar_url`: User profile data.
+  * `status`: Enum mapping (`online`, `offline`, `in_game`).
+  * `elo`: Integer tracking the user's matchmaking rating.
+* **Games Table:** Tracks matches (Chess & Sudoku) and their states.
+  * `id` (Primary Key)
+  * `type`: STI (Single Table Inheritance) defining if it's a Chess or Sudoku match.
+  * `status`: Enum (`active`, `in_progress`, `won`, `lost`, `finished`).
+  * `difficulty`: Specifically for Sudoku instances.
+  * `grid` / `moves`: JSON column storing the complex matrix data and move history efficiently.
+  * `timestamps`: For tracking AFK timeouts and match duration.
+
+## 7. Modules & Points Claimed
+_[Lista pendiente de rellenar con los Major y Minor modules de la hoja de corrección para la evaluación]_
