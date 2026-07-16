@@ -1,4 +1,30 @@
-                                                                       Table "public.games"
+# Transcendence Project Database Schema
+
+This was generated using `psql` commands and is for reference. An overview discussion of the database can be found in the main README.md file.
+
+## List of relations
+
+Some of these are not very interesting, e.g. ar_internal_metadata and schema_migrations (used by the ruby ORM).
+
+ Schema |         Name         | Type  |  Owner   
+--------+----------------------+-------+----------
+ public | ar_internal_metadata | table | postgres
+ public | blocks               | table | postgres
+ public | friendships          | table | postgres
+ public | games                | table | postgres
+ public | messages             | table | postgres
+ public | room_memberships     | table | postgres
+ public | rooms                | table | postgres
+ public | schema_migrations    | table | postgres
+ public | sudoku_games         | table | postgres
+ public | users                | table | postgres
+(10 rows)
+
+
+## Details of each table
+
+### Table "public.games"
+
      Column      |              Type              | Collation | Nullable |              Default              | Storage  | Compression | Stats target | Description 
 -----------------+--------------------------------+-----------+----------+-----------------------------------+----------+-------------+--------------+-------------
  id              | bigint                         |           | not null | nextval('games_id_seq'::regclass) | plain    |             |              | 
@@ -22,7 +48,7 @@ Foreign-key constraints:
     "fk_rails_c341d2ac1e" FOREIGN KEY (player1_id) REFERENCES users(id)
 Access method: heap
 
-                                                                     Table "public.rooms"
+### Table "public.rooms"
    Column   |              Type              | Collation | Nullable |              Default              | Storage  | Compression | Stats target | Description 
 ------------+--------------------------------+-----------+----------+-----------------------------------+----------+-------------+--------------+-------------
  id         | bigint                         |           | not null | nextval('rooms_id_seq'::regclass) | plain    |             |              | 
@@ -37,7 +63,7 @@ Referenced by:
     TABLE "messages" CONSTRAINT "fk_rails_a8db0fb63a" FOREIGN KEY (room_id) REFERENCES rooms(id)
 Access method: heap
 
-                                                                    Table "public.room_memberships"
+### Table "public.room_memberships"
    Column   |              Type              | Collation | Nullable |                   Default                    | Storage | Compression | Stats target | Description 
 ------------+--------------------------------+-----------+----------+----------------------------------------------+---------+-------------+--------------+-------------
  id         | bigint                         |           | not null | nextval('room_memberships_id_seq'::regclass) | plain   |             |              | 
@@ -54,7 +80,7 @@ Foreign-key constraints:
     "fk_rails_9e247fff77" FOREIGN KEY (user_id) REFERENCES users(id)
 Access method: heap
 
-                                                                     Table "public.sudoku_games"
+### Table "public.sudoku_games"
    Column   |              Type              | Collation | Nullable |                 Default                  | Storage  | Compression | Stats target | Description 
 ------------+--------------------------------+-----------+----------+------------------------------------------+----------+-------------+--------------+-------------
  id         | bigint                         |           | not null | nextval('sudoku_games_id_seq'::regclass) | plain    |             |              | 
@@ -71,7 +97,7 @@ Foreign-key constraints:
     "fk_rails_7ee1dadd8d" FOREIGN KEY (user_id) REFERENCES users(id)
 Access method: heap
 
-                                                                     Table "public.messages"
+### Table "public.messages"
    Column   |              Type              | Collation | Nullable |               Default                | Storage  | Compression | Stats target | Description 
 ------------+--------------------------------+-----------+----------+--------------------------------------+----------+-------------+--------------+-------------
  id         | bigint                         |           | not null | nextval('messages_id_seq'::regclass) | plain    |             |              | 
@@ -90,7 +116,7 @@ Foreign-key constraints:
     "fk_rails_a8db0fb63a" FOREIGN KEY (room_id) REFERENCES rooms(id)
 Access method: heap
 
-                                                                           Table "public.users"
+### Table "public.users"
          Column         |              Type              | Collation | Nullable |              Default              | Storage  | Compression | Stats target | Description 
 ------------------------+--------------------------------+-----------+----------+-----------------------------------+----------+-------------+--------------+-------------
  id                     | bigint                         |           | not null | nextval('users_id_seq'::regclass) | plain    |             |              | 
@@ -125,7 +151,7 @@ Referenced by:
     TABLE "friendships" CONSTRAINT "fk_rails_e3733b59b7" FOREIGN KEY (user_id) REFERENCES users(id)
 Access method: heap
 
-                                                                     Table "public.friendships"
+### Table "public.friendships"
    Column   |              Type              | Collation | Nullable |                 Default                 | Storage  | Compression | Stats target | Description 
 ------------+--------------------------------+-----------+----------+-----------------------------------------+----------+-------------+--------------+-------------
  id         | bigint                         |           | not null | nextval('friendships_id_seq'::regclass) | plain    |             |              | 
@@ -144,7 +170,7 @@ Foreign-key constraints:
     "fk_rails_e3733b59b7" FOREIGN KEY (user_id) REFERENCES users(id)
 Access method: heap
 
-                                          Table "public.schema_migrations"
+### Table "public.schema_migrations"
  Column  |       Type        | Collation | Nullable | Default | Storage  | Compression | Stats target | Description 
 ---------+-------------------+-----------+----------+---------+----------+-------------+--------------+-------------
  version | character varying |           | not null |         | extended |             |              | 
@@ -152,7 +178,7 @@ Indexes:
     "schema_migrations_pkey" PRIMARY KEY, btree (version)
 Access method: heap
 
-                                                Table "public.ar_internal_metadata"
+### Table "public.ar_internal_metadata"
    Column   |              Type              | Collation | Nullable | Default | Storage  | Compression | Stats target | Description 
 ------------+--------------------------------+-----------+----------+---------+----------+-------------+--------------+-------------
  key        | character varying              |           | not null |         | extended |             |              | 
@@ -163,7 +189,7 @@ Indexes:
     "ar_internal_metadata_pkey" PRIMARY KEY, btree (key)
 Access method: heap
 
-                                                                    Table "public.blocks"
+### Table "public.blocks"
    Column   |              Type              | Collation | Nullable |              Default               | Storage | Compression | Stats target | Description 
 ------------+--------------------------------+-----------+----------+------------------------------------+---------+-------------+--------------+-------------
  id         | bigint                         |           | not null | nextval('blocks_id_seq'::regclass) | plain   |             |              | 
