@@ -34,6 +34,8 @@ const styles = {
   navLinkInactive:
     'text-white border-transparent ' +
     'hover:text-white hover:border-border-strong',
+  navLinkDisabled:
+    'text-white border-transparent cursor-default',
   navRight:
     'flex items-center gap-4',
   statusWrap:
@@ -117,7 +119,11 @@ export const RootLayout = () => {
                 } 
                 className={[
                   styles.navLink,
-                  isActive ? styles.navLinkActive : styles.navLinkInactive,
+                  isActive
+                    ? styles.navLinkActive
+                    : isDisabled
+                      ? styles.navLinkDisabled
+                      : styles.navLinkInactive,
                 ].join(' ')}
               >
                 {label}

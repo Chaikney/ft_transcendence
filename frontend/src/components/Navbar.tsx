@@ -27,7 +27,7 @@ const styles = {
   tabActive:
     'bg-accent text-white shadow-sm',
   tabInactive:
-    '<text-text-primary></text-text-primary> hover:text-text-primary hover:bg-bg-overlay',
+    'text-text-primary',
   right:
     'flex items-center gap-4',
   userBadge:
@@ -65,11 +65,9 @@ export const Navbar = ({
         {(['chess', 'sudoku'] as const).map((game) => (
           <button
             key={game}
-            onClick={() => onSelectGame(game)}
-            className={[
-              styles.tab,
-              activeGame === game ? styles.tabActive : styles.tabInactive,
-            ].join(' ')}
+            disabled
+            className={[styles.tab, styles.tabInactive].join(' ')}
+            style={{ cursor: 'default' }}
           >
             {game === 'chess' ? '♟ Chess' : '⊞ Sudoku'}
           </button>

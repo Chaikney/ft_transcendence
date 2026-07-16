@@ -13,12 +13,16 @@ import { createSudokuGame, finishSudokuGame } from './service';
 import type { SudokuDifficulty } from './types';
 
 const styles = {
-  page: 'min-h-screen flex flex-col items-center justify-center px-4 py-4 gap-4', // <- Ajustado para más espacio vertical
+  page: 'min-h-screen flex flex-col items-center justify-center px-4 py-6 gap-4',
   topBar: 'flex items-center justify-between w-full max-w-[500px]',
   gameId: 'text-xs font-mono text-text-muted tracking-widest truncate',
-  actionRow: 'relative flex items-center justify-center gap-3 w-full',
-  hintText: 'text-xs font-mono text-text-muted text-center',
-  boardWrapper: 'w-full max-w-[85vmin] max-h-[85vmin] sm:max-w-[450px] sm:max-h-[450px] aspect-square mx-auto', // <- ¡LA MAGIA AQUÍ!
+  actionRow: 'relative flex items-center justify-center gap-3 w-full mt-2',
+  hintText: 'text-xs font-mono text-text-muted text-center mt-2',
+  // 👇 Antes forzaba aspect-square + altura máxima fija, y el contenido real
+  // (grid + teclado numérico) es más alto que eso: se desbordaba por fuera
+  // del wrapper sin empujar a los elementos de abajo, y quedaban pisados.
+  // Ahora dejamos que la altura la determine el propio contenido.
+  boardWrapper: 'w-full max-w-[75vmin] sm:max-w-[400px] mx-auto',
 } as const;
 
 export const SudokuGamePage = () => {
@@ -37,7 +41,6 @@ export const SudokuGamePage = () => {
 
   const originalGridRef = useRef<number[][] | null>(null);
 
-  // Lógica del confeti: se ejecuta solo cuando el estado cambia a 'won'
   useEffect(() => {
     if (sudokuGame?.status === 'won' || sudokuGame?.status === 'finished') {
       confetti({
@@ -99,11 +102,7 @@ export const SudokuGamePage = () => {
   if (error) {
     return (
       <div className={styles.page}>
-        <ErrorMessage
-          title="Failed to load puzzle"
-          message={error}
-          onRetry={resetMatch}
-        />
+        <ErrorMessage title="Failed to load puzzle" message={error} onRetry={resetMatch} />
       </div>
     );
   }
@@ -135,7 +134,8 @@ export const SudokuGamePage = () => {
         }
         maxWidth="max-w-[540px]"
       >
-        <div className="flex flex-col items-center gap-5">
+        {/* Contenedor principal: gap-5 para dar más aire entre secciones */}
+        <div className="flex flex-col items-center w-full gap-5">
           <Badge variant="accent" dot>
             {sudokuGame.difficulty}
           </Badge>
@@ -148,7 +148,6 @@ export const SudokuGamePage = () => {
               disabled={isLocked}
             />
           </div>
-
           {!isLocked && sudokuGame.status === 'active' && (
             <p className={styles.hintText}>
               Click a cell, then type 1–9 or use the pad
@@ -157,11 +156,7 @@ export const SudokuGamePage = () => {
 
           <div className={styles.actionRow}>
             {gameId && (
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={() => setShowAbandonModal(true)}
-              >
+              <Button variant="danger" size="sm" onClick={() => setShowAbandonModal(true)}>
                 Leave game
               </Button>
             )}
@@ -183,7 +178,7 @@ export const SudokuGamePage = () => {
                       key={level}
                       disabled={isLoading}
                       onClick={() => handleNewPuzzle(level)}
-                      className="px-4 py-2 text-xs text-text-secondary hover:text-white hover:bg-[#2a2a2a] capitalize transition-colors text-left flex items-center justify-between"
+                      className="px-4 py-2 text-xs text-text-secondary hover:text-white hover:bg-[#2a2a2a] capitalize transition-colors text-left"
                     >
                       {level}
                     </button>
@@ -194,7 +189,7 @@ export const SudokuGamePage = () => {
           </div>
         </div>
       </TerminalCard>
-
+      
       {/* Modal de abandono */}
       {showAbandonModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store'; 
 import { useToast } from '@/components/Toast';
+import { BASE_URL } from '@services/api';
 
 // 1. Definimos cómo es un usuario según la base de datos
 interface AdminUser {
