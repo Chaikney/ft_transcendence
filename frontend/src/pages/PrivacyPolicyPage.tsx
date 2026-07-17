@@ -5,14 +5,14 @@ export const PrivacyPolicyPage = () => {
   const navigate = useNavigate();
   return (
     <div className="min-h-screen p-8 flex justify-center">
-      <TerminalCard 
-        title="terms_of_service.txt" 
+      <TerminalCard
+        title="terms_of_service.txt"
         maxWidth="max-w-3xl"
-        onBack={() => navigate(-1)} 
+        onBack={() => navigate(-1)}
       >
         <div className="text-text-secondary font-mono text-sm leading-relaxed space-y-6">
-          <p className="text-text-muted">Last updated: June 2026</p>
-          
+          <p className="text-text-muted">Last updated: July 2026</p>
+
           <div>
             <h2 className="text-accent font-bold mb-2">1. DATA_COLLECTION</h2>
             <div className="space-y-2">
@@ -20,21 +20,20 @@ export const PrivacyPolicyPage = () => {
               <p>Authentication data: your 42 Network username, display name, and profile avatar are retrieved via OAuth 2.0 during login.</p>
               <p>Game data: match results, ELO ratings, move history, and timestamps are stored to provide game statistics and leaderboard functionality.</p>
               <p>Session data: a JWT token is stored in your browser's localStorage to maintain your authenticated session.</p>
-              <p>We do not collect email addresses, passwords, payment information, or any sensitive personal data beyond what is provided by your 42 OAuth profile.</p>
+              <p>We do not collect passwords, payment information, or any sensitive personal data beyond what is provided by your 42 OAuth profile.
+              Email addresses that you provide us (i.e. through the alternative login method) are used only to authenticate your account and never for marketing,  aggregation, aggravation or ostentation. I have six email addresses already I don't want yours as well, seriously.</p>
             </div>
           </div>
-          
+
           <div>
             <h2 className="text-accent font-bold mb-2">2. DATA_USAGE</h2>
             <div className="space-y-2">
-              <p>Your data is used exclusively to operate and improve ft_transcendence.</p>
-              <p>Authentication data is used to identify you across sessions and display your profile.</p>
-              <p>Game data is used to calculate ELO ratings, display match history, and populate leaderboards.</p>
+              <p>Your data is used exclusively to operate and improve ft_transcendence. Authentication data is used to identify you across sessions and display your profile. Game data is used to calculate ELO ratings, display match history, and populate leaderboards.</p>
               <p>We do not sell, rent, or share your data with third parties for commercial purposes.</p>
               <p>Aggregated, anonymized statistics may be used to improve platform performance.</p>
             </div>
           </div>
-          
+
           <div>
             <h2 className="text-accent font-bold mb-2">3. DATA_STORAGE</h2>
             <div className="space-y-2">
@@ -44,7 +43,7 @@ export const PrivacyPolicyPage = () => {
               <p>All data transmission occurs over HTTPS/WSS encrypted connections.</p>
             </div>
           </div>
-          
+
           <div>
             <h2 className="text-accent font-bold mb-2">4. YOUR_RIGHTS</h2>
             <div className="space-y-2">
@@ -55,17 +54,17 @@ export const PrivacyPolicyPage = () => {
               <p>Account deletion requests are processed within 30 days.</p>
             </div>
           </div>
-          
+
           <div>
             <h2 className="text-accent font-bold mb-2">5. COOKIES_AND_STORAGE</h2>
             <div className="space-y-2">
               <p>We use localStorage (not cookies) to store your authentication token.</p>
               <p>No tracking cookies or third-party analytics scripts are used.</p>
               <p>No advertising networks have access to this platform.</p>
-              <p>You can clear your stored data at any time by logging out or clearing browser storage.</p>
+              <p>You can clear your locally stored data at any time by logging out or clearing browser storage.</p>
             </div>
           </div>
-          
+
           <div>
             <h2 className="text-accent font-bold mb-2">6. THIRD_PARTY_SERVICES</h2>
             <div className="space-y-2">
@@ -80,7 +79,7 @@ export const PrivacyPolicyPage = () => {
             <div className="space-y-2">
               <p>This project was created as part of the 42 curriculum.</p>
               <p>For privacy-related questions or data requests, contact the team via 42 intra.</p>
-              <p>Last updated: June 2026. This policy may be updated as the project evolves.</p>
+              <p>Last updated: July 2026. This policy may be updated as the project evolves.</p>
             </div>
           </div>
         </div>
