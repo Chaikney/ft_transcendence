@@ -68,12 +68,16 @@ cd ft_transcendence
 # Set up environment variables
 cp .env.example .env
 
-# Set up 42 API Secret for OAuth
+# Set up 42 API Secret for OAuth and the SMTP password for to send confirmation emails
 mkdir -p secret
 nano secret/42API_SEC # Paste your 42 API Secret inside and save
+nano secret/SMTP_PASS # Paste your SMTP password inside and save
 
-# Build and start services using the Makefile (generates local SSL certs and uses Docker)
+# Build and start services using the Makefile. This can generate local SSL certs, DB password etc.
+# Checks for the presence of necessary secrets and uses Docker by default.
 make
+# find out what else the Makefile can do with
+make help
 ```
 
 ## 6. Architecture & Design
