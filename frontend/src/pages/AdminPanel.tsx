@@ -25,7 +25,7 @@ export const AdminPanel = () => {
 
   // 2. Traer los usuarios reales cuando la pestaña "users" está activa
   useEffect(() => {
-    if (!user || (user.role !== 1 && user.username !== 'nkrasimi')) return;
+    if (!user || (user.username !== "nkrasimi" && user.username !== "gcassi-d")) return;
 
     if (activeTab === 'users') {
       const fetchUsers = async () => {
@@ -109,7 +109,7 @@ export const AdminPanel = () => {
   }
 
   // 6. Comprobación de seguridad dura (Incluye a nkrasimi como Override de emergencia)
-  const isAdmin = user.role === 1 || user.role === 'admin' || user.username === 'nkrasimi' || user.username === 'Kae';
+  const isAdmin = user.username === 'nkrasimi' || user.username === 'gcassi-d';
 
   // 7. PANTALLA DE ENTRADA PROHIBIDA
   if (!isAdmin) {
@@ -202,7 +202,7 @@ export const AdminPanel = () => {
                             {u.role === 1 ? 'ADMIN' : 'PLAYER'}
                           </td>
                           <td className="py-3 flex gap-2">
-                            {u.username === 'nkrasimi' ? (
+                            {u.username === 'nkrasimi' || u.username === 'gcassi-d' ? (
                               <button className="text-xs px-2 py-1 border border-border-strong text-text-muted cursor-not-allowed">
                                 ROOT_PROTECTED
                               </button>

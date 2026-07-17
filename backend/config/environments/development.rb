@@ -35,16 +35,16 @@ Rails.application.configure do
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = true
   config.action_mailer.perform_caching = false
-  
+
   # 👇 IMPORTANTE: Apunta al puerto 5173 (React) para que el link del correo funcione
-  config.action_mailer.default_url_options = { host: 'localhost', port: 5173 }
+  config.action_mailer.default_url_options = { host: 'localhost', port: 8443, protocol: 'https' }
 
   config.action_mailer.smtp_settings = {
     address:              ENV['SMTP_ADDRESS'],
     port:                 ENV['SMTP_PORT'].to_i,
     domain:               ENV['SMTP_DOMAIN'],
     user_name:            ENV['SMTP_USER'],
-    password:             ENV['SMTP_PASSWORD'],
+    password:             File.read(ENV.fetch('SMTP_PASSWORD')).strip,
     authentication:       :plain,
     enable_starttls_auto: true
   }

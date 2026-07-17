@@ -14,6 +14,7 @@ SOCK	=	/run/podman/podman.sock
 SOCK_UNIT=	podman.socket
 ENV_FILE=	.env
 42_FILE	=	secret/42API_SEC
+SMTP_FILE=	secret/42API_SEC
 
 
 all: $(NAME)
@@ -34,6 +35,7 @@ check_env:
 
 check_keys:
 	@test -f "$(42_FILE)" || (echo "Error: $(42_FILE) file not found, cannot launch containers without it." && exit 1)
+	@test -f "$(SMTP_FILE)" || (echo "Error: $(SMTP_FILE) file not found, cannot launch containers without it." && exit 1)
 
 # Evaluator convenience: use this to check the container ENV VARs
 review_envs:
@@ -101,6 +103,7 @@ wipe: stop
 nuke: stop fclean wipe
 
 down: stop
+up: all
 
 clean: stop
 # delete all the built containers

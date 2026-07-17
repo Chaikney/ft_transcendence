@@ -14,7 +14,7 @@ export default function LoginScreen() {
   const handle42Login = (): void => {
     // RECUERDA: Cambia TU_UID_PUBLICO por tu UID real de la Intra
     const uid42 = 'u-s4t2ud-8b88bb52bf805dfccc6336eeab953398a4f08059160682b5a7ec9138cd3e8e12';
-    const redirectUri = 'http://localhost:5173/auth/callback';
+    const redirectUri = 'https://localhost:8443/auth/callback';
     window.location.href = `https://api.intra.42.fr/oauth/authorize?client_id=${uid42}&redirect_uri=${redirectUri}&response_type=code`;
   };
 

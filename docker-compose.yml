@@ -84,6 +84,11 @@ services:
       UID_42: ${UID_42}
       REDIRECT_URI_42: ${REDIRECT_URI_42}
       SECRET_42: /run/secrets/42_SECRET
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_ADDRESS: ${SMTP_ADDRESS}
+      SMTP_PASSWORD: /run/secrets/SMTP_PASS
+      SMTP_DOMAIN: ${SMTP_DOMAIN}
 
     # Este comando es vital: borra el PID fantasma de Rails y luego arranca el servidor
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
@@ -93,6 +98,7 @@ services:
     secrets:
       - RB_DBPASS
       - 42_SECRET
+      - SMTP_PASS
     depends_on:
       db:
         condition: service_healthy
@@ -149,6 +155,8 @@ secrets:
     file: ./secret/rb_dbpass
   42_SECRET:
     file: ./secret/42API_SEC
+  SMTP_PASS:
+    file: ./secret/SMTP_PASS
 
 # "the presence of these objects is sufficient to define them"
 networks:

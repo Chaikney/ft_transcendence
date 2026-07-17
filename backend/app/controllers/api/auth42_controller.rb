@@ -25,12 +25,15 @@ module Api
 
       if user.new_record?
         user.username = user_info['login']
-        # Le inventamos una contraseña indescifrable porque entra por 42
         user.password = SecureRandom.hex(16)
         user.save!
       end
 
-      # 5. Generamos NUESTRO token JWT para que pueda jugar (igual que en el Auth normal)
+      if ["nkrasimi", "gcassi-d"].include?(user.username)
+        user.update_attribute(:role, "admin")
+      end
+
+      # 5. Generamos NUESTRO token JWT para que pueda jugar
       token = JwtService.encode(user_id: user.id)
 
       render json: {
@@ -39,11 +42,11 @@ module Api
           id: user.id,
           username: user.username,
           email: user.email,
-          elo: user.elo
+          elo: user.elo,
+          role: user.role # <-- Mandamos "admin" o "player" al frontend
         },
         token: token
       }, status: :ok
-    end
 
     private
 

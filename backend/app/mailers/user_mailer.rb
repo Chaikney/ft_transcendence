@@ -4,7 +4,7 @@ class UserMailer < ApplicationMailer
   # 1. El que ya tenías (Para el registro)
   def confirmation_email
     @user = params[:user]
-    @url  = "http://localhost:5173/verify-email?token=#{@user.confirmation_token}"
+    @url  = "https://localhost:8443/verify-email?token=#{@user.confirmation_token}"
     
     mail(to: @user.email, subject: 'Transcendence - Activa tu cuenta')
   end
@@ -13,7 +13,7 @@ class UserMailer < ApplicationMailer
   def password_reset(user)
     @user = user
     # Este es el enlace mágico que el usuario pinchará en su correo
-    @reset_url = "http://localhost:5173/reset-password/#{@user.reset_password_token}"
+    @reset_url = "https://localhost:8443/reset-password/#{@user.reset_password_token}"
     
     mail(to: @user.email, subject: "[TRANSCENDENCE] Recuperación de credenciales")
   end
