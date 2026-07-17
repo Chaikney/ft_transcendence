@@ -14,7 +14,7 @@ SOCK	=	/run/podman/podman.sock
 SOCK_UNIT=	podman.socket
 ENV_FILE=	.env
 42_FILE	=	secret/42API_SEC
-SMTP_FILE=	secret/42API_SEC
+SMTP_FILE=	secret/SMTP_PASS
 
 
 all: $(NAME)
