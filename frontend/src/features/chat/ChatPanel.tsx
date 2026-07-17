@@ -18,8 +18,12 @@ const fmtTime = (iso: string) => {
 
 const s = {
   panel:
-    'fixed bottom-20 right-6 z-[900] flex flex-col ' +
-    'w-80 h-[480px] ' +
+    'fixed z-[900] flex flex-col ' +
+    // Mobile: casi toda la pantalla, con margen arriba (navbar) y abajo (botón de chat)
+    'inset-x-3 top-16 bottom-20 ' +
+    // Desktop (sm+): vuelve al tamaño y posición originales
+    'sm:inset-x-auto sm:top-auto sm:bottom-20 sm:right-6 ' +
+    'sm:w-80 sm:h-[480px] ' +
     'bg-bg-surface border border-border-strong ' +
     'shadow-[0_0_32px_rgba(0,212,255,0.12),0_8px_48px_rgba(0,0,0,0.8)] ' +
     'animate-fade-in',

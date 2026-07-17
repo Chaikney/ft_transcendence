@@ -3,6 +3,7 @@ import type { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'a
 import type { ApiResponse } from '../types';
 
 export const BASE_URL = '/api';
+
 const api = axios.create({
   baseURL: BASE_URL,
   headers: {
