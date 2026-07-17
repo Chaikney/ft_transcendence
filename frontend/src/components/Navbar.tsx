@@ -60,20 +60,6 @@ export const Navbar = ({
           <span className={styles.logoDim}> /games</span>
         </span>
       </div>
-
-      <div className={styles.tabs}>
-        {(['chess', 'sudoku'] as const).map((game) => (
-          <button
-            key={game}
-            disabled
-            className={[styles.tab, styles.tabInactive].join(' ')}
-            style={{ cursor: 'default' }}
-          >
-            {game === 'chess' ? '♟ Chess' : '⊞ Sudoku'}
-          </button>
-        ))}
-      </div>
-
       <div className={styles.right}>
         <ConnectionStatus status={connectionStatus} />
         {user && (
