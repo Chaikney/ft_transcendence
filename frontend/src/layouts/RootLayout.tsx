@@ -62,8 +62,6 @@ const styles = {
 
 const NAV_ITEMS = [
   { label: '> home', path: '/' },
-  { label: '> chess', path: '/game/chess/chess-001' },
-  { label: '> sudoku', path: '/game/sudoku' },
   { label: '> spectate', path: '/spectate' },
 ] as const;
 
@@ -108,22 +106,13 @@ export const RootLayout = () => {
                 location.pathname.startsWith(
                   path.split('/').slice(0, 3).join('/')
                 ));
-                const isDisabled = path.includes('chess') || path.includes('sudoku');
             return (
               <button
                 key={path}
-                onClick={() => {
-                  if (!isDisabled) {
-                    navigate(path)}
-                  }
-                } 
+                onClick={() => navigate(path)}
                 className={[
                   styles.navLink,
-                  isActive
-                    ? styles.navLinkActive
-                    : isDisabled
-                      ? styles.navLinkDisabled
-                      : styles.navLinkInactive,
+                  isActive ? styles.navLinkActive : styles.navLinkInactive,
                 ].join(' ')}
               >
                 {label}
