@@ -17,7 +17,7 @@ test('Boss Final: Rage Quit de 2 jugadores (Selectores Reales)', async ({ browse
     
     await page1.locator('input[name="username"]').fill('nkrasimi');
 
-    await page1.locator('input[name="password"]').fill('PASSWORD');
+    await page1.locator('input[name="password"]').fill('12Happycoding()=');
     await page1.locator('input[type="submit"]').click();
     
     await expect(page1.locator('body')).toContainText('nkrasimi', { timeout: 15000 });
@@ -29,11 +29,11 @@ test('Boss Final: Rage Quit de 2 jugadores (Selectores Reales)', async ({ browse
     await page2.getByRole('button', { name: '> login' }).click();
     await page2.getByRole('button', { name: '> guest_login' }).click();
     
-    await page2.getByRole('textbox', { name: 'USERNAME_' }).fill('USER2');
-    await page2.getByRole('textbox', { name: 'PASSWORD_' }).fill('PASSWORD2');
+    await page2.getByRole('textbox', { name: 'USERNAME_' }).fill('Vegetta777');
+    await page2.getByRole('textbox', { name: 'PASSWORD_' }).fill('123456');
     await page2.getByRole('button', { name: '> INITIALIZE_LOGIN' }).click(); 
     
-    await expect(page2.locator('body')).toContainText('USER2', { timeout: 15000 });
+    await expect(page2.locator('body')).toContainText('Vegetta777', { timeout: 15000 });
   });
 
   await test.step('3. Matchmaking Simultáneo', async () => {
