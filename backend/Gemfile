@@ -59,3 +59,5 @@ gem 'chess'
 gem "rqrcode", "~> 3.2"
 
 gem "rack-attack", "~> 6.8"
+
+gem "rspec-rails", "~> 8.0"
