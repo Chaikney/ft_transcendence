@@ -8,6 +8,7 @@ services:
       # NOTE This is one bind mount and one storage volume defined on the fly
       # TODO Work out which of these are actually needed
       args:
+        VITE_BASE_URL: ${BASE_URL}
         VITE_42_REDIRECT_URI: ${REDIRECT_URI_42}
         VITE_API_URL: ${VITE_API_URL}
         VITE_CABLE_URL: ${VITE_CABLE_URL}
@@ -29,30 +30,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-  # web_complex:
-  #   build:
-  #     context: ./frontend
-  #     args:
-  #       ALP_VERSION: ${ALP_VERSION}
-  #   restart: unless-stopped
-  #   depends_on:
-  #     - ruby
-  #   env_file: ".env"
-  #   # IDEA Does the web volume need access to the ruby files? Or the react ones?
-  #   volumes:
-  #      - type: volume
-  #        source: FE_vol
-  #        target: ${FE_FILES}
-  #   networks:
-  #     - app_int
-  #   # NOTE Binds to high host ports so that we can run rootlessly
-  #   # IDEA This may need to change as we get to completion?
-  #   ports:
-  #     - "8080:80"
-  #     - "8443:443"
-     # NOTE This is an alternative way to specify healthchecks if they are not in the image
 
-  # TODO This part is formatted different from the others, not ideal.
   db:
     image: postgres:15-alpine
     restart: always
@@ -78,6 +56,7 @@ services:
       args:
         RUBY_VERSION: ${RUBY_VERSION}
     environment:
+      BASE_URL: ${BASE_URL}
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD_FILE: /run/secrets/RB_DBPASS
@@ -113,31 +92,6 @@ r=Net::HTTP.get_response(u); exit(r.code.start_with?(\"2\") ? 0 : 1)'"
       timeout: 2s
       retries: 20
 
-  # db_complex:
-  #   build:
-  #     context: ./backend
-  #     args:
-  #       ALP_VERSION: ${ALP_VERSION}
-  #       DB_FILES: ${DB_FILES}
-  #       RB_DBNAME: /run/secrets/RB_DBNAME
-  #       RB_DBUSER: /run/secrets/RB_DBUSER
-  #       WP_DBPASS: /run/secrets/RB_DBPASS
-  #   secrets:
-  #     - RB_DBPASS
-  #     - RB_DBNAME
-  #     - RB_DBUSER
-  #   restart: on-failure:3
-  #   volumes:
-  #     - type: volume
-  #       source: DB_vol
-  #       target: ${DB_FILES}
-  #   networks:
-  #     - app_int
-  #   expose:
-  #     - "5432"
-  #   env_file: ".env"
-
- # TODO Do we need a location for the ruby files? Other pieces?
 volumes:
   DB_vol:
 

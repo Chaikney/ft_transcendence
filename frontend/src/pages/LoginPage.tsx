@@ -6,10 +6,12 @@ import { useAuthStore } from '@/store';
 import { useToast } from '@/components/Toast';
 
 // ── 42 OAuth URL ───────────────────────────────────────────────────────────
+const BASE_URL = import.meta.env.VITE_BASE_URL ?? 'https://10.13.1.6:8443';
+
 const OAUTH_URL = `https://api.intra.42.fr/oauth/authorize?client_id=${
   import.meta.env.VITE_42_CLIENT_ID ?? 'YOUR_CLIENT_ID'
 }&redirect_uri=${
-  encodeURIComponent(import.meta.env.VITE_42_REDIRECT_URI ?? 'https://localhost:8443/auth/callback')
+  encodeURIComponent(import.meta.env.VITE_42_REDIRECT_URI ?? `${BASE_URL}/auth/callback`)
 }&response_type=code`;
 
 // ── Styles ────────────────────────────────────────────────────────────────
