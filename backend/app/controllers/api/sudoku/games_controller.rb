@@ -85,10 +85,20 @@ module Api
 
       def set_game
         numeric_id = params[:game_id].to_s.gsub(/[^0-9]/, '').to_i
-        @game = @current_user&.sudoku_games&.find_by(id: numeric_id) || SudokuGame.find_by(id: numeric_id)
+        
+        # 1. Buscamos la partida a nivel global primero
+        @game = SudokuGame.find_by(id: numeric_id)
 
-        unless @game
-          render json: { error: "Game not found" }, status: :not_found
+        # 2. Si la partida no existe, le decimos que no se encontró (404)
+        if @game.nil?
+          return render json: { error: "Game not found" }, status: :not_found
+        end
+
+        # 3. 🛑 LA BARRERA ANTI-INTRUSOS
+        # Como en tu create creas el juego dentro de @current_user.sudoku_games,
+        # comprobamos si esta partida pertenece a su lista de juegos.
+        unless @current_user.sudoku_games.exists?(id: @game.id)
+          return render json: { error: "Acceso denegado: Esta partida no es tuya" }, status: :forbidden
         end
       end
     end

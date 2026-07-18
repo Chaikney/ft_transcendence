@@ -9,7 +9,7 @@ class UserMailer < ApplicationMailer
   # 1. El que ya tenías (Para el registro)
   def confirmation_email
     @user = params[:user]
-    @url  = "https://localhost:8443/verify-email?token=#{@user.confirmation_token}"
+    @url  = "#{base_url}/verify-email?token=#{@user.confirmation_token}"
     
     mail(to: @user.email, subject: 'Transcendence - Activa tu cuenta')
   end
