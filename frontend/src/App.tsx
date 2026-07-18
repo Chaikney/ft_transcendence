@@ -40,7 +40,6 @@ export default function App() {
       if (token) {
         setLoading(true);
         try {
-          //console.log("🌐 [INIT] Enviando petición al backend: http://localhost:3000/api/profile");
             const response = await fetch(`${BASE_URL}/profile`, {
             method: 'GET',
             headers: {

@@ -2,6 +2,7 @@ class ApplicationController < ActionController::API
   
   before_action :authorize_request
   before_action :sweep_afk_games
+  before_action :set_no_cache_headers
 
   private
 
@@ -27,6 +28,12 @@ class ApplicationController < ActionController::API
       # Si el token es falso, ha caducado o está mal escrito, le damos un portazo
       render json: { errors: 'Acceso denegado. Token inválido o no proporcionado.' }, status: :unauthorized
     end
+  end
+
+  def set_no_cache_headers
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "Sat, 01 Jan 2000 00:00:00 GMT"
   end
 
   def sweep_afk_games

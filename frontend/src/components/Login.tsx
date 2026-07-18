@@ -13,8 +13,8 @@ export default function LoginScreen() {
   // 1. Lógica para 42
   const handle42Login = (): void => {
     // RECUERDA: Cambia TU_UID_PUBLICO por tu UID real de la Intra
-    const uid42 = 'u-s4t2ud-8b88bb52bf805dfccc6336eeab953398a4f08059160682b5a7ec9138cd3e8e12';
-    const redirectUri = 'https://localhost:8443/auth/callback';
+    const uid42 = import.meta.env.VITE_42_CLIENT_ID;
+    const redirectUri = import.meta.env.VITE_42_REDIRECT_URI;
     window.location.href = `https://api.intra.42.fr/oauth/authorize?client_id=${uid42}&redirect_uri=${redirectUri}&response_type=code`;
   };
 
@@ -22,14 +22,12 @@ export default function LoginScreen() {
   const handleGuestLogin = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     console.log('Intentando loguear invitado con:', username, password);
-    // Aquí harás un fetch('http://localhost:3000/api/auth/login', ...) a tu Rails
   };
 
   // 3. Lógica para Invitados (Registro) - Añadimos FormEvent de React
   const handleGuestRegister = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     console.log('Intentando registrar invitado con:', username, password);
-    // Aquí harás un fetch('http://localhost:3000/api/users', ...) a tu Rails
   };
 
   return (
