@@ -42,8 +42,11 @@ A **Single Page Application (SPA)** built with **React** and **Ruby on Rails**, 
   * Integrated secure OAuth 2.0 authentication with the 42 Network API.
 
 * **gcassi-d (Software Developer)**
-  * _[Añadir descripciones específicas de sus aportaciones reales]_
+  * Created the motor for the chess game in c++, later translated to Ruby
   * Implementation of features, debugging, and testing.
+  * Maneged the chess page in the web, making everything work correctly, testing it and making sure no cheating is possibe
+  * Supervised work on Friend list, blacklist, login and admin panel, as well as helping in implementing
+  * General bug fixes
 
 * **chaikney (DevOps, Release Manager)**
   * Implementation and orchestration of production containers.
