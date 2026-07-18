@@ -15,11 +15,15 @@ services:
         VITE_42_CLIENT_ID: ${UID_42}
     volumes:
       - ../frontend:/app
-       - /app/node_modules
-    # TODO Ideally this would be binding to 80 but that needs root
+      - /app/node_modules
+    # NOTE Ideally this would be binding to 80/443 but that needs root
     ports:
-      - "8080:80"
-      - "8443:443"
+      - target: 80
+        published: 8080
+        protocol: tcp
+      - target: 443
+        published: 8443
+        protocol: tcp
     depends_on:
       - api
     networks:
@@ -42,7 +46,7 @@ services:
     volumes:
       - DB_vol:/var/lib/postgresql/data
     networks:
-      - app_int
+      - app_db
     healthcheck:
       test: ["CMD-SHELL","pg_isready -U postgres || exit 1"]
       interval: 30s
@@ -67,7 +71,6 @@ services:
       SMTP_ADDRESS: ${SMTP_ADDRESS}
       SMTP_PASSWORD: /run/secrets/SMTP_PASS
       SMTP_DOMAIN: ${SMTP_DOMAIN}
-
     # Este comando es vital: borra el PID fantasma de Rails y luego arranca el servidor
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
     # NOTE Bind mount for development
@@ -82,6 +85,7 @@ services:
         condition: service_healthy
     networks:
       - app_int
+      - app_db
     healthcheck:
       test:
       - "CMD-SHELL"
@@ -114,3 +118,6 @@ secrets:
 # "the presence of these objects is sufficient to define them"
 networks:
   app_int:
+    internal: true
+  app_db:
+    internal: true
