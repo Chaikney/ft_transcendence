@@ -4,7 +4,7 @@ require 'uri'
 module Api
   class OauthController < ApplicationController
     skip_before_action :verify_authenticity_token, raise: false
-    skip_before_action :authorize_request, only: [:callback_42]
+    skip_before_action :authorize_request, only: [:create, :callback_42]
     def callback_42
       code = params[:code]
 

@@ -12,18 +12,10 @@ type CallbackStatus =
   | 'success'
   | 'error';
 
-  interface TokenResponse {
-    token: string;
-    user: User;
-  }
-
-const STATUS_LOGS: Record<CallbackStatus, string> = {
-  extracting: '> Extracting authorization code...',
-  exchanging: '> Exchanging code for token.......',
-  fetching:   '> Fetching user profile...........',
-  success:    '> Authentication successful.......',
-  error:      '> Authentication failed............',
-};
+interface TokenResponse {
+  token: string;
+  user: User;
+}
 
 const styles = {
   page:
@@ -50,26 +42,11 @@ const styles = {
   titleAccent:
     'text-accent',
 
-  // Log terminal
-  logWrap:
-    'flex flex-col gap-1.5 p-3 border border-border bg-bg-base ' +
-    'font-mono text-xs min-h-[120px]',
-  logLine:
-    'flex items-center gap-2',
-  logText:
-    'text-text-secondary',
-  logOk:
-    'text-[#00ff88] text-[10px] font-bold shrink-0',
-  logPending:
-    'text-[#ffaa00] text-[10px] font-bold shrink-0',
-  logError:
-    'text-[#ff3366] text-[10px] font-bold shrink-0',
+  // UI Elements
   logSpinner:
-    'w-3 h-3 rounded-full border border-border-strong border-t-accent ' +
-    'animate-spin-slow shrink-0',
-  logCursor:
-    'w-2 h-3 bg-accent animate-blink shrink-0',
-
+    'w-6 h-6 rounded-full border-2 border-border-strong border-t-accent ' +
+    'animate-spin-slow shrink-0 mx-auto',
+  
   // Success state
   successWrap:
     'flex flex-col gap-2 p-3 border border-[#00ff88]/30 bg-[#00ff88]/05',
@@ -95,7 +72,6 @@ const styles = {
 
 // Completed steps tracker ────────────────────────────────────────────────
 type Step = 'extracting' | 'exchanging' | 'fetching';
-const STEPS: Step[] = ['extracting', 'exchanging', 'fetching'];
 
 // Component ──────────────────────────────────────────────────────────────
 export const CallbackPage = () => {
@@ -104,7 +80,7 @@ export const CallbackPage = () => {
   const { error, success } = useToast();
 
   const [status,    setStatus]    = useState<CallbackStatus>('extracting');
-  const [authError,     setAuthError]     = useState<string | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [user,      setLocalUser] = useState<User | null>(null);
   const [completed, setCompleted] = useState<Set<Step>>(new Set());
 
@@ -156,12 +132,6 @@ export const CallbackPage = () => {
     exchange();
   }, []);
 
-  const getStepState = (step: Step) => {
-    if (completed.has(step))        return 'ok';
-    if (STATUS_LOGS[status] === STATUS_LOGS[step]) return 'pending';
-    return 'waiting';
-  };
-
   return (
     <div className={styles.page}>
       <div className={styles.card}>
@@ -185,53 +155,12 @@ export const CallbackPage = () => {
           </h1>
         </div>
 
-        {/* Log terminal */}
-        <div className={styles.logWrap}>
-          {STEPS.map((step) => {
-            const state = getStepState(step);
-            return (
-              <div key={step} className={styles.logLine}>
-                {state === 'ok'      && <span className={styles.logOk}>OK</span>}
-                {state === 'pending' && <span className={styles.logSpinner} />}
-                {state === 'waiting' && <span className={styles.logCursor} style={{ opacity: 0.2 }} />}
-                <span
-                  className={styles.logText}
-                  style={{
-                    color: state === 'ok'
-                      ? '#4a9eca'
-                      : state === 'pending'
-                      ? '#c8e8ff'
-                      : '#1e4d6b',
-                  }}
-                >
-                  {STATUS_LOGS[step]}
-                </span>
-              </div>
-            );
-          })}
-
-          {status === 'error' && (
-            <div className={styles.logLine}>
-              <span className={styles.logError}>ERR</span>
-              <span className={styles.logText} style={{ color: '#ff3366' }}>
-                {STATUS_LOGS.error}
-              </span>
-            </div>
-          )}
-
-          {status === 'success' && (
-            <div className={styles.logLine}>
-              <span className={styles.logOk}>OK</span>
-              <span className={styles.logText} style={{ color: '#00ff88' }}>
-                &gt; Redirecting to dashboard...
-              </span>
-            </div>
-          )}
-
-          {status !== 'success' && status !== 'error' && (
-            <span className={styles.logCursor} style={{ marginTop: 4 }} />
-          )}
-        </div>
+        {/* 🚀 INDICADOR DE CARGA SILENCIOSO (Sustituye al bloque de texto) */}
+        {status !== 'error' && status !== 'success' && (
+          <div className="py-8 flex justify-center">
+            <span className={styles.logSpinner} />
+          </div>
+        )}
 
         {/* Success info */}
         {status === 'success' && user && (
@@ -253,6 +182,7 @@ export const CallbackPage = () => {
         {status === 'error' && (
           <div className={styles.errorWrap}>
             <div className={styles.errorMsg}>
+              {authError}
             </div>
             <button
               className={styles.retryBtn}
