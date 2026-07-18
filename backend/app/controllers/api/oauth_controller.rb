@@ -3,8 +3,9 @@ require 'uri'
 
 module Api
   class OauthController < ApplicationController
-    skip_before_action :verify_authenticity_token, raise: false
+    # ⚠️ CRÍTICO: El skip debe ir ANTES que cualquier otro callback
     skip_before_action :authorize_request, only: [:callback_42]
+    skip_before_action :verify_authenticity_token, raise: false
     def callback_42
       code = params[:code]
 
@@ -43,7 +44,7 @@ module Api
             avatar_url: user.avatar_url # <--- EL ESLABÓN PERDIDO
           }
         }
-      }
+      }, status: :ok
     end
 
     private
