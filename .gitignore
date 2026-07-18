@@ -67,3 +67,4 @@ coverage/
 /chessthing/chess
 /secret/
 /backend/tmp/
+frontend/secret/*
