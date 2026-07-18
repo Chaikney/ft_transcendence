@@ -68,3 +68,7 @@ coverage/
 /secret/
 /backend/tmp/
 frontend/secret/*
+# name specific files in case they are moved outside of their folders.
+*42API_SEC*
+*SMTP_PASS*
+*rb_dbpass*

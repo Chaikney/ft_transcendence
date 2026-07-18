@@ -2,7 +2,6 @@ name: ft_transcendence
 
 services:
   web:
-    # FIXME should be depends on api or similar,   transient faults if not
     build:
       context: ./frontend
       # NOTE This is one bind mount and one storage volume defined on the fly
