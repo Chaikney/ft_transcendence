@@ -3,8 +3,9 @@ require 'uri'
 
 module Api
   class OauthController < ApplicationController
-    skip_before_action :verify_authenticity_token, raise: false
+    # ⚠️ CRÍTICO: El skip debe ir ANTES que cualquier otro callback
     skip_before_action :authorize_request, only: [:callback_42]
+    skip_before_action :verify_authenticity_token, raise: false
     def callback_42
       code = params[:code]
 
@@ -43,7 +44,7 @@ module Api
             avatar_url: user.avatar_url # <--- EL ESLABÓN PERDIDO
           }
         }
-      }
+      }, status: :ok
     end
 
     private
@@ -58,14 +59,14 @@ module Api
 #       req.basic_auth(ENV['UID_42'], ENV['SECRET_42'])
       req.basic_auth(ENV['UID_42'], File.read(ENV.fetch('SECRET_42')).strip)
 
+      # 🔥 AHORA LEE REDIRECT_URI_42 DEL .env
+      redirect_uri = ENV['REDIRECT_URI_42'] || 'https://10.13.1.6:8443/auth/callback'
+
       # 3. Ponemos el resto de parámetros en el cuerpo (como un formulario)
       req.set_form_data(
         'grant_type' => 'authorization_code',
         'code' => code,
-      # FIXME This is hardcoding, replace with reading from env (or something)
-        'redirect_uri' => 'https://localhost:8443/auth/callback'
-        #'redirect_uri' => 'http://localhost:5173/auth/callback'
-#        'redirect_uri' => ENV['ŔEDIRECT_URI_42']
+        'redirect_uri' => redirect_uri
       )
 
       # 4. Enviamos la petición asegurando SSL
@@ -74,6 +75,9 @@ module Api
       end
 
       JSON.parse(res.body)
+    rescue => e
+      Rails.logger.error "Error exchanging code for token: #{e.message}"
+      {}
     end
 
     def fetch_42_user_info(access_token)
@@ -85,6 +89,9 @@ module Api
         http.request(req)
       end
       JSON.parse(res.body)
+    rescue => e
+      Rails.logger.error "Error fetching user info: #{e.message}"
+      {}
     end
   end
 end

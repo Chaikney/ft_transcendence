@@ -3,6 +3,10 @@ require "active_support/core_ext/integer/time"
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
+  # 🔥 PERMITIR CONEXIONES EXTERNAS (CAMPUS)
+  # Esto permite que otros ordenadores del campus accedan a tu aplicación
+  config.hosts.clear  # Permite cualquier host en desarrollo
+
   # Make code changes take effect immediately without server restart.
   config.enable_reloading = true
 
@@ -36,8 +40,23 @@ Rails.application.configure do
   config.action_mailer.raise_delivery_errors = true
   config.action_mailer.perform_caching = false
 
-  # 👇 IMPORTANTE: Apunta al puerto 5173 (React) para que el link del correo funcione
-  config.action_mailer.default_url_options = { host: 'localhost', port: 8443, protocol: 'https' }
+  # Lee BASE_URL del .env o usa un valor por defecto
+  base_url = ENV['BASE_URL'] || 'https://10.13.1.6:8443'
+  uri = URI.parse(base_url)
+
+  # Configuración para ActionMailer (enlaces en correos)
+  config.action_mailer.default_url_options = {
+    host: uri.host,
+    port: uri.port,
+    protocol: uri.scheme
+  }
+
+  # Configuración de URLs para toda la aplicación
+  Rails.application.routes.default_url_options = {
+    host: uri.host,
+    port: uri.port,
+    protocol: uri.scheme
+  }
 
   config.action_mailer.smtp_settings = {
     address:              ENV['SMTP_ADDRESS'],
@@ -84,7 +103,12 @@ Rails.application.configure do
   # 1. Permitir ActionCable desde cualquier origen (o usar una regex más permisiva)
   # Usar /.*/ permite cualquier origen, lo cual es seguro en entornos controlados de desarrollo
   config.action_cable.disable_request_forgery_protection = true
-  config.action_cable.allowed_request_origins = [/http:\/\/.*/, /https:\/\/.*/]
+  config.action_cable.allowed_request_origins = [
+    /http:\/\/.*/, 
+    /https:\/\/.*/,
+    /https:\/\/10\.13\..*/,
+    /https:\/\/10\.13\.1\.6/
+  ]
 
   # 2. Configuración de Hosts para evitar el error "Blocked Host"
   # Rails 6+ bloquea por defecto cualquier host que no sea localhost.

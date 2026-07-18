@@ -6,7 +6,7 @@ import type { Consumer } from "@rails/actioncable";
 import { useNavigate } from "react-router-dom";
 import { useMatchStore, useRadarStore } from "@/store";
 
-const CABLE_URL = import.meta.env.VITE_CABLE_URL ?? 'ws://localhost:3000/cable';
+const CABLE_URL = import.meta.env.VITE_CABLE_URL ?? 'wss://10.13.1.6:8443/cable';
 
 // Singleton global estricto
 let globalConsumer: Consumer | null = null;

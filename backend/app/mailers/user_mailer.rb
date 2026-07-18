@@ -1,6 +1,11 @@
 class UserMailer < ApplicationMailer
   default from: 'noctyve.transcendence@gmail.com' 
 
+  # Helper to take the BASE_URL
+  def base_url
+    @base_url ||= ENV['BASE_URL'] || 'https://10.13.1.6:8443'
+  end
+
   # 1. El que ya tenías (Para el registro)
   def confirmation_email
     @user = params[:user]
@@ -13,7 +18,7 @@ class UserMailer < ApplicationMailer
   def password_reset(user)
     @user = user
     # Este es el enlace mágico que el usuario pinchará en su correo
-    @reset_url = "https://localhost:8443/reset-password/#{@user.reset_password_token}"
+    @reset_url = "#{base_url}/reset-password/#{@user.reset_password_token}"
     
     mail(to: @user.email, subject: "[TRANSCENDENCE] Recuperación de credenciales")
   end

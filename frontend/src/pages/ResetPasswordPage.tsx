@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
+const BASE_URL = import.meta.env.VITE_API_URL || 'https://10.13.1.6:8443/api';
+
 export const ResetPasswordPage = () => {
   // Pillamos el token directamente de la URL
   const { token } = useParams<{ token: string }>(); 
@@ -19,7 +21,7 @@ export const ResetPasswordPage = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:3000/api/password_resets/${token}`, {
+      const response = await fetch(`${BASE_URL}/password_resets/${token}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password: newPassword })
