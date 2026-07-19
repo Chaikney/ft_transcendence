@@ -31,7 +31,7 @@ export const useChatChannel = () => {
           //console.log('[ChatChannel] connected');
         },
         disconnected() {
-          console.warn('[ChatChannel] disconnected');
+          console.log('[ChatChannel] disconnected');
         },
         received(raw: unknown) {
           if (!raw || typeof raw !== 'object') return;

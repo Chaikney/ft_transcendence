@@ -31,7 +31,7 @@ export const useGameSocket = (
           //console.log(`📡 [GameSocket] Conectado a game_${gameId}`);
         },
         disconnected() {
-          console.warn(`📡 [GameSocket] Desconectado de game_${gameId}`);
+          console.log(`📡 [GameSocket] Desconectado de game_${gameId}`);
         },
         received(data: any) {
           // 3. Ejecutamos el callback pasando la data recibida

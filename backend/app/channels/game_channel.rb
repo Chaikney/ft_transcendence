@@ -41,6 +41,9 @@ class GameChannel < ApplicationCable::Channel
     game_id = room.to_s.split('-').last
     partida = Game.find(game_id)
 
+    is_player = (current_user == partida.player1 || current_user == partida.player2)
+    return unless is_player
+
     new_fen = data['fen']
     last_move = data['last_move']
 
@@ -94,6 +97,7 @@ class GameChannel < ApplicationCable::Channel
     room = params[:game_id]
     game_id = room.to_s.split('-').last
     partida = Game.find(game_id)
+    return unless current_user == partida.player1 || current_user == partida.player2
     partida.update!(status: 'finished')
 
     ActionCable.server.broadcast("game_#{room}", {
@@ -108,6 +112,7 @@ class GameChannel < ApplicationCable::Channel
     partida = Game.find(game_id)
 
     return if partida.status == 'finished'
+    return unless current_user == partida.player1 || current_user == partida.player2
 
     winner = (current_user == partida.player1) ? partida.player2 : partida.player1
 

@@ -6,27 +6,14 @@ module Api
       before_action :authorize_request
 
       def show
-        numeric_id = params[:game_id].to_s.split('-').last.to_i
+        raw_id = params[:game_id] || params[:id]
+        numeric_id = raw_id.to_s.split('-').last.to_i
+        
         game = Game.find_by(id: numeric_id)
         
         if game.nil?
-          default_fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-          begin
-            game = Game.create!(
-              id: numeric_id,
-              status: 'in_progress',
-              initial_board: default_fen,
-              current_board: default_fen,
-              fen_history: [default_fen.split(' ')[0..3].join(' ')],
-              player1_id: @current_user.id,
-              player2_id: @current_user.id 
-            )
-          rescue ActiveRecord::RecordNotUnique
-            game = Game.find_by(id: numeric_id)
-          rescue ActiveRecord::RecordInvalid => e
-            render json: { error: "Error: #{e.message}" }, status: :unprocessable_entity
-            return
-          end
+          # 🚀 CERO ROJOS
+          return render json: { error: "La partida solicitada no existe." }, status: :ok
         end
 
         render_game_state(game, params[:game_id])
@@ -36,13 +23,20 @@ module Api
         numeric_id = params[:game_id].to_s.split('-').last.to_i
         game = Game.find_by(id: numeric_id)
         
-        return render json: { error: "Partida no encontrada" }, status: :not_found unless game
+        # 🚀 CERO ROJOS
+        return render json: { error: "Partida no encontrada" }, status: :ok unless game
+
+        # 🛑 BARRERA Y CERO ROJOS: Evita que los espectadores muevan
+        unless game.player1_id == @current_user.id || game.player2_id == @current_user.id
+          return render json: { error: "Acceso denegado: Los espectadores no pueden mover" }, status: :ok
+        end
 
         engine = ::Chess::Game.load_fen(game.current_board) rescue nil
-        return render json: { error: "Tablero corrupto" }, status: :unprocessable_entity unless engine
+        
+        # 🚀 CERO ROJOS
+        return render json: { error: "Tablero corrupto" }, status: :ok unless engine
 
         begin
-          # Si hay promoción, el string será "e7e8n". Si no hay, será "e2e4" normal.
           move_string = "#{params[:from]}#{params[:to]}#{params[:promotion]}"
           engine.move(move_string)
         rescue StandardError
@@ -103,12 +97,11 @@ module Api
       def challenge
         target = User.find_by(id: params[:target_id])
         
-        # 🛡️ Seguridad extra en el servidor por si hackean el botón del front
         if target.nil? || target.status != 'online'
-          return render json: { error: 'El usuario no está disponible' }, status: :unprocessable_entity
+          # 🚀 CERO ROJOS
+          return render json: { error: 'El usuario no está disponible' }, status: :ok
         end
 
-        # Avisamos al rival por su canal de WebSockets
         ActionCable.server.broadcast("matchmaking_#{target.id}", {
           type: 'incoming_challenge',
           challenger: { id: @current_user.id, username: @current_user.username }
@@ -122,17 +115,15 @@ module Api
         challenger = User.find_by(id: params[:challenger_id])
         
         if challenger.nil?
-          return render json: { error: 'El retador ha desaparecido' }, status: :not_found
+          return render json: { error: 'El retador ha desaparecido' }, status: :ok
         end
 
-        # 🎲 LA MAGIA DEL AZAR: Mezclamos a los dos jugadores. 
         jugadores = [@current_user.id, challenger.id].shuffle
 
-        # Creamos la partida oficial
         game = Game.create!(
           player1_id: jugadores[0],
           player2_id: jugadores[1],
-          status: 'pending'
+          status: 'in_progress' 
         )
 
         # 🚀 Avisamos a LOS DOS para que sus navegadores los envíen a la pantalla de juego

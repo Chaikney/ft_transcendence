@@ -50,7 +50,7 @@ export const useSpectatorChannel = (
 
         rejected() {
           setConnectionStatus('disconnected');
-          console.warn(`[SpectatorChannel] Subscription rejected for game ${gameId}`);
+          //console.warn(`[SpectatorChannel] Subscription rejected for game ${gameId}`);
         },
 
         received(raw: unknown) {
@@ -77,7 +77,7 @@ export const useSpectatorChannel = (
               break;
 
             default:
-              console.warn('[SpectatorChannel] Unknown event:', event);
+              console.log('[SpectatorChannel] Unknown event:', event);
           }
         },
       }
