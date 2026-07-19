@@ -69,6 +69,7 @@ git clone https://github.com/Chaikney/ft_transcendence.git
 cd ft_transcendence
 
 # Set up environment variables
+# NOTE you may want to provide your own value of UID_42, see the notes below.
 cp .env.example .env
 
 # Set up 42 API Secret for OAuth and the SMTP password for to send confirmation emails
@@ -94,6 +95,8 @@ The SMTP_PASS will be provided by the team on evaluation, or provide all your ow
 
 ### Notes on 42 API keys in particular
 These are in 2 parts; think of them roughly as being a user id (that starts with u-) and its password (starts with s-). The u- part is **not secret**, no matter how hacker-y it looks in logfiles. We provide one of these in `.env.example`, it identifies the app to 42 infra. The s- part **is** secret, expires periodically, and must be provided by the team or the evaluator.
+
+There are 3 parts that have to work together: UID_42, 42API_SEC, and the redirect URLs in the env (REDIRECT_URI_42) and registered at 42. Ensure they all match or you will have a bad time.
 
 ## 6. Architecture & Design
 
