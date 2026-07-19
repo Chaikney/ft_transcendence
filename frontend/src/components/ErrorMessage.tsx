@@ -1,4 +1,5 @@
 import { Button } from './Button';
+import { useNavigate } from "react-router-dom";
 
 // ── Styles ─────────────────────────────────────────────────────────────────
 const styles = {
@@ -23,21 +24,26 @@ export const ErrorMessage = ({
   title   = 'Something went wrong',
   message = 'An unexpected error occurred. Please try again.',
   onRetry,
-}: ErrorMessageProps) => (
-  <div className={styles.wrapper} role="alert">
-    <div className={styles.iconWrapper}>
-      <span className={styles.icon}>✕</span>
-    </div>
+}: ErrorMessageProps) => {
+  // 🚀 AHORA SÍ: El hook está dentro del componente
+  const navigate = useNavigate();
 
-    <div className="flex flex-col gap-1">
-      <p className={styles.title}>{title}</p>
-      <p className={styles.message}>{message}</p>
-    </div>
+  return (
+    <div className={styles.wrapper} role="alert">
+      <div className={styles.iconWrapper}>
+        <span className={styles.icon}>✕</span>
+      </div>
 
-    {onRetry && (
-      <Button variant="secondary" size="sm" onClick={onRetry}>
-        Try again
-      </Button>
-    )}
-  </div>
-);
+      <div className="flex flex-col gap-1">
+        <p className={styles.title}>{title}</p>
+        <p className={styles.message}>{message}</p>
+      </div>
+
+      {onRetry && (
+        <Button variant="secondary" size="sm" onClick={() => navigate('/')}>
+          Go Home
+        </Button>
+      )}
+    </div>
+  );
+};
