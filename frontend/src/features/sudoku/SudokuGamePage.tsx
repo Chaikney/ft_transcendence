@@ -70,7 +70,7 @@ export const SudokuGamePage = () => {
       const newGame = res as unknown as { id: number };
       navigate(`/game/sudoku/sudoku-${String(newGame.id).padStart(3, '0')}`);
     } catch (err) {
-      console.error('Failed to create new puzzle:', err);
+      //console.error('Failed to create new puzzle:', err);
     } finally {
       setIsLoading(false);
     }
@@ -82,7 +82,7 @@ export const SudokuGamePage = () => {
         await finishSudokuGame(gameId);
       }
     } catch (err) {
-      console.error("Error when finishing the game:", err);
+      //console.error("Error when finishing the game:", err);
     } finally {
       setShowAbandonModal(false);
       resetMatch();

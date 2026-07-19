@@ -111,7 +111,7 @@ export const SpectatorPage = () => {
         const data = await gameService.fetchGame(gameId);
         setGameData(data);
       } catch (err) {
-        console.error("Error cargando partida:", err);
+        //console.error("Error cargando partida:", err);
       } finally {
         setLoading(false);
       }

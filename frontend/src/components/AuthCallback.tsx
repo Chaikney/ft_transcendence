@@ -40,7 +40,7 @@ export default function AuthCallback() {
           }
         })
         .catch((err) => {
-          console.error("Error conectando con el backend:", err);
+          //console.error("Error conectando con el backend:", err);
           navigate('/login');
         });
     }

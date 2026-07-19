@@ -15,7 +15,7 @@ export const LeaderboardTable = () => {
       .catch((err) => {
         // 🛡️ MAGIA 2: Si el servidor da error (ej. el 401), lo atrapamos
         // y reseteamos el estado a un array vacío en silencio.
-        console.error("Error al cargar ranking:", err);
+        //console.error("Error al cargar ranking:", err);
         setUsers([]);
       })
       .finally(() => setLoading(false));

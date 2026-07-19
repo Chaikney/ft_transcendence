@@ -47,7 +47,7 @@ module Api
         }
       rescue => e
         # 🚨 Si explota, lo pintamos en rojo en consola pero NO tiramos el servidor
-        Rails.logger.error "🚨 ERROR CALCULANDO H2H: #{e.message}"
+        #Rails.logger.error "🚨 ERROR CALCULANDO H2H: #{e.message}"
       end
 
       # Devolvemos los datos del amigo SANOS Y SALVOS (con historial incluido)

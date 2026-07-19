@@ -32,7 +32,7 @@ export const FriendsList = () => {
             setFriendRequests(mappedRequests);
         }
       } catch (error) {
-        console.error('Error cargando la red de contactos:', error);
+        //console.error('Error cargando la red de contactos:', error);
       }
     };
 

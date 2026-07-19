@@ -82,7 +82,7 @@ export const ProfilePage = () => {
           setProfileUser(null);
         }
       } catch (error) {
-        console.error("Error al cargar el perfil:", error);
+        //console.error("Error al cargar el perfil:", error);
       } finally {
         setIsLoading(false);
       }
@@ -176,7 +176,7 @@ export const ProfilePage = () => {
                                 setProfileUser((prev: any) => ({ ...prev, avatar_url: newAvatarPath }));
                               }
                             } catch (err) {
-                              console.error("Error al actualizar avatar:", err);
+                              //console.error("Error al actualizar avatar:", err);
                             }
                             setShowPicker(false);
                           }}

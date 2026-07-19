@@ -20,7 +20,7 @@ export const SudokuLobby = () => {
           { replace: true }
         );
       } catch (err) {
-        console.error('Failed to create sudoku game:', err);
+        //console.error('Failed to create sudoku game:', err);
         navigate('/', { replace: true });
       }
     };

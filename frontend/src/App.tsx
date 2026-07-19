@@ -55,11 +55,11 @@ export default function App() {
             //console.log("✅ [INIT] Usuario validado por el backend:", userData.username);
             setUser(userData); // Esto mete tus datos y pone isAuthenticated a true
           } else {
-            console.error("❌ [INIT] El backend rechazó el token. Borrando de memoria.");
+            //console.error("❌ [INIT] El backend rechazó el token. Borrando de memoria.");
             localStorage.removeItem('auth_token');
           }
         } catch (error) {
-          console.error("💥 [INIT] Error crítico de red o servidor caído:", error);
+          //console.error("💥 [INIT] Error crítico de red o servidor caído:", error);
           localStorage.removeItem('auth_token');
         } finally {
           setLoading(false);

@@ -39,6 +39,6 @@ class ApplicationController < ActionController::API
   def sweep_afk_games
     Game.check_afk_timeouts
   rescue => e
-    Rails.logger.error "Error en la guadaña AFK: #{e.message}"
+    #Rails.logger.error "Error en la guadaña AFK: #{e.message}"
   end
 end

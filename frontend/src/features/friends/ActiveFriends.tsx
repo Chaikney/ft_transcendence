@@ -28,7 +28,7 @@ export const ActiveFriends = () => {
     try {
       await del('/friends/remove', { data: { username: friendUsername } });
     } catch (e) { 
-      console.error('El servidor falló al eliminar al amigo', e); 
+     //console.error ('El servidor falló al eliminar al amigo', e); 
     }
   };
 
@@ -38,7 +38,7 @@ export const ActiveFriends = () => {
     try {
       await post('/friends/block', { username: friendUsername });
     } catch (e) { 
-      console.error('El servidor falló al bloquear al usuario', e); 
+      //console.error('El servidor falló al bloquear al usuario', e); 
     }
   };
 

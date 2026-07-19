@@ -55,7 +55,7 @@ export const useSudokuGame = (gameId: string) => {
           });
         }
       } catch (err) {
-        console.error("Error cargando el juego:", err);
+        //console.error("Error cargando el juego:", err);
         setError('Failed to load sudoku game');
       }
     };
@@ -96,7 +96,7 @@ export const useSudokuGame = (gameId: string) => {
         }
       }
     } catch (err) {
-      console.error('Move failed to sync:', err);
+      //console.error('Move failed to sync:', err);
     }
   };
 

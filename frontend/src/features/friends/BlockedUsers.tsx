@@ -21,7 +21,7 @@ export const BlockedUsers = () => {
         setBlacklist(response.blacklist);
       }
     } catch (error) {
-      console.error('Error al cargar la lista de bloqueados:', error);
+      //console.error('Error al cargar la lista de bloqueados:', error);
     }
   };
 
@@ -37,7 +37,7 @@ export const BlockedUsers = () => {
     try {
       await post('/friends/unblock', { username });
     } catch (error) {
-      console.error('Error al desbloquear al usuario:', error);
+      //console.error('Error al desbloquear al usuario:', error);
       // Si falla el servidor, recargamos la lista real para no dejar la UI rota
       fetchBlacklist();
     }

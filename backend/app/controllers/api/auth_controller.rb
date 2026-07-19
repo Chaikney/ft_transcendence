@@ -128,7 +128,7 @@ module Api
     rescue => e
       # Si la API de 42 se cae, permitimos el registro (fail-open) o lo denegamos.
       # Por ahora lo dejamos en false para no bloquear a la gente si Intra falla.
-      Rails.logger.error "🚨 Error al consultar la API de 42: #{e.message}"
+      #Rails.logger.error "🚨 Error al consultar la API de 42: #{e.message}"
       false
     end
   end

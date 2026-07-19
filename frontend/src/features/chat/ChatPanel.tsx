@@ -118,7 +118,7 @@ export const ChatPanel = ({ sendMessage, sendTyping }: ChatPanelProps) => {
   useEffect(() => {
     api.get('/rooms')
       .then((res) => setRooms(res.data))
-      .catch((err) => console.error('Error fetching rooms:', err));
+      .catch((err) => {});
   }, []);
 
   // 2. Fetch de Mensajes al cambiar de sala

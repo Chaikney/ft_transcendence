@@ -23,7 +23,7 @@ module ApplicationCable
             return verified_user
           end
         rescue JWT::DecodeError
-          Rails.logger.error "🚨 WebSockets Auth Failed: Token inválido o expirado"
+          #Rails.logger.error "🚨 WebSockets Auth Failed: Token inválido o expirado"
         end
       end
 

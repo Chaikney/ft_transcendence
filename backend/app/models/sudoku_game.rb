@@ -30,7 +30,7 @@ class SudokuGame < ApplicationRecord
   # Valida si el string de 81 caracteres es un Sudoku válido según las reglas
   def self.valid_board?(board_str)
     unless board_str.is_a?(String) && board_str.length == 81
-      Rails.logger.error "SUDOKU DEBUG: El tablero no tiene 81 caracteres o no es string. Longitud: #{board_str&.length}"
+      #Rails.logger.error "SUDOKU DEBUG: El tablero no tiene 81 caracteres o no es string. Longitud: #{board_str&.length}"
       return false
     end
 
@@ -42,7 +42,7 @@ class SudokuGame < ApplicationRecord
         next if val == 0
 
         unless valid_placement_in_grid?(grid, r, c, val)
-          Rails.logger.error "SUDOKU DEBUG: Error de validación en fila #{r}, columna #{c}, valor #{val}"
+          #Rails.logger.error "SUDOKU DEBUG: Error de validación en fila #{r}, columna #{c}, valor #{val}"
           return false
         end
       end

@@ -100,7 +100,7 @@ export const LandingPage = () => {
           navigate(`/game/sudoku/sudoku-${String(newGame.id).padStart(3, '0')}`);
         }
       } catch (err) {
-        console.error("Failed to launch sudoku:", err);
+        //console.error("Failed to launch sudoku:", err);
       }
     }
   };

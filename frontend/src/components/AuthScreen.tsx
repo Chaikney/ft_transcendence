@@ -40,7 +40,7 @@ export const AdminPanel = () => {
           setUsersDb(data);
         }
       } catch (error) {
-        console.error("Error al cargar la DB de usuarios:", error);
+        //console.error("Error al cargar la DB de usuarios:", error);
       }
     };
 
@@ -66,7 +66,7 @@ export const AdminPanel = () => {
         alert(`Error: ${errorData.error}`);
       }
     } catch (error) {
-      console.error("Error ejecutando el ban:", error);
+      //console.error("Error ejecutando el ban:", error);
     }
   };
 
@@ -91,7 +91,7 @@ export const AdminPanel = () => {
         alert(`Error: ${errorData.error}`);
       }
     } catch (error) {
-      console.error("Error borrando el usuario:", error);
+      //console.error("Error borrando el usuario:", error);
     }
   };
 
