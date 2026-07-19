@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/store';
+import { useAuthStore, useMatchStore } from '@/store';
 import { createSudokuGame } from '@/features/sudoku/service';
 import { FriendsList } from '@/features/friends/FriendsList';
 import { AvatarPicker } from '@/components/AvatarPicker';
@@ -239,39 +239,6 @@ export const ProfilePage = () => {
               {/* 🎮 Actions (SOLO SI ES TU PERFIL) */}
               {isOwnProfile && (
                 <div className={styles.actionRow}>
-                  <button
-                    className={[styles.actionBtn, styles.actionBtnPrimary].join(' ')}
-                    onClick={async () => {
-                      try {
-                          const response = await fetch(`${BASE_URL}/games`, {
-                          method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-                          },
-                          body: JSON.stringify({}) // Pide al backend que cree la partida oficial
-                        });
-
-                        const data = await response.json();
-
-                        if (response.ok && data.game_id) {
-                          navigate(`/game/chess/chess-${data.game_id}`);
-                        }
-                      } catch (err) {
-                        console.error("Error al crear la partida de ajedrez:", err);
-                      }
-                    }}
-                  >
-                    &gt; play_chess()
-                  </button>
-                  <button className={[styles.actionBtn, styles.actionBtnPrimary].join(' ')} onClick={async () => {
-                      try {
-                        const res = await createSudokuGame('easy');
-                        if (res && typeof res === 'object' && 'id' in res) {
-                          navigate(`/game/sudoku/sudoku-${String((res as {id: number}).id).padStart(3, '0')}`);
-                        }
-                      } catch (err) { console.error("Error al crear juego:", err); }
-                    }}>&gt; play_sudoku()</button>
                   <button className={[styles.actionBtn, styles.actionBtnSecondary].join(' ')} onClick={handleLogout}>&gt; logout()</button>
                 </div>
               )}
