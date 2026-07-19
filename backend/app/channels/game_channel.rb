@@ -125,7 +125,9 @@ class GameChannel < ApplicationCable::Channel
 
     ActionCable.server.broadcast("game_#{room}", {
       type: 'game_over',
-      status: 'resigned'
+      status: 'resigned',
+      winner: winner.username,
+      message: "#{current_user.username} se ha rendido. #{winner.username} gana!"
     })
   end
 
@@ -148,21 +150,32 @@ class GameChannel < ApplicationCable::Channel
         count = 0
       end
       ActionCable.server.broadcast("game_#{room}", { type: 'spectator_count', count: count })
+      return
     end
 
-    if (partida&.status != 'finished') && is_player
-      #Rails.logger.info "💀 [GAME] Usuario #{current_user.id} abandonó #{room}"
+    if partida&.status != 'finished' && is_player
+      # 🔥 Determinar el ganador (el que NO se ha desconectado)
       winner = (current_user == partida.player1) ? partida.player2 : partida.player1
+      
+      Rails.logger.info "💀 [GAME] Usuario #{current_user.id} abandonó la partida #{room}. Ganador: #{winner.id}"
+      
+      # Guardar el resultado en la BD
       if game_type == 'chess'
         partida.finalize_match(winner.id)
       else
-        # 🚀 FIX: Añadimos el winner_id para el Sudoku
         partida.update!(status: 'finished', winner_id: winner.id)
       end
 
+      # 📡 NOTIFICAR AL RIVAL INMEDIATAMENTE con el resultado
+      ActionCable.server.broadcast("game_#{room}", { 
+        type: 'game_over', 
+        status: 'resigned',
+        winner: winner.username,
+        message: "#{current_user.username} ha abandonado la partida. #{winner.username} gana!"
+      })
       ActionCable.server.broadcast("game_#{room}", { type: 'opponent_disconnect' })
     else
-      #Rails.logger.info "👋 [GAME] Usuario #{current_user.id} salió de #{room} — sin broadcast"
+      Rails.logger.info "👋 [GAME] Usuario #{current_user.id} salió de #{room} — sin broadcast"
     end
   end
 
