@@ -1,6 +1,6 @@
 # ft_transcendence
 
-> "This project has been created as part of the 42 curriculum by chaikney, gcassi-d, mdiaz-or and nkrasimi."
+_"This project has been created as part of the 42 curriculum by chaikney, gcassi-d, mdiaz-or and nkrasimi."__
 
 ## 1. Project Overview
 
