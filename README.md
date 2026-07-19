@@ -6,12 +6,16 @@ _"This project has been created as part of the 42 curriculum by chaikney, gcassi
 
 A **Single Page Application (SPA)** built with **React** and **Ruby on Rails**, featuring real-time multiplayer gaming via **WebSockets (ActionCable)**, secure **OAuth 2.0 (42)** authentication, and a robust **ELO-based ranking system**.
 
-**Note for evaluators** you may want to jump to Section 5 on launching the project. You may also enjoy the convenience function `make review_envs` to inspect the running containers.
+That is the show off language. What is it _really_? It's a website where you can play a 2-player game of chess, or a single player game of sudoku. Login is easy for those with 42 accounts and available for anyone with an email address. You can make friends, chat and compare rankings on a global leaderboard.
+
+On the horizon, the **goal** of the project was for us all to gain experience in working on a complex project, in a team, and demonstrate our ability to work with the kind of tools you. In each of our roles we aimed to have gone beyond the minimum demanded by the subject criteria.
+
+**Note for evaluators** Please do first jump to Section 5 on launching the project. Containers from scratch take a while to build and launch. Later, you may also enjoy the convenience function `make review_envs` to inspect the running containers.
 
 ## 2. Key Features
 
 - **Real-time Gaming:** Multiplayer engine with low-latency synchronization.
-- **Authentication:** Secure OAuth 2.0 integration with 42 Intra or local acccount registration.
+- **Authentication:** Secure OAuth 2.0 integration with 42 Intra or local account registration.
 - **Security:** Advanced RBAC (Role-Based Access Control) for Admin/Player roles and 2FA via TOTP.
 - **Social & Competitive:** Global leaderboard, detailed match history, chat, and friend systems.
 - **Spectator Mode:** Live match broadcasting with real-time viewer counting.
@@ -83,6 +87,8 @@ make
 # find out what else the Makefile can do with
 make help
 ```
+
+Once you have launched the cluster with `make`, you can monitor its progress in that terminal, and check on its status in another terminal with `docker ps` or your tools of choice.
 
 ### Notes on secrets
 Some secret values are generated on first launch. Some must be provided by the user or evaluator. Every effort has been made to explain the difference and avoid surprises or confusion, but oh look a green monkey in the middle of my sentence nobody reads documentation any more, if they ever did.
