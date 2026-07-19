@@ -12,21 +12,21 @@ const styles = {
   shell: 'min-h-screen bg-bg-base flex flex-col',
   nav:
     'fixed top-0 left-0 right-0 z-50 h-12 ' +
-    'flex items-center justify-between px-6 ' +
+    'flex items-center justify-between px-3 sm:px-6 ' + // Compacto en móvil, normal en PC
     'bg-bg-base/95 backdrop-blur-sm ' +
     'border-b border-border-strong',
   logoWrap:
-    'flex items-center gap-3 cursor-pointer select-none',
+    'flex items-center gap-1 sm:gap-3 cursor-pointer select-none',
   logoBracket:
     'text-accent font-mono text-sm font-bold',
   logoText:
     'text-text-primary font-mono text-sm font-bold tracking-widest uppercase',
   logoDim:
-    'text-white font-mono text-xs',
+    'hidden sm:inline text-white font-mono text-xs', // Oculta 'transcendence' en móvil, visible en PC
   navLinks:
-    'flex items-center gap-1',
+    'flex items-center gap-0.5 sm:gap-1',
   navLink:
-    'px-3 py-1 font-mono text-xs tracking-widest uppercase ' +
+    'px-2 sm:px-3 py-1 font-mono text-[10px] sm:text-xs tracking-widest uppercase ' +
     'transition-all duration-base border cursor-pointer',
   navLinkActive:
     'text-accent border-accent-border bg-accent-bg ' +
@@ -37,17 +37,17 @@ const styles = {
   navLinkDisabled:
     'text-white border-transparent cursor-default',
   navRight:
-    'flex items-center gap-4',
+    'flex items-center gap-2 sm:gap-4',
   statusWrap:
-    'flex items-center gap-2',
+    'flex items-center gap-1.5 sm:gap-2',
   statusDot:
-    'relative w-1.5 h-1.5 rounded-full',
+    'relative w-1.5 h-1.5 rounded-full flex-shrink-0', // Evita que el puntito se aplaste en móvil
   statusLabel:
-    'text-[10px] font-mono tracking-widest uppercase',
+    'text-[9px] sm:text-[10px] font-mono tracking-widest uppercase', // 🚀 ¡FIXED! Visible siempre, solo un pelo más pequeño en móvil
   userWrap:
-    'flex items-center gap-2 px-2 py-1 ' +
+    'flex items-center gap-1 sm:gap-2 px-1.5 sm:px-2 py-1 ' +
     'border border-border-strong ' +
-    'font-mono text-xs text-text-secondary cursor-pointer',
+    'font-mono text-[10px] sm:text-xs text-text-secondary cursor-pointer',
   userElo:
     'text-accent',
   content: 'flex-1 pt-12 relative',
@@ -59,6 +59,7 @@ const styles = {
   pageWrap: 'relative z-10 min-h-full flex flex-col',
   pageContent: 'flex-1',
 } as const;
+
 
 const NAV_ITEMS = [
   { label: '> home', path: '/' },
