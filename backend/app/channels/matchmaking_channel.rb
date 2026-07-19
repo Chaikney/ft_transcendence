@@ -28,7 +28,7 @@ class MatchmakingChannel < ApplicationCable::Channel
         game = Game.create!(
           player1_id: opponent_id,
           player2_id: current_user.id,
-          status: 'pending',
+          status: 'in_progress',
           initial_board: starting_fen,
           current_board: starting_fen,
           fen_history: [starting_fen]

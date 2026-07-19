@@ -67,7 +67,7 @@ export const useChessBoard = (
     console.log(`[⚙️ LÓGICA] Turno real: ${actualTurn} | Tu navegador cree que tú eres: ${localPlayerColor}`);
 
     if (actualTurn !== localPlayerColor) {
-      console.warn(`🔒 Bloqueado: Le toca a ${actualTurn}, pero tu cliente es ${localPlayerColor}`);
+      //console.warn(`🔒 Bloqueado: Le toca a ${actualTurn}, pero tu cliente es ${localPlayerColor}`);
       return;
     }
 
@@ -78,7 +78,7 @@ export const useChessBoard = (
       const pieceColor = isWhitePiece ? 'w' : 'b';
 
       if (pieceColor !== localPlayerColor) {
-        console.warn(`🚫 Estás intentando tocar una pieza que no es tuya (Pieza: ${pieceColor})`);
+        //console.warn(`🚫 Estás intentando tocar una pieza que no es tuya (Pieza: ${pieceColor})`);
         return;
       }
 

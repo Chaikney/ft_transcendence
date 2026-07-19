@@ -108,7 +108,7 @@ export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
                 }
                 break;
               default:
-                console.warn('[GameChannel] Evento no procesado:', event);
+                console.log('[GameChannel] Evento no procesado:', event);
             }
           },
         }

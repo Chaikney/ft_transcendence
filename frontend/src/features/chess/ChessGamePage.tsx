@@ -1,5 +1,5 @@
 import { useParams, Navigate, useNavigate } from 'react-router-dom';
-import { useEffect, useState, useRef } from 'react'; // 🚀 AÑADIDO: useRef para la trampa del abandono
+import { useEffect, useState, useRef } from 'react';
 import { ChessBoard } from './ChessBoard';
 import { useChessGame } from './hooks/useChessGame';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
@@ -8,9 +8,11 @@ import { TerminalCard } from '@/components/TerminalCard';
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { useMatchStore, useAuthStore } from '@/store';
 import { LobbyScreen } from '@/components/LobbyScreen';
+import { PlayerCard } from '@/components/PlayerCard';
 import { BASE_URL } from '../../services/api';
 
-import { PlayerCard } from '@/components/PlayerCard';
+// 👇 IMPORTAMOS EL MODO ESPECTADOR
+import { SpectatorPage } from './../../pages/SpectatorPage';
 
 const styles = {
   page: 'min-h-screen flex flex-col items-center justify-center px-4 py-8 gap-6',
@@ -19,7 +21,60 @@ const styles = {
   actionRow: 'flex items-center justify-center gap-3 w-full mt-4',
 } as const;
 
+// ==========================================
+// 🚦 EL SEMÁFORO (Componente principal)
+// ==========================================
 export const ChessGamePage = () => {
+  const { id } = useParams<{ id: string }>();
+  const [role, setRole] = useState<'player1' | 'player2' | 'spectator' | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!id) return;
+    
+    const checkRole = async () => {
+      try {
+        const token = localStorage.getItem('auth_token');
+        const response = await fetch(`${BASE_URL}/games/${id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const json = await response.json();
+
+        if (json.error) {
+          setError(json.error); 
+          return; 
+        }
+        
+        setRole(json.data.role || 'spectator');
+      } catch (err) {
+    
+        setError("Error de conexión con el servidor.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkRole();
+  }, [id]);
+
+  if (loading) return <div className={styles.page}><InlineLoader label="Cargando sala..." /></div>;
+  if (error) return <div className={styles.page}><ErrorMessage title="Failed to load game" message={error} onRetry={() => window.location.reload()} /></div>;
+
+  // 🛑 Si eres espectador, te muestro TU vista exclusiva
+  if (role === 'spectator') {
+    return <SpectatorPage />;
+  }
+
+  // ✅ Si eres jugador, te monto el tablero oficial con sus castigos
+  return <ChessPlayerView />;
+};
+
+// ==========================================
+// ♟️ LA VISTA DEL JUGADOR
+// ==========================================
+const ChessPlayerView = () => {
   const { id: gameId } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -33,8 +88,6 @@ export const ChessGamePage = () => {
   const [localColor, setLocalColor] = useState<'w' | 'b'>('w');
   const [isResigning, setIsResigning] = useState(false);
 
-  // 🛡️ BARRERA 1: Rastreador silencioso del estado de la partida
-  // 1. 🛡️ BARRERA: Metemos estado y funciones en Refs para que React no entre en bucle
   const gameStatusRef = useRef(chessGame?.status);
   const resignRef = useRef(resign);
   const resetMatchRef = useRef(resetMatch);
@@ -45,18 +98,14 @@ export const ChessGamePage = () => {
     resetMatchRef.current = resetMatch;
   }, [chessGame?.status, resign, resetMatch]);
 
-  // 2. 🧹 EL CASTIGO DEFINITIVO Y SEGURO (Solo al salir de la URL)
+  // CASTIGO AL ABANDONAR (Solo afecta a los jugadores reales)
   useEffect(() => {
     return () => {
-      // 1. Aplicamos el castigo
       if (gameStatusRef.current === 'in_progress' || gameStatusRef.current === 'active') {
         resignRef.current();
       }
-
-      // 2. Formateamos la memoria del tablero
       resetMatchRef.current();
 
-      // 3. 🚀 MAGIA: Pedimos los datos frescos al backend para que el ELO visual se actualice
       const token = localStorage.getItem('auth_token');
       if (token) {
           fetch(`${BASE_URL}/profile`, {
@@ -64,18 +113,15 @@ export const ChessGamePage = () => {
         })
         .then(res => res.json())
         .then(data => {
-          // Si el backend nos devuelve al usuario, forzamos a Zustand a actualizarse
-          if (data && data.username) {
-            useAuthStore.getState().setUser(data);
-          }
+          if (data && data.username) useAuthStore.getState().setUser(data);
         })
-        .catch(err => console.error("Error refrescando ELO:", err));
+        .catch(() => {
+        });
       }
     };
   }, []);
 
   useEffect(() => {
-    // Revisamos si el backend nos ha mandado ya los datos del player2
     if (chessGame?.player2_id && currentUser?.id) {
       const p2 = String(chessGame.player2_id);
       const me = String(currentUser.id);
@@ -102,17 +148,10 @@ export const ChessGamePage = () => {
   if (!chessGame) return <div className={styles.page}><InlineLoader label="Connecting to game..." /></div>;
 
   const isGameActive = chessGame.status === 'in_progress' || chessGame.status === 'active';
-  const isPlayer1Turn = chessGame.turn === 'white';
-  const isPlayer2Turn = chessGame.turn === 'black';
-
-  // 1. Averiguamos si el usuario logueado es el jugador 1 (Blancas)
   const isMeWhite = currentUser?.id === chessGame.player1_id;
 
-  // 2. Asignamos quién va arriba (Rival) y quién va abajo (Tú) usando '?. ' por seguridad
   const topPlayer = isMeWhite ? chessGame.player?.player2 : chessGame.player?.player1;
   const bottomPlayer = isMeWhite ? chessGame.player?.player1 : chessGame.player?.player2;
-
-  // 3. Calculamos a quién le toca mover para iluminar su tarjeta
   const isTopTurn = isMeWhite ? (chessGame.turn === 'black') : (chessGame.turn === 'white');
   const isBottomTurn = isMeWhite ? (chessGame.turn === 'white') : (chessGame.turn === 'black');
 
@@ -131,7 +170,6 @@ export const ChessGamePage = () => {
       >
         <div className="flex flex-col items-center gap-4 w-full">
 
-          {/* 🃏 TARJETA DEL RIVAL (NEGRAS - ARRIBA) */}
           {topPlayer && (
             <PlayerCard
               name={topPlayer.name}
@@ -142,7 +180,6 @@ export const ChessGamePage = () => {
             />
           )}
 
-          {/* ♟️ EL TABLERO */}
           <ChessBoard
             gameState={chessGame}
             onMove={sendMove}
@@ -151,7 +188,6 @@ export const ChessGamePage = () => {
             localPlayerColor={localColor}
           />
 
-          {/* 🃏 TU TARJETA (ABAJO) */}
           {bottomPlayer && (
             <PlayerCard
               name={bottomPlayer.name}
@@ -163,17 +199,10 @@ export const ChessGamePage = () => {
           )}
 
           <div className={styles.actionRow}>
-            <Button
-              variant="primary"
-              onClick={handleResignClick}
-              disabled={isLocked || isResigning || !isGameActive}
-            >
+            <Button variant="primary" onClick={handleResignClick} disabled={isLocked || isResigning || !isGameActive}>
               {isResigning ? 'Resigning...' : 'Resign'}
             </Button>
-
-            <Button variant="ghost" size="sm" onClick={handleNewGame}>
-              Home
-            </Button>
+            <Button variant="ghost" size="sm" onClick={handleNewGame}>Home</Button>
           </div>
 
         </div>

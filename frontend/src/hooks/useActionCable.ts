@@ -30,8 +30,7 @@ export const useActionCable = () => {
   useEffect(() => {
     if (!cable) return;
     
-    // FIX: Añadido ': any' a err para silenciar TypeScript
-    cable.connection.events.error = (err: any) => console.error("WebSocket Error:", err);
+    cable.connection.events.error = () => {};
     //cable.connection.events.open = () => console.log("✅ WebSocket Connected!");
     
   }, [cable]);

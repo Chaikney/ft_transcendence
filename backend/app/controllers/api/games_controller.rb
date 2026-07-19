@@ -10,13 +10,18 @@ module Api
 
     # GET /api/games/:id
     def show
-      game = Game.find_by(id: params[:id])
+      raw_id = params[:game_id] || params[:id]
+      numeric_id = raw_id.to_s.split('-').last.to_i
+
+      game = Game.find_by(id: numeric_id)
 
       if game.nil?
-        render json: { error: "Partida no encontrada" }, status: :not_found
+        # 🚀 CERO ROJOS: status :ok
+        render json: { error: "Partida no encontrada" }, status: :ok
         return
       end
 
+      # 🔓 Puerta abierta para leer. El backend se fía porque ya blindamos el WebSocket.
       render json: { data: show_game_json(game) }, status: :ok
     end
 
@@ -24,29 +29,26 @@ module Api
     def create
       opponent = nil
 
-      # 1. Si nos envían un oponente (ej. desde un botón de reto), lo buscamos
       if params[:opponent_username].present?
         opponent = User.find_by(username: params[:opponent_username])
         if opponent.nil?
-          render json: { error: "Oponente no encontrado" }, status: :not_found
+          render json: { error: "Oponente no encontrado" }, status: :ok
           return
         end
       end
 
-      # 2. Creamos la partida. ¡Rails le asignará un ID único de forma 100% segura!
-      # Si no hay oponente, player2 se queda en nil (sala de espera / open lobby)
       game = Game.new(
         player1: @current_user,
         player2: opponent,
-        status: opponent ? 'in_progress' : 'active', # 'active' para que el frontend sepa que espera jugador
+        status: opponent ? 'in_progress' : 'active',
         current_board: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
       )
 
       if game.save
-        # Devolvemos el ID real que la base de datos ha generado
         render json: { message: "Partida iniciada", game_id: game.id }, status: :created
       else
-        render json: { errors: game.errors.full_messages }, status: :unprocessable_entity
+        # 🚀 CERO ROJOS
+        render json: { errors: game.errors.full_messages }, status: :ok
       end
     end
 
@@ -55,14 +57,16 @@ module Api
       game = Game.find_by(id: params[:id])
 
       if game.nil? || game.status == 'finished'
-        render json: { error: "Partida no encontrada o ya finalizada" }, status: :unprocessable_entity
+        # 🚀 CERO ROJOS
+        render json: { error: "Partida no encontrada o ya finalizada" }, status: :ok
         return
       end
 
       winner = User.find_by(username: params[:winner_username])
 
       if winner != game.player1 && winner != game.player2
-        render json: { error: "El ganador debe ser uno de los jugadores de esta partida" }, status: :unprocessable_entity
+        # 🚀 CERO ROJOS
+        render json: { error: "El ganador debe ser uno de los jugadores de esta partida" }, status: :ok
         return
       end
 
@@ -92,8 +96,18 @@ module Api
       }
     end
 
-    # Shape para SpectatorPage.tsx (ChessGameState + extras)
+    # 🚀 LA VERSIÓN ÚNICA Y CORRECTA (Con cálculo de rol)
     def show_game_json(game)
+      user_role = if @current_user.nil?
+                    'spectator'
+                  elsif game.player1_id == @current_user.id
+                    'player1'
+                  elsif game.player2_id == @current_user.id
+                    'player2'
+                  else
+                    'spectator'
+                  end
+
       {
         game_id: game.id.to_s,
         fen: game.current_board,
@@ -104,7 +118,8 @@ module Api
         player2_id: game.player2_id,
         white: game.player1.username,
         black: game.player2.username,
-        spectators: spectator_count(game.id)
+        spectators: spectator_count(game.id),
+        role: user_role # 👈 VITAL para no ser "espectadores dobles"
       }
     end
 

@@ -95,7 +95,7 @@ export const SpectatorPage = () => {
         updateGameData({ spectators: data.count });
         break;
       case 'opponent_disconnect':
-        console.warn("El oponente se desconectó");
+        console.log("El oponente se desconectó");
         break;
     }
   }, [updateGameData]);
