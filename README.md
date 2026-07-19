@@ -1,6 +1,6 @@
 # ft_transcendence
 
-> "The final project of the common core: A real-time competitive gaming platform."
+> "This project has been created as part of the 42 curriculum by chaikney, gcassi-d, mdiaz-or and nkrasimi."
 
 ## 1. Project Overview
 
