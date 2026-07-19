@@ -32,8 +32,9 @@ A **Single Page Application (SPA)** built with **React** and **Ruby on Rails**, 
 ## 4. Team Members & Individual Contributions
 
 * **mdiaz-or (Project Manager)**
-  * _[Añadir descripciones específicas de sus aportaciones reales]_
-  * Planning, scheduling, project tracking, and documentation.
+  *  Led project planning, scheduling, tracking, and technical documentation, ensuring an agile and structured workflow.
+  - Architected and orchestrated the frontend using a fully decoupled SPA model, implementing critical features including global chat, spectator mode, and real-time notifications.
+  - Optimized performance through global state management with **Zustand** and a strict separation of concerns between presentation and business logic, ensuring a highly testable, scalable, and maintainable system.
 
 * **nkrasimi (Technical Lead / Backend & Fullstack)**
   * Designed and implemented the PostgreSQL database schema and ActiveRecord relationships.
@@ -42,8 +43,10 @@ A **Single Page Application (SPA)** built with **React** and **Ruby on Rails**, 
   * Integrated secure OAuth 2.0 authentication with the 42 Network API.
 
 * **gcassi-d (Software Developer)**
-  * _[Añadir descripciones específicas de sus aportaciones reales]_
-  * Implementation of features, debugging, and testing.
+  * Implemented the chess motor in c++, then translated it to ruby.
+  * Implemented the chess UI, as well as piece moving and game-ending flow.
+  * General UI fixes for phone visualization.
+  * General bug fixes for friends, admin control and login features.
 
 * **chaikney (DevOps, Release Manager)**
   * Implementation and orchestration of production containers.
