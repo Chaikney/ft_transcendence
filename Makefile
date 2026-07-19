@@ -128,10 +128,10 @@ The targets are:\n \
 * check_env\tEnsure that the environment file is present\n \
 * stop\t\thalt any running containers, using compose\n \
 * secrets\tEnsure we have a database password and web certificates\n \
-* re\t\tTODO launch the containers while forcing their rebuild\n \
+* rebuild\t\launch the containers while forcing their rebuild\n \
 * clean\tremoves the cached parts of containers\n \
 * fclean\tremoves the cached parts of containers, with --force option\n \
-* wipe\t\tremoves the storage volumes. Destructive!\n \
+* wipe\t\tremoves the storage volumes (i.e. the user database). Destructive!\n \
 * nuke\t\tRemove container cache *and* the storage volumes. Very destructive!"
 
 .PHONY: clean, all, fclean, re, wipe, nuke, help, review_envs, check_host, check_env, check_keys, start, stop, rebuild
