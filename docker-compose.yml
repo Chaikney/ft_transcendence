@@ -28,6 +28,10 @@ services:
       - api
     networks:
       - app_int
+      - app_ext
+    # NOTE this is my home host DNS address that *can* reach 42api
+    # dns:
+    #   - 192.168.0.1
     healthcheck:
       test: ["CMD-SHELL","nginx -t"]
       interval: 30s
@@ -121,3 +125,4 @@ networks:
     internal: true
   app_db:
     internal: true
+  app_ext:

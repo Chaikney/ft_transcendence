@@ -4,7 +4,7 @@ require 'uri'
 module Api
   class OauthController < ApplicationController
     skip_before_action :verify_authenticity_token, raise: false
-    skip_before_action :authorize_request, only: [:callback_42]    
+    skip_before_action :authorize_request, only: [:callback_42]
 
     def callback_42
       code = params[:code]
@@ -28,7 +28,7 @@ module Api
         u.username = user_info['login']
         u.email = user_info['email'] || "#{user_info['login']}@student.42.fr"
         u.password = SecureRandom.hex(10) if u.respond_to?(:password=)
-        u.elo = 1000 
+        u.elo = 1000
       end
 
       jwt_token = JWT.encode({ user_id: user.id }, Rails.application.secret_key_base.to_s)
@@ -48,9 +48,10 @@ module Api
     private
 
     def exchange_code_for_token(code)
-      uri = URI('https://api.intra.42.fr/oauth/token')
+      uri = URI('https://web/api/oauth/token')
+      #uri = URI('https://api.intra.42.fr/oauth/token')
       req = Net::HTTP::Post.new(uri)
-      
+
       # Lee el secreto asegurándose de quitar saltos de línea invisibles
       req.basic_auth(ENV['UID_42'], File.read(ENV.fetch('SECRET_42')).strip)
 
@@ -68,7 +69,8 @@ module Api
     end
 
     def fetch_42_user_info(access_token)
-      uri = URI('https://api.intra.42.fr/v2/me')
+      uri = URI('https://web/api/v2/me')
+      # uri = URI('https://api.intra.42.fr/v2/me')
       req = Net::HTTP::Get.new(uri)
       req['Authorization'] = "Bearer #{access_token}"
 
