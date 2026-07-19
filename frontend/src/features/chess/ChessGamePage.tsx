@@ -11,6 +11,7 @@ import { LobbyScreen } from '@/components/LobbyScreen';
 import { PlayerCard } from '@/components/PlayerCard';
 import { BASE_URL } from '../../services/api';
 
+
 // 👇 IMPORTAMOS EL MODO ESPECTADOR
 import { SpectatorPage } from './../../pages/SpectatorPage';
 
@@ -19,6 +20,12 @@ const styles = {
   topBar: 'flex items-center justify-between w-full max-w-[520px]',
   gameId: 'text-xs font-mono text-text-muted tracking-widest truncate',
   actionRow: 'flex items-center justify-center gap-3 w-full mt-4',
+  // 🆕 ESTILOS PARA EL OVERLAY DE ABANDONO
+  overlay: 'fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in',
+  overlayCard: 'bg-bg-surface border border-border-strong p-8 max-w-md w-full text-center',
+  overlayTitle: 'text-2xl font-mono font-bold text-[#ff3366] mb-4',
+  overlayMessage: 'text-text-secondary font-mono text-sm mb-6 leading-relaxed',
+  overlayButton: 'px-6 py-2 border border-accent text-accent font-mono text-sm hover:bg-accent hover:text-bg-base transition-colors cursor-pointer',
 } as const;
 
 // ==========================================
@@ -88,9 +95,22 @@ const ChessPlayerView = () => {
   const [localColor, setLocalColor] = useState<'w' | 'b'>('w');
   const [isResigning, setIsResigning] = useState(false);
 
+  // 🆕 ESTADO PARA EL OVERLAY DE ABANDONO
+  const [abandonMessage, setAbandonMessage] = useState<string | null>(null);
+
   const gameStatusRef = useRef(chessGame?.status);
   const resignRef = useRef(resign);
   const resetMatchRef = useRef(resetMatch);
+
+  // 🆕 EFECTO PARA DETECTAR CAMBIOS EN EL ESTADO DE LA PARTIDA
+  useEffect(() => {
+    if (chessGame?.status === 'resigned' || chessGame?.status === 'finished') {
+      // Si la partida terminó por abandono, mostrar mensaje
+      if (chessGame.status === 'resigned') {
+        setAbandonMessage('Tu oponente ha abandonado la partida. ¡Ganas!');
+      }
+    }
+  }, [chessGame?.status]);
 
   useEffect(() => {
     gameStatusRef.current = chessGame?.status;
@@ -140,6 +160,12 @@ const ChessPlayerView = () => {
     resign();
   };
 
+  const handleCloseOverlay = () => {
+    setAbandonMessage(null);
+    resetMatch();
+    navigate('/');
+  };
+
   const isLocked = connectionStatus !== 'connected';
 
   if (!gameId) return <Navigate to="/" replace />;
@@ -154,6 +180,21 @@ const ChessPlayerView = () => {
   const bottomPlayer = isMeWhite ? chessGame.player?.player1 : chessGame.player?.player2;
   const isTopTurn = isMeWhite ? (chessGame.turn === 'black') : (chessGame.turn === 'white');
   const isBottomTurn = isMeWhite ? (chessGame.turn === 'white') : (chessGame.turn === 'black');
+
+  // ✅ Si la partida terminó por abandono y estamos mostrando el overlay
+  if (abandonMessage) {
+    return (
+      <div className={styles.overlay}>
+        <div className={styles.overlayCard}>
+          <h2 className={styles.overlayTitle}>⚔️ VICTORIA</h2>
+          <p className={styles.overlayMessage}>{abandonMessage}</p>
+          <button className={styles.overlayButton} onClick={handleCloseOverlay}>
+            &gt; IR A LA HOME
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>
@@ -199,7 +240,11 @@ const ChessPlayerView = () => {
           )}
 
           <div className={styles.actionRow}>
-            <Button variant="primary" onClick={handleResignClick} disabled={isLocked || isResigning || !isGameActive}>
+            <Button 
+              variant="primary" 
+              onClick={handleResignClick} 
+              disabled={isLocked || isResigning || !isGameActive}
+            >
               {isResigning ? 'Resigning...' : 'Resign'}
             </Button>
             <Button variant="ghost" size="sm" onClick={handleNewGame}>Home</Button>

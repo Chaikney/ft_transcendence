@@ -8,13 +8,14 @@ import type { SudokuGameState } from "@features/sudoku/types";
 
 type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'reconnecting';
 
-type GameChannelEvent =
+export type GameChannelEvent =
   | { type: 'move_updated'; game: ChessGameState }
   | { type: 'sudoku_updated'; game: SudokuGameState }
-  | { type: 'game_over'; status: string }
+  | { type: 'game_over'; status: string; winner?: string; message?: string }
   | { type: 'opponent_disconnect' }
   | { type: 'player_ready'; user_id: number }
-  | { type: 'game_start' };
+  | { type: 'game_start' }
+  | { type: 'spectator_count'; count: number };
 
 interface UseGameChanelReturn {
   connectionStatus: ConnectionStatus;
@@ -98,15 +99,54 @@ export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
                   }
                 }
                 break;
+              // ✅ NUEVO: Manejo de GAME_OVER (incluye abandono)
               case 'game_over':
                 if (!isSudoku) {
-                  useMatchStore.setState({ status: 'finished' });
+                  // 1. Actualizar el estado de la partida
                   const currentChess = useMatchStore.getState().chessGame;
                   if (currentChess) {
-                    setChessGame({ ...currentChess, status: event.status as any });
+                    setChessGame({ 
+                      ...currentChess, 
+                      status: event.status as any 
+                    });
+                  }
+                  
+                  // 2. Marcar como finalizada
+                  useMatchStore.setState({ status: 'finished' });
+                  
+                  // 3. Mostrar mensaje si es por abandono
+                  if (event.status === 'resigned' && event.message) {
+                    alert(event.message);
+                  } else if (event.status === 'draw') {
+                    alert('La partida ha terminado en empate.');
+                  } else if (event.status === 'checkmate') {
+                    alert('¡Jaque mate! Partida finalizada.');
                   }
                 }
                 break;
+
+              // ✅ NUEVO: Manejo de OPPONENT_DISCONNECT (mejorado)
+              case 'opponent_disconnect':
+                if (!isSudoku) {
+                  // Mostrar mensaje al usuario
+                  const opponentName = useMatchStore.getState().opponent?.username || 'Tu rival';
+                  alert(`${opponentName} se ha desconectado. La partida ha terminado.`);
+                  
+                  // Marcar la partida como finalizada
+                  const currentChess = useMatchStore.getState().chessGame;
+                  if (currentChess) {
+                    setChessGame({ 
+                      ...currentChess, 
+                      status: 'resigned' 
+                    });
+                  }
+                  useMatchStore.setState({ status: 'finished' });
+                  
+                  // Redirigir al home después de un momento
+                  setTimeout(() => navigate('/'), 2000);
+                }
+                break;
+
               default:
                 console.log('[GameChannel] Evento no procesado:', event);
             }
@@ -114,22 +154,15 @@ export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
         }
       );
     } else {
-      //console.log("♻️ Reutilizando cable existente para", gameId);
       setConnectionStatus('connected');
     }
 
-    // Guardamos la referencia (ya sea nueva o reciclada)
     subscriptionRef.current = activeSub;
-
-    // 🛑 MODO INMORTAL: NO HAY RETURN. NO HAY UNSUBSCRIBE.
-    // Dejamos que el cable viva tranquilamente en la memoria del navegador.
     
   }, [gameId, cable]);
-
   const sendReady = () => subscriptionRef.current?.perform('player_ready');
   const claimDraw = () => subscriptionRef.current?.perform('claim_draw');
   const resign = () => subscriptionRef.current?.perform('resign');
 
   return { connectionStatus, lastEvent, sendReady, claimDraw, resign };
 };
-
