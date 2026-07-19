@@ -124,4 +124,116 @@ The backend uses PostgreSQL, we see it as the default choice for many applicatio
 : Chat functionality
 
 ## 7. TODO Modules & Points Claimed
-_[Lista pendiente de rellenar con los Major y Minor modules de la hoja de corrección para la evaluación]_
+We are claiming a total of 21 points.
+
+### **Web (8 puntos)**
+
+- ✅ **Major (2 pts): Frameworks frontend + backend**
+
+    - Frontend: React 18.3.1 + TypeScript + Vite (mdiaz-or)
+
+    - Backend: Ruby on Rails 8.1.3 (nkrasimi)
+
+- ✅ **Major (2 pts): Real-time features con WebSockets**
+
+    - Action Cable implemented (nkrasimi)
+
+    - Real-timeChat (mdiaz-or)
+
+    - Real time gameplay (chess, sudoku) (nkrasimi, gcassi-d)
+
+    - Handle (dis)connection gracefully (mdiaz-or)
+
+    - Efficient broadcasting (mdiaz-or)
+
+- ✅ **Major (2 pts): User interaction**
+
+    - Basic Chat (send/receive messages) (mdiaz-or)
+
+    - Profile system (nkrasimi, gcassi-d)
+
+    - Online "friends" system (add/remove, ready) (nkrasimi, gcassi-d)
+
+- ✅ **Minor (1 pt): ORM**
+
+    - ActiveRecord (Ruby on Rails ORM) (nkrasimi)
+
+- ✅ **Minor (1 pt): Custom design system**
+
+    - 15+ reusable components implemented including: Button, Modal, Avatar, Badge, Toast, Navbar, Footer, TerminalCard, LoadingScreen, AuthScreen, Login, ErrorMessage, ConnectionStatus, LobbyScreen, MatchmakingModal, ProtectedRoute
+        (mdiaz-or)
+
+### **User Management (7 puntos)**
+
+- ✅ **Major (2 pts): Standard user management**
+
+    - Users can update their profile (nkrasimi, gcassi-d)
+
+    - Avatar images with defaults (nkrasimi, gcassi-d)
+
+    - Friends system with online status (nkrasimi, gcassi-d)
+
+    - Profile page (nkrasimi, gcassi-d)
+
+- ✅ **Minor (1 pt): Game statistics**
+
+    - Elo system implemented (gcassi-d)
+
+    - Leaderboard (mdiaz-or)
+
+    - Match history (mdiaz-or)
+
+- ✅ **Minor (1 pt): OAuth 2.0**
+
+    - OAuth implemented using 42 accounts (nkrasimi)
+
+- ✅ **Major (2 pts): Advanced permissions**
+
+    - CRUD operations on users can be done by admins (nkrasimi)
+
+    - Define Roles (player/admin) (nkrasimi)
+
+    - Roles have different views (nkrasimi)
+
+- ✅ **Minor (1 pt): 2FA completo**
+
+    - 2FA with ROTP implemented (nkrasimi, gcassi-d)
+
+    - email code provisioning (nkrasimi, gcassi-d)
+
+
+### **Gaming and UX (7 puntos)**
+
+- ✅ **Major (2 pts): Web-based game**
+
+    - Chess implemented in ruby (gcassi-d)
+
+    - Live matches are watchable (nkrasimi)
+
+    - Clear rules (it is chess as someone from 250 years ago would recognise) (gcassi-d)
+
+    - Clear victory / defeat conditions (as above) (gcassi-d)
+
+    - Matchmaking (nkrasimi)
+
+- ✅ **Major (2 pts): Remote players**
+
+    - Two player can play on seaprate computers (mdiaz-or)
+
+    - Latency is handled (mdiaz-or)
+
+    - Reconnection logic (mdiaz-or)
+
+- ✅ **Major (2 pts): Add another game**
+
+    - Sudoku implemented as 2nd game (nkrasimi, mdiaz-or)
+
+    - User history (nkrasimi, gcassi-d)
+
+-  **✅Minor (1 pt): Spectator mode**
+
+    - SpectatorPage implemented (mdiaz-or)
+
+    - Real-time updates (mdiaz-or)
+
+    - Spectator count (mdiaz-or)
