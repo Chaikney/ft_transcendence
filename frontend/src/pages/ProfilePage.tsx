@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/store';
+import { useAuthStore, useMatchStore } from '@/store';
 import { createSudokuGame } from '@/features/sudoku/service';
 import { FriendsList } from '@/features/friends/FriendsList';
 import { AvatarPicker } from '@/components/AvatarPicker';
@@ -37,8 +37,8 @@ const styles = {
   resultWin: 'text-[#00ff88] font-bold',
   resultLoss: 'text-[#ff3366] font-bold',
   resultDraw: 'text-[#ffaa00] font-bold',
-  actionRow: 'flex items-center gap-3 mt-2',
-  actionBtn: 'px-4 py-2 font-mono text-xs tracking-widest uppercase border transition-all duration-base cursor-pointer',
+  actionRow: 'flex items-center flex-wrap gap-2 mt-4',
+  actionBtn: 'w-full xs:w-auto text-center px-3 sm:px-4 py-2 font-mono text-[11px] sm:text-xs tracking-widest uppercase border transition-all duration-base cursor-pointer',
   actionBtnPrimary: 'border-accent-border text-accent bg-accent-bg hover:bg-accent hover:text-bg-base hover:shadow-[0_0_12px_rgba(0,212,255,0.3)]',
   actionBtnSecondary: 'border-border-strong text-text-muted hover:border-accent-border hover:text-text-secondary',
   inputGroup: 'flex flex-col gap-2 mt-4 pt-4 border-t border-border-strong',
@@ -239,39 +239,6 @@ export const ProfilePage = () => {
               {/* 🎮 Actions (SOLO SI ES TU PERFIL) */}
               {isOwnProfile && (
                 <div className={styles.actionRow}>
-                  <button
-                    className={[styles.actionBtn, styles.actionBtnPrimary].join(' ')}
-                    onClick={async () => {
-                      try {
-                          const response = await fetch(`${BASE_URL}/games`, {
-                          method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-                          },
-                          body: JSON.stringify({}) // Pide al backend que cree la partida oficial
-                        });
-
-                        const data = await response.json();
-
-                        if (response.ok && data.game_id) {
-                          navigate(`/game/chess/chess-${data.game_id}`);
-                        }
-                      } catch (err) {
-                        console.error("Error al crear la partida de ajedrez:", err);
-                      }
-                    }}
-                  >
-                    &gt; play_chess()
-                  </button>
-                  <button className={[styles.actionBtn, styles.actionBtnPrimary].join(' ')} onClick={async () => {
-                      try {
-                        const res = await createSudokuGame('easy');
-                        if (res && typeof res === 'object' && 'id' in res) {
-                          navigate(`/game/sudoku/sudoku-${String((res as {id: number}).id).padStart(3, '0')}`);
-                        }
-                      } catch (err) { console.error("Error al crear juego:", err); }
-                    }}>&gt; play_sudoku()</button>
                   <button className={[styles.actionBtn, styles.actionBtnSecondary].join(' ')} onClick={handleLogout}>&gt; logout()</button>
                 </div>
               )}
