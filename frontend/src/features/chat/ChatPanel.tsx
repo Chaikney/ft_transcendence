@@ -127,7 +127,7 @@ export const ChatPanel = ({ sendMessage, sendTyping }: ChatPanelProps) => {
     
     api.get(`/rooms/${activeRoomId}/messages`)
       .then((res) => setMessages(activeRoomId, res.data))
-      .catch((err) => console.error('Error fetching messages:', err));
+      .catch((err) => {});
   }, [activeRoomId, setMessages]);
 
   // Auto-scroll
