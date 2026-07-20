@@ -6,7 +6,7 @@ import type { Consumer } from "@rails/actioncable";
 import { useNavigate } from "react-router-dom";
 import { useMatchStore, useRadarStore } from "@/store";
 
-const CABLE_URL = import.meta.env.VITE_CABLE_URL ?? 'wss://10.13.1.6:8443/cable';
+const CABLE_URL = import.meta.env.VITE_CABLE_URL ?? 'wss://10.13.1.2:8443/cable';
 
 // Singleton global estricto
 let globalConsumer: Consumer | null = null;
@@ -102,6 +102,16 @@ export const useMatchmaking = () => {
               const gameType = data.room_id.split('-')[0];
               useMatchStore.getState().setLobby(gameType, data.opponent);
               navigate(`/game/${gameType}/${data.room_id}`);
+            }
+            // 👇 NUEVO: ESCUDO ANTI-ABANDONOS
+            else if (data.type === 'match_cancelled' || data.action === 'match_cancelled') {
+              //console.log("💥 MATCHMAKING: El oponente ha huido. Cancelando sala de espera.");
+              
+              // 1. Ocultar todos los carteles de "Waiting" y "Searching"
+              useMatchStore.getState().resetMatch(); 
+              
+              // 2. Por si acaso se quedó atrapado en la ruta de juego, lo mandamos a inicio
+              navigate('/');
             }
           }
         }

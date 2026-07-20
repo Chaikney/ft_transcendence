@@ -15,7 +15,8 @@ export type GameChannelEvent =
   | { type: 'opponent_disconnect' }
   | { type: 'player_ready'; user_id: number }
   | { type: 'game_start' }
-  | { type: 'spectator_count'; count: number };
+  | { type: 'spectator_count'; count: number }
+  | { type: 'match_cancelled'; message?: string };
 
 interface UseGameChanelReturn {
   connectionStatus: ConnectionStatus;
@@ -74,35 +75,27 @@ export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
               case 'move_updated':
                 if (!isSudoku) setChessGame(event.game as ChessGameState);
                 break;
+
               case 'sudoku_updated':
                 if (isSudoku) setSudokuGame(event.game as SudokuGameState);
                 break;
+
               case 'player_ready':
                 //console.log(`👍 El jugador ${event.user_id} está listo.`);
                 break;
-              case "opponent_disconnect":
-                if (!isSudoku) {
-                  alert("Tu rival se ha salido de la partida.");
-                  useMatchStore.getState().resetMatch();
-                  navigate('/');
-                }
-                break;
+
               case 'game_start':
                 if (!isSudoku) {
-                  // 1. Actualizamos el estado global del MatchStore
                   useMatchStore.setState({ status: 'in_progress' });
-                  
-                  // 2. 🚀 LA CLAVE: Actualizamos también el estado interno de la partida
                   const currentChess = useMatchStore.getState().chessGame;
                   if (currentChess) {
                     setChessGame({ ...currentChess, status: 'active' });
                   }
                 }
                 break;
-              // ✅ NUEVO: Manejo de GAME_OVER (incluye abandono)
+
               case 'game_over':
                 if (!isSudoku) {
-                  // 1. Actualizar el estado de la partida
                   const currentChess = useMatchStore.getState().chessGame;
                   if (currentChess) {
                     setChessGame({ 
@@ -110,11 +103,8 @@ export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
                       status: event.status as any 
                     });
                   }
-                  
-                  // 2. Marcar como finalizada
                   useMatchStore.setState({ status: 'finished' });
                   
-                  // 3. Mostrar mensaje si es por abandono
                   if (event.status === 'resigned' && event.message) {
                     alert(event.message);
                   } else if (event.status === 'draw') {
@@ -125,14 +115,11 @@ export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
                 }
                 break;
 
-              // ✅ NUEVO: Manejo de OPPONENT_DISCONNECT (mejorado)
               case 'opponent_disconnect':
                 if (!isSudoku) {
-                  // Mostrar mensaje al usuario
                   const opponentName = useMatchStore.getState().opponent?.username || 'Tu rival';
                   alert(`${opponentName} se ha desconectado. La partida ha terminado.`);
                   
-                  // Marcar la partida como finalizada
                   const currentChess = useMatchStore.getState().chessGame;
                   if (currentChess) {
                     setChessGame({ 
@@ -142,11 +129,20 @@ export const useGameChannel = (gameId: string | null): UseGameChanelReturn => {
                   }
                   useMatchStore.setState({ status: 'finished' });
                   
-                  // Redirigir al home después de un momento
                   setTimeout(() => navigate('/'), 2000);
                 }
                 break;
-
+              
+              // ✅ AQUÍ ESTÁ NUESTRO ESCUDO SIN ROJOS
+              case 'match_cancelled':
+                if (!isSudoku) {
+                  console.log("💥 MATCH CANCELLED recibido. Destruyendo sala de espera.");
+                  alert(event.message || "El rival canceló la partida.");
+                  useMatchStore.getState().resetMatch();
+                  navigate('/');
+                }
+                break;
+                
               default:
                 console.log('[GameChannel] Evento no procesado:', event);
             }

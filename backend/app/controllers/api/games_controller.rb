@@ -52,13 +52,75 @@ module Api
       end
     end
 
+    # POST /api/games/:id/accept
+    # POST /api/games/:id/accept
+    def accept
+      game = Game.find_by(id: params[:id])
+      
+      if game.nil?
+        return render json: { error: "Partida no encontrada" }, status: :ok
+      end
+
+      if game.status == 'cancelled'
+        return render json: { error: "El oponente canceló la partida" }, status: :ok
+      end
+
+      # 1. Guardamos en la memoria temporal que ESTE jugador ha dicho que sí.
+      # Usamos una "llave" única con el ID del juego y del usuario.
+      Rails.cache.write("game_#{game.id}_user_#{@current_user.id}_accepted", true, expires_in: 5.minutes)
+
+      # 2. Averiguamos quién es el oponente
+      opponent_id = (@current_user.id == game.player1_id) ? game.player2_id : game.player1_id
+
+      # 3. Comprobamos si el oponente TAMBIÉN ha dicho que sí previamente
+      if Rails.cache.read("game_#{game.id}_user_#{opponent_id}_accepted")
+        
+        # ¡LOS DOS HAN ACEPTADO! Ahora SÍ arranca la partida.
+        if game.status == 'pending_acceptance' || game.status == 'active'
+          game.update!(status: 'in_progress')
+          ActionCable.server.broadcast("game_#{game.id}", { type: 'match_started' })
+        end
+        
+        render json: { message: "Partida iniciada", status: game.status }, status: :ok
+      else
+        # SOLO HA ACEPTADO UNO. 
+        # No tocamos el status de la base de datos, sigue en 'pending_acceptance'.
+        # Así, si el otro huye ahora, no perderá puntos.
+        render json: { message: "Esperando al oponente...", status: 'pending_acceptance' }, status: :ok
+      end
+    end
+
+    # POST /api/games/:id/decline
+    def decline
+      game = Game.find_by(id: params[:id])
+      
+      return render json: { error: "Partida no encontrada" }, status: :ok if game.nil?
+
+      if game.status == 'pending_acceptance' || game.status == 'active'
+        game.update!(status: 'cancelled')
+        # Avisar al oponente para que vuelva a la cola
+        ActionCable.server.broadcast("game_#{game.id}", { type: 'match_cancelled' })
+        render json: { message: "Partida cancelada limpiamente" }, status: :ok
+      else
+        render json: { error: "La partida ya está en curso." }, status: :ok
+      end
+    end
+
     # PATCH /api/games/:id/finish
     def update
       game = Game.find_by(id: params[:id])
 
-      if game.nil? || game.status == 'finished'
+      if game.nil? || game.status == 'finished' || game.status == 'cancelled'
         # 🚀 CERO ROJOS
-        render json: { error: "Partida no encontrada o ya finalizada" }, status: :ok
+        render json: { error: "Partida no válida o ya finalizada" }, status: :ok
+        return
+      end
+
+      # 🛡️ EL ESCUDO CONTRA EL FRONTEND TRAMPOSO
+      # Si el frontend intenta declarar un ganador de una partida que ni había empezado:
+      if game.status == 'pending_acceptance' || game.status == 'pending'
+        game.update!(status: 'cancelled')
+        render json: { error: "No se puede ganar una partida que no ha empezado" }, status: :ok
         return
       end
 
@@ -70,6 +132,7 @@ module Api
         return
       end
 
+      # Si pasamos todos los escudos, es una partida legítima (in_progress)
       game.finalize_match(winner.id)
 
       render json: {

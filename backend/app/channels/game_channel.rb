@@ -3,7 +3,6 @@ class GameChannel < ApplicationCable::Channel
 
   def subscribed
     stream_from "game_#{params[:game_id]}"
-    #Rails.logger.info "🔌 [GAME] Usuario #{current_user.id} entró a la sala game_#{params[:game_id]}"
 
     game_id = params[:game_id].to_s.split('-').last
     game = Game.find_by(id: game_id)
@@ -18,15 +17,13 @@ class GameChannel < ApplicationCable::Channel
   def player_ready
     room = params[:game_id]
     user_id = current_user.id
-    #Rails.logger.info "✅ [GAME] Usuario #{user_id} envió READY a #{room}"
     @@ready_players[room] << user_id unless @@ready_players[room].include?(user_id)
-    #Rails.logger.info "✅ [GAME] Usuario #{user_id} está READY en #{room}"
 
     if @@ready_players[room].length == 2
       game_id = room.to_s.split('-').last
       partida = Game.find_by(id: game_id)
       
-      # 🚀 FIX: Le damos el turno inicial al player1 (Blancas)
+      # FIX: Le damos el turno inicial al player1 (Blancas)
       partida&.update!(status: 'in_progress', current_turn_id: partida.player1_id)
       
       ActionCable.server.broadcast("game_#{room}", { type: 'game_start' })
@@ -50,14 +47,11 @@ class GameChannel < ApplicationCable::Channel
     historial_actual = partida.fen_history || []
     
     # 🛡️ BARRERA ANTI-EMPATE FANTASMA:
-    # Si React se vuelve loco y manda el mismo tablero repetido, lo ignoramos.
     if historial_actual.last == new_fen
-      #Rails.logger.warn "⚠️ [GAME] Tablero duplicado ignorado para #{room}"
       return
     end
 
     nuevo_historial = historial_actual + [new_fen]
-
     historial_limpio = nuevo_historial.map { |f| f.to_s.split(' ')[0..3].join(' ') }
     is_threefold = historial_limpio.tally.values.any? { |count| count >= 3 }
 
@@ -66,7 +60,6 @@ class GameChannel < ApplicationCable::Channel
 
     siguiente_turno_id = (data['turn'] == 'w') ? partida.player1_id : partida.player2_id
     
-    # Guardamos en la base de datos
     partida.update!(
       current_board: new_fen,
       fen_history:   nuevo_historial,
@@ -114,12 +107,31 @@ class GameChannel < ApplicationCable::Channel
     return if partida.status == 'finished'
     return unless current_user == partida.player1 || current_user == partida.player2
 
+    # 🛡️ ESCUDO: Si React manda un "resign" antes de empezar, cancelamos sin restar ELO
+    if partida.status == 'pending_acceptance' || partida.status == 'pending'
+      partida.update!(status: 'cancelled')
+      
+      ActionCable.server.broadcast("game_#{room}", {
+        type: 'match_cancelled',
+        message: 'El rival rechazó la partida.'
+      })
+      
+      # 🚀 NUEVO: Avisamos también por matchmaking por si el otro no había transicionado
+      opponent_id = (partida.player1_id == current_user.id) ? partida.player2_id : partida.player1_id
+      ActionCable.server.broadcast("matchmaking_#{opponent_id}", {
+        action: 'match_cancelled',
+        type: 'match_cancelled',
+        message: 'El rival rechazó la partida.'
+      })
+      return
+    end
+
+    # ⚔️ Si ya empezó, entonces SÍ restamos Elo
     winner = (current_user == partida.player1) ? partida.player2 : partida.player1
 
     if game_type == 'chess'
         partida.finalize_match(winner.id)
     else
-      # 🚀 FIX: Añadimos el winner_id para el Sudoku
       partida.update!(status: 'finished', winner_id: winner.id)
     end
 
@@ -153,29 +165,44 @@ class GameChannel < ApplicationCable::Channel
       return
     end
 
-    if partida&.status != 'finished' && is_player
-      # 🔥 Determinar el ganador (el que NO se ha desconectado)
-      winner = (current_user == partida.player1) ? partida.player2 : partida.player1
+    if partida && is_player && partida.status != 'finished'
       
-      Rails.logger.info "💀 [GAME] Usuario #{current_user.id} abandonó la partida #{room}. Ganador: #{winner.id}"
-      
-      # Guardar el resultado en la BD
-      if game_type == 'chess'
-        partida.finalize_match(winner.id)
-      else
-        partida.update!(status: 'finished', winner_id: winner.id)
-      end
+      if partida.status == 'in_progress' || partida.status == 'active'
+        # 🔴 CASO 1: PARTIDA EN CURSO. RESTAMOS ELO.
+        winner = (current_user == partida.player1) ? partida.player2 : partida.player1
+        
+        if game_type == 'chess'
+          partida.finalize_match(winner.id)
+        else
+          partida.update!(status: 'finished', winner_id: winner.id)
+        end
 
-      # 📡 NOTIFICAR AL RIVAL INMEDIATAMENTE con el resultado
-      ActionCable.server.broadcast("game_#{room}", { 
-        type: 'game_over', 
-        status: 'resigned',
-        winner: winner.username,
-        message: "#{current_user.username} ha abandonado la partida. #{winner.username} gana!"
-      })
-      ActionCable.server.broadcast("game_#{room}", { type: 'opponent_disconnect' })
-    else
-      Rails.logger.info "👋 [GAME] Usuario #{current_user.id} salió de #{room} — sin broadcast"
+        ActionCable.server.broadcast("game_#{room}", { 
+          type: 'game_over', 
+          status: 'resigned',
+          winner: winner.username,
+          message: "Tu oponente ha abandonado la partida. ¡Ganas!"
+        })
+        ActionCable.server.broadcast("game_#{room}", { type: 'opponent_disconnect' })
+        
+      elsif partida.status == 'pending_acceptance' || partida.status == 'pending'
+        # 🟢 CASO 2: NO HABÍAN ACEPTADO. CANCELACIÓN SEGURA. ¡NO SE RESTA ELO!
+        partida.update!(status: 'cancelled')
+        
+        # Avisamos al canal de juego
+        ActionCable.server.broadcast("game_#{room}", { 
+          type: 'match_cancelled',
+          message: 'El oponente no aceptó la partida.'
+        })
+
+        # Avisamos al Matchmaking (por si el otro sigue en la pantalla de cola)
+        opponent_id = (partida.player1_id == current_user.id) ? partida.player2_id : partida.player1_id
+        ActionCable.server.broadcast("matchmaking_#{opponent_id}", {
+          action: 'match_cancelled',
+          type: 'match_cancelled',
+          message: 'El oponente no aceptó la partida.'
+        })
+      end
     end
   end
 

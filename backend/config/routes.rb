@@ -21,6 +21,8 @@ Rails.application.routes.draw do
       end
       member do
         patch :finish, to: 'games#update'
+        post  :accept 
+        post  :decline
       end
     end
 

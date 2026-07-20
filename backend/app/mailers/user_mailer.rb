@@ -3,7 +3,7 @@ class UserMailer < ApplicationMailer
 
   # Helper to take the BASE_URL
   def base_url
-    @base_url ||= ENV['BASE_URL'] || 'https://10.13.1.6:8443'
+    @base_url ||= ENV['BASE_URL'] 
   end
 
   # 1. El que ya tenías (Para el registro)
