@@ -133,116 +133,48 @@ The backend uses PostgreSQL, we see it as the default choice for many applicatio
 : Chat functionality
 
 ## 7. TODO Modules & Points Claimed
-We are claiming a total of 21 points.
+We are claiming a total of 22 points.
 
-### **Web (8 puntos)**
+Web (8 pts)
+✅ Major (2 pts): Frameworks frontend + backend: Built with React 18, TypeScript, and Vite on the frontend  paired with Ruby on Rails on the backend. Ensures a modular, type-safe architecture communicating via a fast API and real-time channels.
+(mdiaz-or, nkrasimi)
 
-- ✅ **Major (2 pts): Frameworks frontend + backend**
+✅ Major (2 pts): Real-time features con WebSockets: Powered by Rails Action Cable (nkrasimi) to stream real-time events, chat messages (mdiaz-or), and gameplay states. Gracefully handles disconnections and efficiently broadcasts updates to active clients.
+(mdiaz-or, nkrasimi, gcassi-d)
 
-    - Frontend: React 18.3.1 + TypeScript + Vite (mdiaz-or)
+✅ Major (2 pts): User interaction: Features a functional messaging chat , a complete profile customization ecosystem , and an online friends management system. Includes status trackers and interactive request states.
+(nkrasimi, gcassi-d, mdiaz-or)
 
-    - Backend: Ruby on Rails 8.1.3 (nkrasimi)
+✅ Minor (1 pt): ORM: Utilizes Ruby on Rails ActiveRecord to model database relations, handle migrations, and execute clean, efficient database queries.
+(nkrasimi)
 
-- ✅ **Major (2 pts): Real-time features con WebSockets**
+✅ Minor (1 pt): Custom design system: Features 15+ reusable cyberpunk-styled UI components like Modals, Toasts, Badges, and Terminal Cards. Built to maintain strict visual consistency across the entire app. (mdiaz-or)
 
-    - Action Cable implemented (nkrasimi)
+User Management (7 pts)
+✅ Major (2 pts): Standard user management: Allows users to modify profile details, configure default or custom avatar choices, and track friend states. Centralized through a dedicated Profile page view.
+(nkrasimi, gcassi-d)
 
-    - Real-timeChat (mdiaz-or)
+✅ Minor (1 pt): Game statistics: Tracks competitive performance using an Elo rating algorithm , historical match logs, and a live global leaderboard. Displays analytical progress for all users.
+(gcassi-d, mdiaz-or)
 
-    - Real time gameplay (chess, sudoku) (nkrasimi, gcassi-d)
+✅ Minor (1 pt): OAuth 2.0: Integrated with 42 school accounts to provide secure, frictionless authentication. Automatically maps external credentials to internal user profiles.
+(nkrasimi)
 
-    - Handle (dis)connection gracefully (mdiaz-or)
+✅ Major (2 pts): Advanced permissions: Implements administrative roles (player / admin) with restricted permission layers. Admins can execute full CRUD operations and access dedicated control views.
+(nkrasimi)
 
-    - Efficient broadcasting (mdiaz-or)
+✅ Minor (1 pt): 2FA complete: Secures accounts using ROTP token generation and email code provisioning . Provisions verification codes before granting full access.
+(nkrasimi, gcassi-d)
 
-- ✅ **Major (2 pts): User interaction**
+Gaming and UX (7 pts)
+✅ Major (2 pts): Web-based game: Implements a fully-featured Chess game with classic rule sets, match matchmaking, and live spectatable matches . Features explicit victory, defeat, and draw conditions.
+(gcassi-d, nkrasimi)
 
-    - Basic Chat (send/receive messages) (mdiaz-or)
+✅ Major (2 pts): Remote players: Enables smooth peer-to-peer remote sessions across different machines. Incorporates latency mitigation and robust reconnection handling to maintain session states
+(mdiaz-or)
 
-    - Profile system (nkrasimi, gcassi-d)
+✅ Major (2 pts): Add another game: Introduces Sudoku as a secondary interactive game mode complete with custom validation rules and separate history tracking.
+(nkrasimi, mdiaz-or)
 
-    - Online "friends" system (add/remove, ready) (nkrasimi, gcassi-d)
-
-- ✅ **Minor (1 pt): ORM**
-
-    - ActiveRecord (Ruby on Rails ORM) (nkrasimi)
-
-- ✅ **Minor (1 pt): Custom design system**
-
-    - 15+ reusable components implemented including: Button, Modal, Avatar, Badge, Toast, Navbar, Footer, TerminalCard, LoadingScreen, AuthScreen, Login, ErrorMessage, ConnectionStatus, LobbyScreen, MatchmakingModal, ProtectedRoute
-        (mdiaz-or)
-
-### **User Management (7 puntos)**
-
-- ✅ **Major (2 pts): Standard user management**
-
-    - Users can update their profile (nkrasimi, gcassi-d)
-
-    - Avatar images with defaults (nkrasimi, gcassi-d)
-
-    - Friends system with online status (nkrasimi, gcassi-d)
-
-    - Profile page (nkrasimi, gcassi-d)
-
-- ✅ **Minor (1 pt): Game statistics**
-
-    - Elo system implemented (gcassi-d)
-
-    - Leaderboard (mdiaz-or)
-
-    - Match history (mdiaz-or)
-
-- ✅ **Minor (1 pt): OAuth 2.0**
-
-    - OAuth implemented using 42 accounts (nkrasimi)
-
-- ✅ **Major (2 pts): Advanced permissions**
-
-    - CRUD operations on users can be done by admins (nkrasimi)
-
-    - Define Roles (player/admin) (nkrasimi)
-
-    - Roles have different views (nkrasimi)
-
-- ✅ **Minor (1 pt): 2FA completo**
-
-    - 2FA with ROTP implemented (nkrasimi, gcassi-d)
-
-    - email code provisioning (nkrasimi, gcassi-d)
-
-
-### **Gaming and UX (7 puntos)**
-
-- ✅ **Major (2 pts): Web-based game**
-
-    - Chess implemented in ruby (gcassi-d)
-
-    - Live matches are watchable (nkrasimi)
-
-    - Clear rules (it is chess as someone from 250 years ago would recognise) (gcassi-d)
-
-    - Clear victory / defeat conditions (as above) (gcassi-d)
-
-    - Matchmaking (nkrasimi)
-
-- ✅ **Major (2 pts): Remote players**
-
-    - Two player can play on seaprate computers (mdiaz-or)
-
-    - Latency is handled (mdiaz-or)
-
-    - Reconnection logic (mdiaz-or)
-
-- ✅ **Major (2 pts): Add another game**
-
-    - Sudoku implemented as 2nd game (nkrasimi, mdiaz-or)
-
-    - User history (nkrasimi, gcassi-d)
-
--  **✅Minor (1 pt): Spectator mode**
-
-    - SpectatorPage implemented (mdiaz-or)
-
-    - Real-time updates (mdiaz-or)
-
-    - Spectator count (mdiaz-or)
+✅ Minor (1 pt): Spectator mode: Provides a dedicated SpectatorPage allowing users to watch active live matches in real time, displaying live stream states and an active spectator count.
+(mdiaz-or).
