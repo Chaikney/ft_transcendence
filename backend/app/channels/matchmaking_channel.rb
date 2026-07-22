@@ -37,7 +37,7 @@ class MatchmakingChannel < ApplicationCable::Channel
           )
           Rails.logger.info "✅ [MATCHMAKING] Partida #{game.id} creada en BD."
         rescue => e
-          Rails.logger.error "❌ [MATCHMAKING ERROR] Fallo al crear partida: #{e.message}"
+          #Rails.logger.error "❌ [MATCHMAKING ERROR] Fallo al crear partida: #{e.message}"
           return # Si peta la BD, abortamos.
         end
 

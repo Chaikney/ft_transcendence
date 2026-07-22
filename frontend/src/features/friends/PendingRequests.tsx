@@ -11,10 +11,8 @@ export const PendingRequests = () => {
     try {
       await patch('/friends/accept', { username });
       removeFriendRequest(id);
-      // Nota: Aquí el estado de amigos se actualizará cuando hagas reload, 
-      // o podrías disparar el fetchFriendsData() desde el padre.
     } catch (e) {
-      //console.error('Failed to accept');
+      console.log('Failed to accept');
     }
   };
 
@@ -23,7 +21,7 @@ export const PendingRequests = () => {
       await del('/friends/reject', { data: { username } });
       removeFriendRequest(id);
     } catch (e) {
-      //console.error('Failed to reject');
+      console.log('Failed to reject');
     }
   };
 

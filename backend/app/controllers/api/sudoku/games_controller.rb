@@ -42,10 +42,23 @@ module Api
             # 🚀 CERO ROJOS
             return render json: { error: "Movimiento inválido" }, status: :ok
           end
-          # ... (tu código)
+           update_params[:board] = params[:board]
+          
+          # Si el tablero está completo y bien, marcamos estado 'won'
+          if @game.solved? || @game.board.include?('0') == false # Verificación adicional
+            # Nota: Asumimos que solved? contiene la lógica de verificación
+          end
         end
       
-        # ... (tu código)
+        # Procesar estado si viene del cliente
+        if params[:game].present? && params[:game][:status].present?
+          update_params[:status] = params[:game][:status]
+        end
+
+        # Si el tablero se resolvió, forzamos status a 'won'
+        if update_params[:board] && @game.class.new(board: update_params[:board]).solved?
+          update_params[:status] = 'won'
+        end
       
         if update_params.empty?
           # 🚀 CERO ROJOS
@@ -53,7 +66,16 @@ module Api
         end
       
         if @game.update(update_params)
-          # ... (tu código de ganar)
+          if @game.status == 'won'
+            @game.finalize_game!
+          end
+
+          render json: {
+            id: @game.id,
+            status: @game.status,
+            board: @game.board,
+            difficulty: @game.difficulty
+          }, status: :ok
         else
           # 🚀 CERO ROJOS
           render json: { error: @game.errors.full_messages.join(', ') }, status: :ok

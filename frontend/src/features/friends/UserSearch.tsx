@@ -10,11 +10,19 @@ export const UserSearch = () => {
     setStatus('loading');
     
     try {
-      await post('/friends/request', { username });
-      setStatus('success');
-      setUsername('');
-      setTimeout(() => setStatus('idle'), 2000);
+      const res = await post('/friends/request', { username });
+      
+      if (res.success) {
+        setStatus('success');
+        setUsername('');
+        setTimeout(() => setStatus('idle'), 2000);
+      } else {
+        // La petición se realizó con éxito, pero la validación de negocio no pasó
+        setStatus('error');
+        setTimeout(() => setStatus('idle'), 2000);
+      }
     } catch {
+      // Solo entra aquí si realmente se cayó el servidor o no hay internet
       setStatus('error');
       setTimeout(() => setStatus('idle'), 2000);
     }
