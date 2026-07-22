@@ -4,7 +4,7 @@ export interface ChessGameState {
 	game_id: string;
     fen: string;                
 	turn: 'white' | 'black';
-    status: 'active' | 'in_progress' | 'checkmate' | 'draw' | 'finished'; 
+    status: 'active' | 'in_progress' | 'checkmate' | 'draw' | 'finished' | 'resigned'; 
 	last_move: ChessMove | null;
 	player2_id?: number;
 	player1_id?: number;

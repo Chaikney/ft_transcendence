@@ -41,7 +41,7 @@ Rails.application.configure do
   config.action_mailer.perform_caching = false
 
   # Lee BASE_URL del .env o usa un valor por defecto
-  base_url = ENV['BASE_URL'] || 'https://10.13.1.6:8443'
+  base_url = ENV['BASE_URL']
   uri = URI.parse(base_url)
 
   # Configuración para ActionMailer (enlaces en correos)

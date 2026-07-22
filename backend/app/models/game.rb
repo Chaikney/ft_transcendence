@@ -2,7 +2,7 @@ class Game < ApplicationRecord
   belongs_to :player1, class_name: 'User'
   belongs_to :player2, class_name: 'User'
 
-  validates :status, inclusion: { in: %w[pending in_progress finished] }
+  validates :status, inclusion: { in: %w[pending pending_acceptance active in_progress finished cancelled] }
   validates :player1, :player2, presence: true
 
   # --- Helpers de ajedrez (todo vive en Game, no hay modelo ChessGame) ---
