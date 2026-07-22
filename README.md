@@ -194,7 +194,57 @@ With the general understanding I then had several problems to solve.  Here I mad
 As I hope will be obvious from this section, none of my documentation contributions were LLM-generated. In a couple of cases (noted where they are used) I used [https://www.deepl.com/en/translator#en/es/](DeepL for machine translation from Spanish to English).
 
 ### gcassi-d
+AI was used to aid me in the following points:
+* Translate the chess engine from c++ to Ruby
+* General bugfixes when checking .tsx code
+* Debugging when checking the rails console in case of errors
+
+In order to more accurately make the chess engine, I used the following sources to precisely immitate FIDE rules:
+* chess.com fen tutorial: https://www.chess.com/es/blog/PEDROJGC10/que-es-el-fen-para-que-sirve-consejos-y-entrenamiento-del-mismo-blog-3
+* concrete draw rules: https://www.chess.com/terms/draw-chess
 
 ### mdiaz-or
 
+AI tools were leveraged to streamline component design, state management, and user interaction logic across the frontend:
+
+* **UI/UX Design & Styling:**
+  * Prototyping and refining CSS/Tailwind layouts to establish a cohesive, responsive cyberpunk aesthetic across all screens.
+  * Adjusting mobile responsiveness and layout adaptation for navigation, user profiles, and interactive game cards.
+
+* **Interactive Sudoku Logic:**
+  * Implementing the user interaction flow for the interactive Sudoku game, ensuring fluid input handling, real-time board updates, and state syncing.
+
+* **TypeScript & React Architecture:**
+  * Writing type-safe React components and custom hooks to enforce strict TypeScript contracts across game views and UI elements.
+  * Debugging complex component re-renders, ref propagation, and state updates to maintain optimal UI performance.
+
+* **Links & Resources:**
+	* react: https://react.dev/
+
 ### nkrasimi
+AI tools were utilized as an adaptive collaborator throughout the development process in the following areas:
+
+* **Research & Architecture:** 
+  * Brainstorming and evaluating structural ideas prior to implementation across the stack (**Ruby on Rails, PostgreSQL, Docker, TypeScript, React**).
+  * Analyzing official documentation (e.g., Ruby on Rails guides, ActionCable, Docker docs) to select optimal patterns for real-time WebSocket communication and API design.
+
+* **Database & Rails Automation:**
+  * Leveraging Rails CLI and Active Record migrations to automatically configure, manage, and seed the **PostgreSQL** database structure without writing manual raw SQL queries.
+
+* **Debugging & Problem Solving:**
+  * Diagnosing and resolving complex compilation errors and stack traces in Ruby on Rails and TypeScript.
+  * Troubleshooting Docker multi-container network behavior and volume persistence issues.
+
+* **API & Backend Optimization:**
+  * Refactoring API endpoints and standardizing HTTP status handling (e.g., graceful error responses for friendship workflows).
+  * Optimizing database query strategy and state management flow between backend controllers and React frontend components.
+
+* **Links & Resources:**
+	
+	* Ruby on Rails: https://guides.rubyonrails.org/ 
+	
+	* API Design Basics: https://apisyouwonthate.com/blog/understanding-resources-and-collections-in-restful-apis/
+
+	* PostgreSQL: https://neon.com/postgresql/tutorial
+
+
