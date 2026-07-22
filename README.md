@@ -165,7 +165,7 @@ User Management (7 pts)
 (nkrasimi, gcassi-d)
 
 Gaming and UX (7 pts)
-✅ Major (2 pts): Web-based game: Implements a fully-featured Chess game with classic rule sets, match matchmaking, and live spectatable matches . Features explicit victory, defeat, and draw conditions.
+✅ Major (2 pts): Web-based game: Implements a fully-featured Chess game with classic rule sets, match matchmaking, and live viewable matches . Features explicit victory, defeat, and draw conditions.
 (gcassi-d, nkrasimi)
 
 ✅ Major (2 pts): Remote players: Enables smooth peer-to-peer remote sessions across different machines. Incorporates latency mitigation and robust reconnection handling to maintain session states
@@ -174,7 +174,7 @@ Gaming and UX (7 pts)
 ✅ Major (2 pts): Add another game: Introduces Sudoku as a secondary interactive game mode complete with custom validation rules and separate history tracking.
 (nkrasimi, mdiaz-or)
 
-✅ Minor (1 pt): Spectator mode: Provides a dedicated SpectatorPage allowing users to watch active live matches in real time, displaying live stream states and an active spectator count.
+✅ Minor (1 pt): Spectator mode: Provides a dedicated Spectator Page allowing users to watch active live matches in real time, displaying live stream states and an active spectator count.
 (mdiaz-or).
 
 ## 8. Resources and AI usage
@@ -182,16 +182,16 @@ Gaming and UX (7 pts)
 The resources used by the team as a whole were limited to a repository on GitHub and a Slack workspace, both on the free tier. Individual resources (and AI tools) used were as follows.
 
 ### chaikney
-Almost all development was done on my personal laptop running [https://www.debian.org](Debian 13), mostly for reasons of time and familiarity. [https://www.doomemacs.org](Doom Emacs) remains my editor of choice. For this project it was especially useful to be able to apply `mode`s for each of the languages we used, plus containers. Even more so, Doom's integration of [https://magit.vc/](`magit`, *by far* the best UI for `git`), meant that I was able to quickly manage, view and merge the branches of code from all contributors.
-I preferred to use the official documentation provided by the technologies that we used or considered. Initially when looking at podman vs docker, two articles that I referred to were [https://www.linuxjournal.com/content/containers-2025-docker-vs-podman-modern-developers](this from Linux Journal) and [https://www.redhat.com/en/blog/container-networking-podman](this from Red Hat). Other important tutorials were [https://github.com/podman-container-tools/podman/blob/main/docs/tutorials/basic_networking.md](on networking) and [https://github.com/podman-container-tools/podman/blob/main/rootless.md](on rootless operation).
+Almost all development was done on my personal laptop running [Debian 13](https://www.debian.org), mostly for reasons of time and familiarity. [Doom Emacs](https://www.doomemacs.org) remains my editor of choice. For this project it was especially useful to be able to apply `mode`s for each of the languages we used, plus containers. Even more so, Doom's integration of [`magit`, *by far* the best UI for `git`](https://magit.vc/), meant that I was able to quickly manage, view and merge the branches of code from all contributors.
+I preferred to use the official documentation provided by the technologies that we used or considered. Initially when looking at podman vs docker, two articles that I referred to were [this from Linux Journal](https://www.linuxjournal.com/content/containers-2025-docker-vs-podman-modern-developers) and [this from Red Hat](https://www.redhat.com/en/blog/container-networking-podman). Other important tutorials were [on networking](https://github.com/podman-container-tools/podman/blob/main/docs/tutorials/basic_networking.md) and [on rootless operation](https://github.com/podman-container-tools/podman/blob/main/rootless.md).
 
-The official [https://www.postgresql.org/docs/](PostrgreSQL documentation) is fine and detailed, though ultimately I went with a stock Docker image. The [https://wiki.alpinelinux.org/wiki/Main_Page](Alpine Linux wiki) and [https://pkgs.alpinelinux.org/](package index) helped me understand the differences in its tools and approach in contrast to the debian-linked distros I am more used to. This was especially important for the "gotchas" arising from their different `libc` implementations (`musl` instead of classic `glibc`).
+The official [PostgreSQL documentation](https://www.postgresql.org/docs/) is fine and detailed, though ultimately I went with a stock Docker image. The [Alpine Linux wiki](https://wiki.alpinelinux.org/wiki/Main_Page) and [package index](https://pkgs.alpinelinux.org/) helped me understand the differences in its tools and approach in contrast to the debian-linked distros I am more used to. This was especially important for the "gotchas" arising from their different `libc` implementations (`musl` instead of classic `glibc`).
 
-I used the [https://library.kiwix.org/]("offline wikipedia viewer" Kiwix) to grab local copies of the official documentation for all the technologies we used. the very-online nature of container development made that less useful than I had hoped but it is a very fine project.
+I used the ["offline wikipedia viewer" Kiwix](https://library.kiwix.org/) to grab local copies of the official documentation for all the technologies we used. the very-online nature of container development made that less useful than I had hoped but it is a very fine project.
 
-With the general understanding I then had several problems to solve.  Here I made use of [https://duck.ai](DuckDuckGo's AI "chat" service) for several specific sessions. The advantages of that for are their commitment to neither  saving the data nor using it to re-train models. I also like very much to use a duck-branded website for a process that is essentially a couple of steps up from "rubber-duck debugging", and that the URL sounds like a (vulgar) Glaswegian affirmation of enthusiastic positivity.
+With the general understanding I then had several problems to solve.  Here I made use of [DuckDuckGo's AI "chat" service](https://duck.ai) for several specific sessions. The advantages of that for are their commitment to neither  saving the data nor using it to re-train models. I also like very much to use a duck-branded website for a process that is essentially a couple of steps up from "rubber-duck debugging", and that the URL sounds like a (vulgar) Glaswegian affirmation of enthusiastic positivity.
 
-As I hope will be obvious from this section, none of my documentation contributions were LLM-generated. In a couple of cases (noted where they are used) I used [https://www.deepl.com/en/translator#en/es/](DeepL for machine translation from Spanish to English).
+As I hope will be obvious from this section, none of my documentation contributions were LLM-generated. In a couple of cases (noted where they are used) I used [DeepL for machine translation from Spanish to English](https://www.deepl.com/en/translator#en/es/).
 
 ### gcassi-d
 AI was used to aid me in the following points:
@@ -199,7 +199,7 @@ AI was used to aid me in the following points:
 * General bugfixes when checking .tsx code
 * Debugging when checking the rails console in case of errors
 
-In order to more accurately make the chess engine, I used the following sources to precisely immitate FIDE rules:
+In order to more accurately make the chess engine, I used the following sources to precisely imitate FIDE rules:
 * chess.com fen tutorial: https://www.chess.com/es/blog/PEDROJGC10/que-es-el-fen-para-que-sirve-consejos-y-entrenamiento-del-mismo-blog-3
 * concrete draw rules: https://www.chess.com/terms/draw-chess
 
@@ -224,7 +224,7 @@ AI tools were leveraged to streamline component design, state management, and us
 ### nkrasimi
 AI tools were utilized as an adaptive collaborator throughout the development process in the following areas:
 
-* **Research & Architecture:** 
+* **Research & Architecture:**
   * Brainstorming and evaluating structural ideas prior to implementation across the stack (**Ruby on Rails, PostgreSQL, Docker, TypeScript, React**).
   * Analyzing official documentation (e.g., Ruby on Rails guides, ActionCable, Docker docs) to select optimal patterns for real-time WebSocket communication and API design.
 
@@ -240,11 +240,9 @@ AI tools were utilized as an adaptive collaborator throughout the development pr
   * Optimizing database query strategy and state management flow between backend controllers and React frontend components.
 
 * **Links & Resources:**
-	
-	* Ruby on Rails: https://guides.rubyonrails.org/ 
-	
+
+	* Ruby on Rails: https://guides.rubyonrails.org/
+
 	* API Design Basics: https://apisyouwonthate.com/blog/understanding-resources-and-collections-in-restful-apis/
 
 	* PostgreSQL: https://neon.com/postgresql/tutorial
-
-
