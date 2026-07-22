@@ -63,6 +63,7 @@ class Game < ApplicationRecord
   end
 
   def self.check_afk_timeouts
+    puts "DEBUG: Comprobando AFK..."
     # Buscamos partidas activas que lleven más de 1 hora sin actualizarse
     partidas_abandonadas = Game.where(status: 'in_progress').where("updated_at < ?", 1.hour.ago)
 

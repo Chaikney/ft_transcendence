@@ -10,6 +10,11 @@ module Api
       
       # 1. Intercambiar el código por un Access Token de 42
       token_response = exchange_code_for_token(code)
+
+      unless token_response['access_token']
+        Rails.logger.error "❌ [OAUTH] Respuesta de 42: #{token_response.inspect}"
+        return render json: { error: 'Fallo al negociar con 42' }, status: :unauthorized
+      end
       
       unless token_response['access_token']
         return render json: { error: 'Fallo al negociar con 42' }, status: :unauthorized
