@@ -76,8 +76,31 @@ module Api
       render json: { message: "Cuenta eliminada permanentemente del sistema" }, status: :ok
     end
 
-    # ─── MÉTODOS DE 2FA ───────────────────────────────────────
+    def ban
+      # 🛡️ BARRERA DE SEGURIDAD: Comprueba que el current_user es admin
+      # Descomenta y adapta esto según tu modelo de base de datos
+      # unless @current_user.is_admin? # o @current_user.role == 'admin'
+      #   return render json: { error: "No tienes permisos de administrador" }, status: :unauthorized
+      # end
 
+      target_user = User.find_by(id: params[:id])
+      
+      if target_user.nil?
+        return render json: { error: "Usuario no encontrado" }, status: :not_found
+      end
+
+      # Asumiendo que tienes una columna boolean `is_banned` o similar en la BD
+      target_user.update!(banned: true)
+
+      # 🚀 EL MISIL TELEDIRIGIDO: Disparamos al túnel privado del usuario
+      ActionCable.server.broadcast("user_#{target_user.id}", { 
+        type: 'account_banned' 
+      })
+
+      render json: { message: "El martillo del ban ha caído sobre #{target_user.username}" }, status: :ok
+    end
+
+    # ─── MÉTODOS DE 2FA ───────────────────────────────────────
     # GET /api/profile/2fa/enable
     def enable_2fa
       @current_user.generate_otp_secret

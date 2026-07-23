@@ -40,6 +40,9 @@ export const useChatChannel = () => {
           switch (event.type) {
             case 'message_received':
               addMessage(event.message.room_id, event.message);
+              if (event.message.sender_id !== currentUser.id) {
+                info(event.message.content.slice(0, 60), event.message.sender);
+              }
               break;
             case 'user_online':
               setFriendOnline(event.user_id, true);

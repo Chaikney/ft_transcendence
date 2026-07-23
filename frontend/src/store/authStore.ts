@@ -10,6 +10,8 @@ interface AuthState {
   setUser: (user: User) => void;
   clearUser: () => void;
   setLoading: (loading: boolean) => void;
+  // 👈 Añadimos la firma de la función
+  setBanned: (banned: boolean) => void; 
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -25,4 +27,13 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setLoading: (loading) =>
     set({ isLoading: loading }),
+
+  // 🔨 Añadimos la ejecución de la función
+  setBanned: (banned) =>
+    set((state) => ({
+      // Solo actualizamos si hay un usuario logueado. 
+      // Ojo: asegúrate de que en tu type User la propiedad se llama `banned` (y no `is_banned`), 
+      // ya que en tu App.tsx has escrito `user?.banned`
+      user: state.user ? { ...state.user, banned } : null,
+    })),
 }));

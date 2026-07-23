@@ -75,6 +75,8 @@ Rails.application.routes.draw do
       patch  'users/:id/ban', to: 'admin#ban' 
     end
 
+    post 'users/:id/ban', to: 'users#ban'
+
     get 'status', to: 'status#index'
   end
 end
