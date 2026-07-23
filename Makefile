@@ -102,6 +102,15 @@ wipe: stop
 
 nuke: stop fclean wipe
 
+# Use this to ensure there are no old images messing up the eval
+# NOTE Destructive; do *not* use if you have other containers going on
+rm-images:
+	@ids="$$( $(BASECMD) images -q )"; \
+	if [ -z "$$ids" ]; then exit 0; fi; \
+	for id in $$ids; do \
+		$(BASECMD) rmi -f "$$id"; \
+	done
+
 down: stop
 up: all
 
@@ -134,4 +143,4 @@ The targets are:\n \
 * wipe\t\tremoves the storage volumes (i.e. the user database). Destructive!\n \
 * nuke\t\tRemove container cache *and* the storage volumes. Very destructive!"
 
-.PHONY: clean, all, fclean, re, wipe, nuke, help, review_envs, check_host, check_env, check_keys, start, stop, rebuild
+.PHONY: clean, all, fclean, re, wipe, nuke, help, review_envs, check_host, check_env, check_keys, start, stop, rebuild, rm-images

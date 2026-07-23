@@ -61,6 +61,8 @@ On the horizon, the **goal** of the project was for us all to gain experience in
 
 ## 5. Getting Started
 
+Note! If you launch from a machine that has existing container images, sadness and confusion may result. *If* you have no other containers running, call `make rm-images` before the final make. If you have images you want to keep, call `docker image ls` to get the names of the bad ones.
+
 The simplest possible setup is the following.
 ```bash
 # Clone the repository from vog
@@ -79,6 +81,8 @@ mkdir -p secret
 nano secret/42API_SEC # Paste your 42 API Secret inside and save
 nano secret/SMTP_PASS # Paste your SMTP password inside and save
 
+# Did you see the note above about stale images? This is the point where you might want to run:
+make rm-images
 # Build and start services using the Makefile. This can generate local SSL certs, DB password etc.
 # Checks for the presence of necessary secrets and uses Docker by default.
 make
