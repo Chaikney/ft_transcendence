@@ -93,9 +93,9 @@ secret/trans.crt: secret/testprivate.key
 # TODO This "relinks"/ never says it has nothing to do, even if the keys are in place
 server_cert: secret/trans.crt
 	@echo "Copying web certs to build context"
-	mkdir --parents frontend/secret
-	cp --update secret/testprivate.key frontend/secret/trans.key
-	cp --update secret/trans.crt frontend/secret/trans.crt
+	mkdir -p frontend/secret
+	cp -u secret/testprivate.key frontend/secret/trans.key
+	cp -u secret/trans.crt frontend/secret/trans.crt
 
 # Remove the storage volume. Destructive!
 wipe: stop
@@ -139,7 +139,7 @@ The targets are:\n \
 * check_env\tEnsure that the environment file is present\n \
 * stop\t\thalt any running containers, using compose\n \
 * secrets\tEnsure we have a database password and web certificates\n \
-* rebuild\t\launch the containers while forcing their rebuild\n \
+* rebuild\tlaunch the containers while forcing their rebuild\n \
 * clean\tremoves the cached parts of containers\n \
 * fclean\tremoves the cached parts of containers, with --force option\n \
 * wipe\t\tremoves the storage volumes (i.e. the user database). Destructive!\n \
