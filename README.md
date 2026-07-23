@@ -207,7 +207,7 @@ The official [PostgreSQL documentation](https://www.postgresql.org/docs/) is fin
 
 I used the ["offline wikipedia viewer" Kiwix](https://library.kiwix.org/) to grab local copies of the official documentation for all the technologies we used. the very-online nature of container development made that less useful than I had hoped but it is a very fine project.
 
-With the general understanding I then had several problems to solve.  Here I made use of [DuckDuckGo's AI "chat" service](https://duck.ai) for several specific sessions. The advantages of that for are their commitment to neither  saving the data nor using it to re-train models. I also like very much to use a duck-branded website for a process that is essentially a couple of steps up from "rubber-duck debugging", and that the URL sounds like a (vulgar) Glaswegian affirmation of enthusiastic positivity.
+With the general understanding I then had several problems to solve.  Here I made use of [DuckDuckGo's AI "chat" service](https://duck.ai) for several specific sessions. The advantages of that for are their commitment to neither  saving the data nor using it to re-train models. I also like very much to use a duck-branded website for a process that is essentially a couple of steps up from "[rubber-duck debugging](https://en.wikipedia.org/wiki/Rubber_duck_debugging)", and that the URL sounds like a (vulgar) [Glaswegian affirmation of enthusiastic positivity](http://fuck-aye.urbanup.com/498197).
 
 As I hope will be obvious from this section, none of my documentation contributions were LLM-generated. In a couple of cases (noted where they are used) I used [DeepL for machine translation from Spanish to English](https://www.deepl.com/en/translator#en/es/).
 
