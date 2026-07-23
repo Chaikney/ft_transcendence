@@ -4,7 +4,6 @@ services:
   web:
     build:
       context: ./frontend
-      # NOTE This is one bind mount and one storage volume defined on the fly
       # TODO Work out which of these are actually needed
       args:
         VITE_BASE_URL: ${BASE_URL}
@@ -13,10 +12,11 @@ services:
         VITE_CABLE_URL: ${VITE_CABLE_URL}
         VITE_USE_MOCK: ${VITE_USE_MOCK}
         VITE_42_CLIENT_ID: ${UID_42}
+      # NOTE This is one bind mount and one storage volume defined on the fly
     volumes:
-      - ../frontend:/app
-       - /app/node_modules
-    # TODO Ideally this would be binding to 80 but that needs root
+      - ./frontend:/app
+      - /app/node_modules
+    # NOTE Ideally this would be binding to 80 but that needs root
     ports:
       - "8080:80"
       - "8443:443"
