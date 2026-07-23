@@ -97,11 +97,24 @@ module Api
 
     # 🛠️ Método privado que consulta a la API de 42
     def intra_student_exists?(username)
-      # ⚠️ Asegúrate de tener estas variables en tu archivo .env
       client_id = ENV['UID_42']
       client_secret = ENV['SECRET_42']
 
-      return false unless client_id && client_secret
+      # 🛡️ FIX PARA DOCKER SECRETS: 
+      # Si client_secret es una ruta a un archivo, leemos su contenido
+      if client_secret.present? && File.exist?(client_secret)
+        client_secret = File.read(client_secret).strip
+      end
+      
+      # Si client_id también estuviera por archivo (por si acaso)
+      if client_id.present? && File.exist?(client_id)
+        client_id = File.read(client_id).strip
+      end
+
+      if client_id.blank? || client_secret.blank?
+        #Rails.logger.error "🚨 [API 42] ERROR: UID_42 o SECRET_42 están vacíos."
+        return false
+      end
 
       # 1. Pedir Token de Aplicación a 42
       token_uri = URI.parse("https://api.intra.42.fr/oauth/token")
@@ -111,7 +124,11 @@ module Api
         'client_secret' => client_secret
       })
 
-      return false unless token_res.is_a?(Net::HTTPSuccess)
+      unless token_res.is_a?(Net::HTTPSuccess)
+        #Rails.logger.error "🚨 [API 42] ERROR PIDIENDO TOKEN: #{token_res.code}"
+        return false
+      end
+      
       token = JSON.parse(token_res.body)['access_token']
 
       # 2. Preguntar a 42 si existe un usuario con ese login
@@ -126,9 +143,6 @@ module Api
       # Si devuelve 200, el estudiante existe. Bloqueamos el registro.
       response.code.to_i == 200
     rescue => e
-      # Si la API de 42 se cae, permitimos el registro (fail-open) o lo denegamos.
-      # Por ahora lo dejamos en false para no bloquear a la gente si Intra falla.
-      #Rails.logger.error "🚨 Error al consultar la API de 42: #{e.message}"
       false
     end
   end
