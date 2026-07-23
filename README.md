@@ -64,8 +64,8 @@ On the horizon, the **goal** of the project was for us all to gain experience in
 The simplest possible setup is the following.
 ```bash
 # Clone the repository from vog
-git clone git@vogsphere.42urduliz.com:vogsphere/intra-uuid-d9bb6f6a-1246-45bc-9a4a-cac51a66ad36-7514648-gcassi-d
-# or from GitHub:
+git clone git@vogsphere.42urduliz.com:vogsphere/intra-uuid-9adfe50d-3d12-4ce6-bb0e-4ac1991e0a16-7556221-gcassi-d
+# or from GitHub (if not on a cluster machine):
 git clone https://github.com/Chaikney/ft_transcendence.git
 
 cd ft_transcendence
