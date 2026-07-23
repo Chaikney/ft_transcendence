@@ -1,154 +1,184 @@
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useState, useRef } from "react";
 // @ts-ignore
 import { createConsumer } from "@rails/actioncable";
 // @ts-ignore
-import type { Consumer } from "@rails/actioncable";
+import type { Consumer, Subscription } from "@rails/actioncable";
 import { useNavigate } from "react-router-dom";
 import { useMatchStore, useRadarStore } from "@/store";
+import { BASE_URL } from "@services/api";
 
-const CABLE_URL = import.meta.env.VITE_CABLE_URL ?? 'wss://10.13.1.2:8443/cable';
+const CABLE_URL = import.meta.env.VITE_CABLE_URL ?? 'wss://10.13.2.5:8443/cable';
 
-// Singleton global estricto
-let globalConsumer: Consumer | null = null;
+let globalConsumerPromise: Promise<Consumer | null> | null = null;
+let activeConsumer: Consumer | null = null;
 
-export const getConsumer = (): Consumer | null => {
+export const getConsumer = async (): Promise<Consumer | null> => {
   const token = localStorage.getItem('auth_token');
   if (!token) return null;
 
-  if (!globalConsumer) {
-    const urlWithAuth = `${CABLE_URL}?token=${token}`;
-    globalConsumer = createConsumer(urlWithAuth);
+  if (activeConsumer && activeConsumer.subscriptions) {
+    return activeConsumer;
   }
-  return globalConsumer;
+
+  if (!globalConsumerPromise) {
+    globalConsumerPromise = (async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/action_cable/ticket`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!res.ok) throw new Error("Error obteniendo ticket");
+        const data = await res.json();
+
+        if (data?.ticket) {
+          const instance = createConsumer(`${CABLE_URL}?ticket=${data.ticket}`);
+          // Esperar a que la estructura subscriptions exista
+          if (instance && instance.subscriptions) {
+            activeConsumer = instance;
+            return activeConsumer;
+          }
+        }
+        return null;
+      } catch (err) {
+        console.error("🚨 Error inicializando ActionCable:", err);
+        globalConsumerPromise = null;
+        activeConsumer = null;
+        return null;
+      }
+    })();
+  }
+
+  return globalConsumerPromise;
 };
 
-// --- HOOKS ---
-
 export const useActionCable = () => {
-  const cable = useMemo(() => getConsumer(), []);
-  
+  const [cable, setCable] = useState<Consumer | null>(activeConsumer);
+
   useEffect(() => {
-    if (!cable) return;
-    
-    cable.connection.events.error = () => {};
-    //cable.connection.events.open = () => console.log("✅ WebSocket Connected!");
-    
-  }, [cable]);
+    let isMounted = true;
+
+    getConsumer().then((consumer) => {
+      if (isMounted && consumer?.subscriptions) {
+        setCable(consumer);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return { cable };
 };
 
-// 📡 EL RADAR
+// 📡 HOOK: RADAR DE PRESENCIA
 export const useAppearanceRadar = () => {
   const { cable } = useActionCable();
-  const radarRef = useRef<any>(null);
+  const radarRef = useRef<Subscription | null>(null);
 
   useEffect(() => {
-    if (!cable) return;
-    
+    // 🛡️ Guardia contra objeto null o sin propiedad subscriptions
+    if (!cable || !cable.subscriptions) return;
+
     if (radarRef.current) {
-        radarRef.current.unsubscribe();
+      try { radarRef.current.unsubscribe(); } catch (_) {}
     }
 
-    radarRef.current = cable.subscriptions.create(
-      { channel: "AppearanceChannel" },
-      {
-        connected() {
-          //console.log("📡 RADAR ONLINE: Conectado.");
-          useRadarStore.getState().setStatus('connected'); 
-        },
-        disconnected() {
-          //console.log("📡 RADAR OFFLINE: Conexión perdida.");
-          useRadarStore.getState().setStatus('disconnected');
-        },
-        // FIX: Añadido ': any' a data
-        received(data: any) {
-          useRadarStore.getState().updateUserStatus(data.user_id, data.status === 'online');
+    try {
+      radarRef.current = cable.subscriptions.create(
+        { channel: "AppearanceChannel" },
+        {
+          connected() {
+            useRadarStore.getState().setStatus('connected');
+          },
+          disconnected() {
+            useRadarStore.getState().setStatus('disconnected');
+          },
+          received(data: any) {
+            if (data?.user_id) {
+              useRadarStore.getState().updateUserStatus(data.user_id, data.status === 'online');
+            }
+          }
         }
-      }
-    );
+      );
+    } catch (err) {
+      console.warn("Error creando suscripción AppearanceChannel:", err);
+    }
 
     return () => {
       if (radarRef.current) {
-          radarRef.current.unsubscribe();
-          radarRef.current = null;
+        try { radarRef.current.unsubscribe(); } catch (_) {}
+        radarRef.current = null;
       }
     };
   }, [cable]);
 };
 
-// ⚔️ MATCHMAKING
+// ⚔️ HOOK: MATCHMAKING
 export const useMatchmaking = () => {
   const { cable } = useActionCable();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!cable) return;
+    // 🛡️ Guardia contra objeto null o sin propiedad subscriptions
+    if (!cable || !cable.subscriptions) return;
 
-    // 🛡️ 1. Buscamos si el canal ya existe para no duplicarlo (por el Strict Mode de React)
     const channelIdentifier = JSON.stringify({ channel: "MatchmakingChannel" });
-    const existingSub = cable.subscriptions.findAll(channelIdentifier)[0];
+    
+    try {
+      const existingSub = cable.subscriptions.findAll(channelIdentifier)[0];
 
-    if (!existingSub) {
-      cable.subscriptions.create(
-        { channel: "MatchmakingChannel" },
-        {
-          connected() {
-            //console.log("⚔️ MATCHMAKING: Canal de Rails conectado y escuchando.");
-          },
-          // FIX: Añadido ': any' a data
-          received(data: any) {
-            if (data.action === 'match_found') {
-              const gameType = data.room_id.split('-')[0];
-              useMatchStore.getState().setLobby(gameType, data.opponent);
-              navigate(`/game/${gameType}/${data.room_id}`);
-            }
-            // 👇 NUEVO: ESCUDO ANTI-ABANDONOS
-            else if (data.type === 'match_cancelled' || data.action === 'match_cancelled') {
-              //console.log("💥 MATCHMAKING: El oponente ha huido. Cancelando sala de espera.");
-              
-              // 1. Ocultar todos los carteles de "Waiting" y "Searching"
-              useMatchStore.getState().resetMatch(); 
-              
-              // 2. Por si acaso se quedó atrapado en la ruta de juego, lo mandamos a inicio
-              navigate('/');
+      if (!existingSub) {
+        cable.subscriptions.create(
+          { channel: "MatchmakingChannel" },
+          {
+            received(data: any) {
+              if (data?.action === 'match_found') {
+                const gameType = data.room_id.split('-')[0];
+                useMatchStore.getState().setLobby(gameType, data.opponent);
+                navigate(`/game/${gameType}/${data.room_id}`);
+              } else if (data?.type === 'match_cancelled' || data?.action === 'match_cancelled') {
+                useMatchStore.getState().resetMatch();
+                navigate('/');
+              }
             }
           }
-        }
-      );
+        );
+      }
+    } catch (err) {
+      console.warn("Error creando suscripción MatchmakingChannel:", err);
     }
-
-    // 🗑️ IMPORTANTE: No devolvemos la función con el `unsubscribe()`. 
-    // Así, cuando cambies a la pantalla de carga, el cable seguirá vivo.
   }, [cable, navigate]);
 
-  const joinQueue = (gameType: 'chess' | 'sudoku') => {
-    if (!cable) return;
-    
-    // Rescatamos el canal global
+  const joinQueue = async (gameType: 'chess' | 'sudoku') => {
+    const currentCable = cable || (await getConsumer());
+    if (!currentCable?.subscriptions) return;
+
     const channelIdentifier = JSON.stringify({ channel: "MatchmakingChannel" });
-    const sub = cable.subscriptions.findAll(channelIdentifier)[0];
-    
+    const sub = currentCable.subscriptions.findAll(channelIdentifier)[0];
+
     if (sub) {
       useMatchStore.getState().startLoading(gameType);
-      // Sin setTimeouts raros, disparamos directo
       sub.perform('join_queue', { game_type: gameType });
     }
   };
 
-  const leaveQueue = () => {
-    if (!cable) return;
-    
+  const leaveQueue = async () => {
+    const currentCable = cable || (await getConsumer());
+    if (!currentCable?.subscriptions) return;
+
     const currentType = useMatchStore.getState().gameType;
     const channelIdentifier = JSON.stringify({ channel: "MatchmakingChannel" });
-    const sub = cable.subscriptions.findAll(channelIdentifier)[0];
-    
+    const sub = currentCable.subscriptions.findAll(channelIdentifier)[0];
+
     if (sub && currentType) {
       sub.perform('leave_queue', { game_type: currentType });
       useMatchStore.getState().resetMatch();
-      
-      // Aquí SÍ cortamos el cable porque el usuario ha cancelado la búsqueda manualmente
-      sub.unsubscribe();
+      try { sub.unsubscribe(); } catch (_) {}
     }
   };
 

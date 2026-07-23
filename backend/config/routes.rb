@@ -77,4 +77,7 @@ Rails.application.routes.draw do
 
     get 'status', to: 'status#index'
   end
+  namespace :api do
+	post 'action_cable/ticket', to: 'action_cable_tickets#create'
+  end
 end

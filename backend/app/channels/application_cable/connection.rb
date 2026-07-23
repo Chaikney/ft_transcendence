@@ -9,30 +9,24 @@ module ApplicationCable
     private
 
     def find_verified_user
-      # 1. Buscamos el token JWT que nos manda React por la URL (?token=...)
-      token = request.params[:token]
+      ticket = request.params[:ticket]
 
-      if token.present?
-        begin
-          # Descodificamos el token para sacar el user_id.
-          # Nota: Si en tu proyecto usáis una clave secreta distinta para el JWT, cámbiala aquí.
-          decoded_token = JWT.decode(token, Rails.application.secret_key_base, true, { algorithm: 'HS256' })
-          user_id = decoded_token[0]['user_id']
+      if ticket.present?
+        # Leemos el ID del usuario desde la caché usando el ticket
+        cache_key = "action_cable_ticket:#{ticket}"
+        user_id = Rails.cache.read(cache_key)
+
+        if user_id
+          # 💥 GUILLOTINA: Borramos el ticket inmediatamente para que sea de un solo uso
+          Rails.cache.delete(cache_key)
 
           if verified_user = User.find_by(id: user_id)
             return verified_user
           end
-        rescue JWT::DecodeError
-          #Rails.logger.error "🚨 WebSockets Auth Failed: Token inválido o expirado"
         end
       end
 
-      # 2. Intento secundario (Devise/Warden) por si alguna vista de Rails lo necesita
-      if env['warden']&.user
-        return env['warden'].user
-      end
-
-      # 3. Si no hay token, o es inválido, RECHAZAMOS LA CONEXIÓN. (¡Se acabó el hack del User.first!)
+      # Rechazamos si no hay ticket o si ya expiró / fue usado
       reject_unauthorized_connection
     end
   end
