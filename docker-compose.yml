@@ -11,7 +11,6 @@ services:
         VITE_CABLE_URL: ${VITE_CABLE_URL}
         VITE_USE_MOCK: ${VITE_USE_MOCK}
         VITE_42_CLIENT_ID: ${UID_42}
-      # NOTE This is one bind mount and one storage volume defined on the fly
     # NOTE Ideally this would be binding to 80 but that needs root
     ports:
       - "8080:80"
@@ -67,8 +66,6 @@ services:
     # Este comando es vital: borra el PID fantasma de Rails y luego arranca el servidor
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
     # NOTE Bind mount for development
-    volumes:
-      - ./backend:/app  # <--- LA MAGIA: Sincroniza tu carpeta local con el contenedor
     secrets:
       - RB_DBPASS
       - 42_SECRET
