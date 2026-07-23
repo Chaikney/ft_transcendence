@@ -15,7 +15,7 @@ SOCK_UNIT=	podman.socket
 ENV_FILE=	.env
 42_FILE	=	secret/42API_SEC
 SMTP_FILE=	secret/SMTP_PASS
-
+VOL_NAMES=	ft_transcendence_DB_vol
 
 all: $(NAME)
 
@@ -95,10 +95,10 @@ server_cert: secret/trans.crt
 	cp --update secret/testprivate.key frontend/secret/trans.key
 	cp --update secret/trans.crt frontend/secret/trans.crt
 
-# Convenience / convention rules; not properly worked out or needed yet
+# Remove the storage volume. Destructive!
 wipe: stop
 	@echo "Removing all storage volumes"
-	$(BASECMD) volume prune --force
+	$(BASECMD) volume rm -f $(VOL_NAMES)
 
 nuke: stop fclean wipe
 
