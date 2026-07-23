@@ -34,9 +34,9 @@ On the horizon, the **goal** of the project was for us all to gain experience in
 ## 4. Team Members & Individual Contributions
 
 * **mdiaz-or (Project Manager)**
-  *  Led project planning, scheduling, tracking, and technical documentation, ensuring an agile and structured workflow.
-  - Architected and orchestrated the frontend using a fully decoupled SPA model, implementing critical features including global chat, spectator mode, and real-time notifications.
-  - Optimized performance through global state management with **Zustand** and a strict separation of concerns between presentation and business logic, ensuring a highly testable, scalable, and maintainable system.
+  * Led project planning, scheduling, tracking, and technical documentation, ensuring an agile and structured workflow.
+  * Architected and orchestrated the frontend using a fully decoupled SPA model, implementing critical features including global chat, spectator mode, and real-time notifications.
+  * Optimized performance through global state management with **Zustand** and a strict separation of concerns between presentation and business logic, ensuring a highly testable, scalable, and maintainable system.
 
 * **nkrasimi (Technical Lead / Backend & Fullstack)**
   * Designed and implemented the PostgreSQL database schema and ActiveRecord relationships.
@@ -147,9 +147,9 @@ The backend uses PostgreSQL, we see it as the default choice for many applicatio
 : Chat functionality
 
 ## 7. Modules & Points Claimed
-We are claiming a total of 22 points.
+We are claiming a total of 23 points, detailed below .
 
-Web (8 pts)
+### Web (9 pts)
 ✅ Major (2 pts): Frameworks frontend + backend: Built with React 18, TypeScript, and Vite on the frontend  paired with Ruby on Rails on the backend. Ensures a modular, type-safe architecture communicating via a fast API and real-time channels.
 (mdiaz-or, nkrasimi)
 
@@ -164,9 +164,9 @@ Web (8 pts)
 
 ✅ Minor (1 pt): Custom design system: Features 15+ reusable cyberpunk-styled UI components like Modals, Toasts, Badges, and Terminal Cards. Built to maintain strict visual consistency across the entire app. (mdiaz-or)
 
-TODO: add anotgher point here (complete notification system)
+✅ Minor (1 pt): Complete notification system: Implements a comprehensive notification system covering creation, update, and deletion actions, powered by global state management and auto-dismissing UI components. (mdiaz-or)
 
-User Management (7 pts)
+### User Management (7 pts)
 ✅ Major (2 pts): Standard user management: Allows users to modify profile details, configure default or custom avatar choices, and track friend states. Centralized through a dedicated Profile page view.
 (nkrasimi, gcassi-d)
 
@@ -182,7 +182,7 @@ User Management (7 pts)
 ✅ Minor (1 pt): 2FA complete: Secures accounts using ROTP token generation and email code provisioning . Provisions verification codes before granting full access.
 (nkrasimi, gcassi-d)
 
-Gaming and UX (7 pts)
+### Gaming and UX (7 pts)
 ✅ Major (2 pts): Web-based game: Implements a fully-featured Chess game with classic rule sets, match matchmaking, and live viewable matches . Features explicit victory, defeat, and draw conditions.
 (gcassi-d, nkrasimi)
 
