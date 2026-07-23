@@ -50,9 +50,17 @@ module Api
         estado = new_status ? "BANEADO" : "DESBANEADO"
         
         if new_status
+          # 1. Avisamos a todo el mundo (para que le pongan el circulito rojo, etc)
           ActionCable.server.broadcast("appearance_global", { type: 'banned', user_id: user.id })
+          
+          # 🚀 2. EL MISIL PRIVADO: Golpea directamente a su pantalla para estampar el mensaje rojo
+          ActionCable.server.broadcast("user_#{user.id}", { type: 'account_banned' })
         else
+          # 1. Avisamos a todo el mundo de que vuelve a estar vivo
           ActionCable.server.broadcast("appearance_global", { type: 'unbanned', user_id: user.id })
+          
+          # 🩹 2. (Opcional pero brutal) Si está mirando la pantalla roja, le devolvemos a la vida en vivo
+          ActionCable.server.broadcast("user_#{user.id}", { type: 'account_unbanned' })
         end
 
         render json: { message: "El usuario #{user.username} ahora está #{estado}" }, status: :ok

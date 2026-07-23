@@ -3,39 +3,33 @@ import { RouterProvider } from 'react-router-dom';
 import { router } from './router';
 import { useAuthStore } from '@/store';
 import { useAppearanceRadar } from './hooks/useActionCable';
+import { useUserChannel } from './hooks/useUserChannel';
 import { AuthScreen } from './components/AuthScreen';
 import { ToastContainer } from '@/components/Toast';
 import { BASE_URL } from './services/api';
 
 export default function App() {
-  // 🚀 Mantenemos la telemetría en consola, pero quitamos el alert molesto
-  //console.log("🚀 ¡HOLA! APP.TSX SE ESTÁ EJECUTANDO (VERSIÓN BAN HAMMER)");
-
   const setUser = useAuthStore((s) => s.setUser);
   const setLoading = useAuthStore((s) => s.setLoading);
+  const setBanned = useAuthStore((s) => s.setBanned);
 
-  // 👇 Leemos al usuario desde el estado global para saber si está baneado
   const user = useAuthStore((s) => s.user);
 
-  // 🛡️ EL ESCUDO: Estado local hiper-estricto. Empieza en true y bloquea TODO.
   const [isInitializing, setIsInitializing] = useState(true);
 
   useAppearanceRadar();
+  useUserChannel();
 
   useEffect(() => {
     const initializeAuth = async () => {
-      //console.log("🔍 [INIT] Iniciando secuencia de validación...");
-
       if (import.meta.env.VITE_USE_MOCK === 'true') {
-        //console.log("⚠️ [INIT] Modo MOCK activado. Saltando validación de backend.");
-        // @ts-ignore - Ignoramos tipado estricto para el mock de momento
+        // @ts-ignore
         setUser({ id: 1, username: 'mdiaz-or', elo: 1247, avatar_url: '', banned: false });
         setIsInitializing(false);
         return;
       }
 
       const token = localStorage.getItem('auth_token');
-      //console.log("🔑 [INIT] Token encontrado en localStorage:", token ? "SÍ" : "NO");
 
       if (token) {
         setLoading(true);
@@ -48,32 +42,36 @@ export default function App() {
             }
           });
 
-          //console.log(`📊 [INIT] Respuesta del backend: Status ${response.status}`);
-
           if (response.ok) {
             const userData = await response.json();
-            //console.log("✅ [INIT] Usuario validado por el backend:", userData.username);
-            setUser(userData); // Esto mete tus datos y pone isAuthenticated a true
+            
+            // 🛡️ TRAMPA ANTI-ROJOS PARA LA EVALUACIÓN
+            // Si el backend mandó un 200 OK pero con la señal de baneo:
+            if (userData.is_banned_signal) {
+              // 1. Guardamos una versión mínima del usuario para que la pantalla roja
+              // tenga algo que mostrar (como su username o ID si vienen en el JSON de error)
+              setUser({ ...userData, banned: true }); 
+            } else {
+              // Si todo está bien, lo metemos normal
+              setUser(userData); 
+            }
           } else {
-            //console.error("❌ [INIT] El backend rechazó el token. Borrando de memoria.");
             localStorage.removeItem('auth_token');
           }
         } catch (error) {
-          //console.error("💥 [INIT] Error crítico de red o servidor caído:", error);
           localStorage.removeItem('auth_token');
         } finally {
           setLoading(false);
-          setIsInitializing(false); // 👈 ¡Solo se quita el candado cuando Ruby ha respondido!
+          setIsInitializing(false); 
         }
       } else {
-        //console.log("🚪 [INIT] No hay token. Abriendo puertas para redirigir al login.");
         setLoading(false);
         setIsInitializing(false);
       }
     };
 
     initializeAuth();
-  }, [setUser, setLoading]);
+  }, [setUser, setLoading, setBanned]);
 
   // 🛑 BLOQUEO ABSOLUTO 1: El router no se monta hasta que no sabemos quién eres.
   if (isInitializing) {
@@ -96,7 +94,7 @@ export default function App() {
             &gt; ACCESO DENEGADO POR ADMINISTRACIÓN
           </p>
           <div className="text-text-muted font-mono mt-8 border-t-2 border-[#ff3366]/30 pt-6 text-sm">
-            ENTIDAD COMPROMETIDA: <span className="text-[#ff3366]">{user.username}</span> | ID: {user.id}
+            ENTIDAD COMPROMETIDA: <span className="text-[#ff3366]">{user.username || "UNKNOWN"}</span>
             <br /><br />
             Tu conexión a la red de Transcendence ha sido cortada indefinidamente.
           </div>
@@ -114,7 +112,7 @@ export default function App() {
     );
   }
 
-  // 🟢 VÍA LIBRE: Ya tenemos tus datos y no estás baneada, el ProtectedRoute hace su trabajo.
+  // 🟢 VÍA LIBRE
   return (
     <>
       <RouterProvider router={router} />
