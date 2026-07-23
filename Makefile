@@ -24,7 +24,9 @@ $(NAME): start
 # Ensure that we have podman available. NOTE some of these are "nice to have" not essential
 check_host:
 	@which $(BASECMD) >/dev/null 2>&1 || { echo "container controller not found"; exit 1; }
+ifeq ($(UNAME_S),Linux)
 	@which systemctl >/dev/null 2>&1 || { echo "service manager not found"; exit 1; }
+endif
 	@systemctl is-active --quiet $(SOCK_UNIT) || { echo "$(SOCK_UNIT) not active - this might cause problems"; exit 0; }
 	@podman system connection --log-level=error >/dev/null 2>&1 || { echo "podman connection failed"; exit 0; }
 
@@ -66,7 +68,7 @@ secrets: secret_dir check_keys secret/rb_dbpass server_cert
 
 secret_dir:
 	@echo "Creating secrets dir if it doesn't already exist"
-	mkdir --parents secret
+	mkdir -p secret
 
 # Generates a random password for database access
 secret/rb_dbpass:
