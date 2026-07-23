@@ -61,11 +61,15 @@ On the horizon, the **goal** of the project was for us all to gain experience in
 
 ## 5. Getting Started
 
+If you are 100% you have nothing container related on your machine that you would miss, then you can call `make nuke` and ~~bask in destruction~~ be sure that there are no confounding factors for this evaluation.
+
 Note! If you launch from a machine that has existing container images, sadness and confusion may result. *If* you have no other containers running, call `make rm-images` before the final make. If you have images you want to keep, call `docker image ls` to get the names of the bad ones.
+
+The same applies to storage volumes: if you do not have anything of your own you can conveniently run `make wipe` and delete all existing volumes, but this is destructive and you may prefer to call `docker volume rm` directly on the transcendence volume.
 
 The simplest possible setup is the following.
 ```bash
-# Clone the repository from vog
+# If you are in 42U and have permissions, clone the repository from vog
 git clone git@vogsphere.42urduliz.com:vogsphere/intra-uuid-9adfe50d-3d12-4ce6-bb0e-4ac1991e0a16-7556221-gcassi-d
 # or from GitHub (if not on a cluster machine):
 git clone https://github.com/Chaikney/ft_transcendence.git
@@ -83,6 +87,8 @@ nano secret/SMTP_PASS # Paste your SMTP password inside and save
 
 # Did you see the note above about stale images? This is the point where you might want to run:
 make rm-images
+# Did you see the note above about old volumes? This is the point where you might want to run:
+make wipe
 # Build and start services using the Makefile. This can generate local SSL certs, DB password etc.
 # Checks for the presence of necessary secrets and uses Docker by default.
 make
@@ -91,6 +97,12 @@ make help
 ```
 
 Once you have launched the cluster with `make`, you can monitor its progress in that terminal, and check on its status in another terminal with `docker ps` or your tools of choice.
+
+### Failure states / troubleshooting
+
+Launching has the usual complications and confusions of container development. These instructions assume that you are working from an environment that is clean and pristine. *Of course* you know how to make sure you're doing that, but to save a minute if there are problems.
+* If the database container complains about a password mismatch, ensure that you are not using a previously existing storage volume for the container. If the volume already has a DB, it will have a pregenerated, random password that you probably no longer have. Delete the volume with `make wipe` or a more targetted command.
+* If you want to ensure that everything starts from zero, we have provided `make nuke` which is as destructive as it sounds.
 
 ### Notes on secrets
 Some secret values are generated on first launch. Some must be provided by the user or evaluator. Every effort has been made to explain the difference and avoid surprises or confusion, but oh look a green monkey in the middle of my sentence nobody reads documentation any more, if they ever did.
@@ -151,6 +163,8 @@ Web (8 pts)
 (nkrasimi)
 
 ✅ Minor (1 pt): Custom design system: Features 15+ reusable cyberpunk-styled UI components like Modals, Toasts, Badges, and Terminal Cards. Built to maintain strict visual consistency across the entire app. (mdiaz-or)
+
+TODO: add anotgher point here (complete notification system)
 
 User Management (7 pts)
 ✅ Major (2 pts): Standard user management: Allows users to modify profile details, configure default or custom avatar choices, and track friend states. Centralized through a dedicated Profile page view.
