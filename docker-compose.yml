@@ -4,7 +4,6 @@ services:
   web:
     build:
       context: ./frontend
-      # TODO Work out which of these are actually needed
       args:
         VITE_BASE_URL: ${BASE_URL}
         VITE_42_REDIRECT_URI: ${REDIRECT_URI_42}
@@ -13,9 +12,6 @@ services:
         VITE_USE_MOCK: ${VITE_USE_MOCK}
         VITE_42_CLIENT_ID: ${UID_42}
       # NOTE This is one bind mount and one storage volume defined on the fly
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
     # NOTE Ideally this would be binding to 80 but that needs root
     ports:
       - "8080:80"
@@ -94,16 +90,8 @@ r=Net::HTTP.get_response(u); exit(r.code.start_with?(\"2\") ? 0 : 1)'"
 volumes:
   DB_vol:
 
-  FE_vol:
-
-  RB_vol:
-
 # NOTE This should point to a folder *outside* of version control!
 secrets:
-  RB_DBUSER:
-    file: ./secret/rb_dbuser
-  RB_DBNAME:
-    file: ./secret/rb_dbname
   RB_DBPASS:
     file: ./secret/rb_dbpass
   42_SECRET:
